@@ -103,5 +103,7 @@ Public Class frmMain
         Process.Start(filename)
     End Function
 
+    Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
+    End Sub
 End Class

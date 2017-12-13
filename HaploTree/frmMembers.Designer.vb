@@ -139,9 +139,8 @@ Partial Class frmMembers
         Me.lblMembers.AutoSize = True
         Me.lblMembers.Location = New System.Drawing.Point(452, 18)
         Me.lblMembers.Name = "lblMembers"
-        Me.lblMembers.Size = New System.Drawing.Size(60, 13)
+        Me.lblMembers.Size = New System.Drawing.Size(0, 13)
         Me.lblMembers.TabIndex = 25
-        Me.lblMembers.Text = "lblMembers"
         '
         'Label1
         '

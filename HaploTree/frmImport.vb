@@ -771,6 +771,9 @@ Public Class frmImport
         Next
         dtmEnd = Now.ToLongTimeString
 
+        MsgBox("Import Complete", MsgBoxStyle.Exclamation, "COMPLETE")
+
+
         '    Next
 
     End Function

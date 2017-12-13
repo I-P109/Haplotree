@@ -7,6 +7,7 @@
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         Dim frmMain As New frmMain
         frmMain.Show()
+        Me.Visible = False
 
     End Sub
 End Class
