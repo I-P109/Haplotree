@@ -42,6 +42,7 @@ Partial Class frmImport
         Me.lblPathAndFileName = New System.Windows.Forms.Label()
         Me.btnBrowse = New System.Windows.Forms.Button()
         Me.lvwImport = New System.Windows.Forms.ListView()
+        Me.lvwHide = New System.Windows.Forms.ListView()
         Me.tabCtlImport.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -237,12 +238,27 @@ Partial Class frmImport
         Me.lvwImport.TabIndex = 30
         Me.lvwImport.UseCompatibleStateImageBehavior = False
         Me.lvwImport.View = System.Windows.Forms.View.Details
+        Me.lvwImport.Visible = False
+        '
+        'lvwHide
+        '
+        Me.lvwHide.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.lvwHide.ForeColor = System.Drawing.Color.Blue
+        Me.lvwHide.FullRowSelect = True
+        Me.lvwHide.GridLines = True
+        Me.lvwHide.Location = New System.Drawing.Point(97, 169)
+        Me.lvwHide.Name = "lvwHide"
+        Me.lvwHide.Size = New System.Drawing.Size(965, 573)
+        Me.lvwHide.TabIndex = 56
+        Me.lvwHide.UseCompatibleStateImageBehavior = False
+        Me.lvwHide.View = System.Windows.Forms.View.Details
         '
         'frmImport
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1333, 801)
+        Me.Controls.Add(Me.lvwHide)
         Me.Controls.Add(Me.btnSave)
         Me.Controls.Add(Me.lblGenomeVersion)
         Me.Controls.Add(Me.Label11)
@@ -288,5 +304,5 @@ End Sub
     Friend WithEvents lblPathAndFileName As System.Windows.Forms.Label
     Friend WithEvents btnBrowse As System.Windows.Forms.Button
     Friend WithEvents lvwImport As System.Windows.Forms.ListView
-
+    Friend WithEvents lvwHide As ListView
 End Class

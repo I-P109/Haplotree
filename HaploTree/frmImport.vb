@@ -156,6 +156,8 @@ Public Class frmImport
             'Write to log file
             GenFunc.WriteLogEntry(dtmEnd.ToLongTimeString & " End import")
 
+            lvwHide.Visible = False
+            lvwImport.Visible = True
             MsgBox("Import Complete!", MsgBoxStyle.Information, "IMPORT COMPLETE")
 
 
@@ -714,17 +716,7 @@ Public Class frmImport
         Dim dsPosition As DataSet
 
 
-
-        'For Each lvi As ListViewItem In ListView1.Items
-        '    For c As Integer = 0 To lvi.SubItems.Count - 1
-        '        MsgBox(lvi.SubItems(c).Text)
-        '    Next
-        'Next
         dtmStart = Now.ToLongTimeString
-
-        '  For Each lvi As ListViewItem In ListView2.Items
-        '  For c As Integer = 0 To lvi.SubItems.Count - 1
-
 
 
         '16606 position
@@ -733,8 +725,6 @@ Public Class frmImport
 
         intFK_MemberID = Me.lblID.Text.Trim
         For i = 0 To Me.lvwImport.Items.Count - 1
-            ' MsgBox(lvi.SubItems(c).Text)
-
             intPosition = lvwImport.Items(i).SubItems(0).Text
             strRef = lvwImport.Items(i).SubItems(1).Text
             strAlt = lvwImport.Items(i).SubItems(2).Text
@@ -746,35 +736,12 @@ Public Class frmImport
             strMutation = Mid(lvwImport.Items(i).SubItems(7).Text, 1, 1)
 
 
-            Call cDataAccess.InsertPositionByMemberID(intFK_MemberID, intPosition, strRef, strAlt, strQual, strFilter, strInfo, strFormat, strMutation)
-
-            'If strMutation = "1" Then
-            '    dsPos = cDataAccess.GetIDByPosition(intPosition)
-            '    If dsPos.Tables(0).Rows.Count > 0 Then
-            '        intPos = dsPos.Tables(0).Rows(0).Item("ID")
-            '    Else
-            '        'Insert the posistion and grab it right away
-            '        Call cDataAccess.InsertPosition(intPosition)
-
-            '        dsPos = cDataAccess.GetIDByPosition(intPosition)
-            '        If dsPos.Tables(0).Rows.Count > 0 Then
-            '            intPos = dsPos.Tables(0).Rows(0).Item("ID")
-            '        End If
-            '    End If
-
-            '    If strRef.Trim.Length = 1 And strAlt.Trim.Length = 1 Then
-            '        Call cDataAccess.InsertSNP(CInt(Me.lblID.Text), intPos, strRef, strAlt, strFilter)
-            '    End If
-
-            'End If
+            Call cDataAccess.InsertPositionByMemberID(intFK_MemberID, intPosition, strRef, strAlt, CDbl(strQual), strFilter, strInfo, strFormat, strMutation)
 
         Next
         dtmEnd = Now.ToLongTimeString
 
         MsgBox("Import Complete", MsgBoxStyle.Exclamation, "COMPLETE")
-
-
-        '    Next
 
     End Function
 
