@@ -36,7 +36,7 @@ Public Class frmMain
         Call ReportMemberReport()
     End Sub
 
-    Public Function ReportMemberReport()
+    Public Sub ReportMemberReport()
         Dim ds As DataSet
         Dim i As Integer = 0
         Dim intColumn1 As Integer = 100
@@ -58,7 +58,7 @@ Public Class frmMain
         Dim pdfpage As PdfPage = document.AddPage
 
         ' Get an XGraphics object for drawing
-        Dim graph As XGraphics = XGraphics.FromPdfPage(PdfPage)
+        Dim graph As XGraphics = XGraphics.FromPdfPage(pdfpage)
         Dim image As PdfSharp.Drawing.XImage = PdfSharp.Drawing.XImage.FromFile(IMAGE_DIRECTORY & "DNAPic2-Large.bmp")
         image.Interpolate = False
 
@@ -101,7 +101,7 @@ Public Class frmMain
 
         ' ...and start a viewer.
         Process.Start(filename)
-    End Function
+    End Sub
 
     Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 

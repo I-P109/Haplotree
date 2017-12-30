@@ -16,7 +16,7 @@
     End Sub
 
 
-    Public Function PopulateMembers()
+    Public Sub PopulateMembers()
         Dim ds As DataSet
 
         Me.lvwMembers.Clear()
@@ -25,11 +25,11 @@
             Call FillListview(ds)
         End If
 
-    End Function
+    End Sub
 
 
 
-    Public Function FillListview(ByVal ds As DataSet)
+    Public Sub FillListview(ByVal ds As DataSet)
         Dim lvwColumn As ColumnHeader
         Dim itmListItem As ListViewItem
         Dim shtCntr As Short
@@ -96,7 +96,7 @@
         Catch ex As Exception
             MsgBox(ex.Message)
         End Try
-    End Function
+    End Sub
 
     Private Sub lvwMembers_ColumnClick(sender As Object, e As ColumnClickEventArgs) Handles lvwMembers.ColumnClick
         'Set the ListViewItemSorter property to a new ListViewItemComparer object.

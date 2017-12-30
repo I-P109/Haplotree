@@ -27,11 +27,11 @@ Module GenFunc
     End Function
 
 
-    Public Function CreateDirectory(ByVal vstrDirectory As String)
+    Public Sub CreateDirectory(ByVal vstrDirectory As String)
         If (Not System.IO.Directory.Exists(vstrDirectory)) Then
             System.IO.Directory.CreateDirectory(vstrDirectory)
         End If
-    End Function
+    End Sub
 
 
 

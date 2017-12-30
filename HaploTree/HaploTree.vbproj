@@ -100,6 +100,12 @@
   <ItemGroup>
     <Compile Include="clsDataAccess.vb" />
     <Compile Include="DataConn.vb" />
+    <Compile Include="frmAddNode.Designer.vb">
+      <DependentUpon>frmAddNode.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAddNode.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmMain.Designer.vb">
       <DependentUpon>frmMain.vb</DependentUpon>
     </Compile>
@@ -131,10 +137,22 @@
     <Compile Include="frmMembersSNPs.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmSNPInfo.Designer.vb">
+      <DependentUpon>frmSNPInfo.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSNPInfo.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmSplash.Designer.vb">
       <DependentUpon>frmSplash.vb</DependentUpon>
     </Compile>
     <Compile Include="frmSplash.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmTest.Designer.vb">
+      <DependentUpon>frmTest.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmTest.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmTree.Designer.vb">
@@ -146,6 +164,7 @@
     <Compile Include="GenFunc.vb" />
     <Compile Include="Globals.vb" />
     <Compile Include="modPDF.vb" />
+    <Compile Include="modPositions.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -163,6 +182,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmAddNode.resx">
+      <DependentUpon>frmAddNode.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.vb</DependentUpon>
     </EmbeddedResource>
@@ -178,8 +200,14 @@
     <EmbeddedResource Include="frmMembersSNPs.resx">
       <DependentUpon>frmMembersSNPs.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="frmSNPInfo.resx">
+      <DependentUpon>frmSNPInfo.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmSplash.resx">
       <DependentUpon>frmSplash.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmTest.resx">
+      <DependentUpon>frmTest.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmTree.resx">
       <DependentUpon>frmTree.vb</DependentUpon>

@@ -99,7 +99,7 @@ Module modPDF
 
 
 
-    Public Function CreatePDF(ByVal vstrSNP As String, ByVal vstrFullPath As String, ByVal vstrSaveDirectory As String)
+    Public Sub CreatePDF(ByVal vstrSNP As String, ByVal vstrFullPath As String, ByVal vstrSaveDirectory As String)
 
         '   Dim dsNotes As DataSet
 
@@ -143,11 +143,11 @@ Module modPDF
 
             Dim intWidth As Integer = 60
             Dim MyText As String = ""
-            Dim rect As XRect
+
             Dim xPos As Integer = 40
             Dim xInterval As Integer = 20
             Dim xcoord As Integer = 200
-            Dim ds As DataSet
+
             Dim strFormed As String = ""
             Dim strTMRCA As String = ""
 
@@ -407,6 +407,6 @@ Module modPDF
 
 
 
-    End Function
+    End Sub
 
 End Module

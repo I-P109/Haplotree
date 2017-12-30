@@ -16,7 +16,7 @@
     End Sub
 
 
-    Public Function PopulateForm()
+    Public Sub PopulateForm()
         Dim ds As DataSet
         Dim dsPositions As DataSet
 
@@ -45,25 +45,25 @@
                 Me.lblYFullID.Text = ""
             End If
 
-            
+
 
             'Now see if this person has records stored
-            dsPositions = cDataAccess.GetPositionsByMemberID(mintMemberID)
+            dsPositions = cDataAccess.GetPositionsByMemberID38(mintMemberID)
             If dsPositions.Tables(0).Rows.Count > 0 Then
                 Call FillListview(dsPositions)
             End If
 
 
-          
+
 
 
         End If
-    End Function
+    End Sub
 
 
-    Public Function FillListview(ByVal dsPositions As DataSet)
+    Public Sub FillListview(ByVal dsPositions As DataSet)
         Dim i As Integer = 0
-        Dim lvwColumn As ColumnHeader
+
         Dim itmListItem As ListViewItem
         Dim shtCntr As Short
         Try
@@ -105,7 +105,7 @@
 
 
 
-                               
+
 
                             Case Else
                                 If dsPositions.Tables(0).Rows(i).IsNull(shtCntr) = False Then
@@ -119,7 +119,7 @@
                     Next shtCntr
                     Me.lvwSNPs.Items.Add(itmListItem)
 
-                    
+
                     Select Case dsPositions.Tables(0).Rows(i).Item("Ref")
                         Case "T"
                             lvwSNPs.Items(i).UseItemStyleForSubItems = False
@@ -174,9 +174,9 @@
 
 
 
-    End Function
+    End Sub
 
-    Public Function PaintCells()
+    Public Sub PaintCells()
         Dim item As ListViewItem
         For Each item In lvwSNPs.Items
             Select Case item.SubItems(2).Text
@@ -217,7 +217,7 @@
                     item.SubItems(3).ForeColor = Color.White
             End Select
         Next
-    End Function
+    End Sub
 
     Private Sub lvwSNPs_ColumnClick(sender As Object, e As ColumnClickEventArgs) Handles lvwSNPs.ColumnClick
         'Set the ListViewItemSorter property to a new ListViewItemComparer object.
@@ -250,11 +250,11 @@
     End Sub
 
 
-    Public Function OtherMembersWithSNP(ByVal vintPosition As Integer,
+    Public Sub OtherMembersWithSNP(ByVal vintPosition As Integer,
                                         ByVal vstrRef As String,
                                         ByVal vstrAlt As String)
         Dim i As Integer = 0
-        Dim lvwColumn As ColumnHeader
+
         Dim itmListItem As ListViewItem
         Dim shtCntr As Short
         Dim ds As DataSet
@@ -273,7 +273,7 @@
                 lvwMembersWithSNP.Columns.Add("Alt", 50, HorizontalAlignment.Left)
                 lvwMembersWithSNP.Columns.Add("Qual", 70, HorizontalAlignment.Left)
                 lvwMembersWithSNP.Columns.Add("Filter", 60, HorizontalAlignment.Left)
-                
+
 
                 For i = 0 To ds.Tables(0).Rows.Count - 1
                     itmListItem = New ListViewItem()
@@ -321,7 +321,7 @@
                 MsgBox(ex.Message)
             End Try
         End If
-    End Function
+    End Sub
 
 
 
