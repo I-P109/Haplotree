@@ -34,9 +34,10 @@ Partial Class frmSplash
         '
         'picLogo
         '
-        Me.picLogo.Location = New System.Drawing.Point(79, 36)
+        Me.picLogo.Location = New System.Drawing.Point(105, 44)
+        Me.picLogo.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.picLogo.Name = "picLogo"
-        Me.picLogo.Size = New System.Drawing.Size(318, 286)
+        Me.picLogo.Size = New System.Drawing.Size(424, 352)
         Me.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.picLogo.TabIndex = 0
         Me.picLogo.TabStop = False
@@ -49,41 +50,45 @@ Partial Class frmSplash
         '
         'btnClose
         '
-        Me.btnClose.Location = New System.Drawing.Point(203, 409)
+        Me.btnClose.Location = New System.Drawing.Point(271, 503)
+        Me.btnClose.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.btnClose.Name = "btnClose"
-        Me.btnClose.Size = New System.Drawing.Size(75, 23)
+        Me.btnClose.Size = New System.Drawing.Size(100, 28)
         Me.btnClose.TabIndex = 1
-        Me.btnClose.Text = "Close"
+        Me.btnClose.Text = "Continue"
         Me.btnClose.UseVisualStyleBackColor = True
         '
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(205, 354)
+        Me.Label1.Location = New System.Drawing.Point(273, 436)
+        Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(76, 13)
+        Me.Label1.Size = New System.Drawing.Size(99, 17)
         Me.Label1.TabIndex = 2
         Me.Label1.Text = "Nicolas Taban"
         '
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(200, 376)
+        Me.Label2.Location = New System.Drawing.Point(267, 463)
+        Me.Label2.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(81, 13)
+        Me.Label2.Size = New System.Drawing.Size(109, 17)
         Me.Label2.TabIndex = 3
         Me.Label2.Text = "Darin Flansburg"
         '
         'frmSplash
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.White
-        Me.ClientSize = New System.Drawing.Size(510, 514)
+        Me.ClientSize = New System.Drawing.Size(680, 633)
         Me.Controls.Add(Me.Label2)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.btnClose)
         Me.Controls.Add(Me.picLogo)
+        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "frmSplash"
