@@ -49,7 +49,7 @@ Partial Class frmMembers
         Me.lvwMembers.MultiSelect = False
         Me.lvwMembers.Name = "lvwMembers"
         Me.lvwMembers.Size = New System.Drawing.Size(516, 564)
-        Me.lvwMembers.TabIndex = 0
+        Me.lvwMembers.TabIndex = 6
         Me.lvwMembers.UseCompatibleStateImageBehavior = False
         Me.lvwMembers.View = System.Windows.Forms.View.Details
         '
@@ -64,7 +64,7 @@ Partial Class frmMembers
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(66, 39)
+        Me.Label8.Location = New System.Drawing.Point(49, 39)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(20, 13)
         Me.Label8.TabIndex = 22
@@ -77,7 +77,7 @@ Partial Class frmMembers
         Me.txtName.Location = New System.Drawing.Point(93, 68)
         Me.txtName.Name = "txtName"
         Me.txtName.Size = New System.Drawing.Size(216, 20)
-        Me.txtName.TabIndex = 21
+        Me.txtName.TabIndex = 0
         '
         'txtFTDNAID
         '
@@ -86,7 +86,7 @@ Partial Class frmMembers
         Me.txtFTDNAID.Location = New System.Drawing.Point(93, 101)
         Me.txtFTDNAID.Name = "txtFTDNAID"
         Me.txtFTDNAID.Size = New System.Drawing.Size(216, 20)
-        Me.txtFTDNAID.TabIndex = 20
+        Me.txtFTDNAID.TabIndex = 1
         '
         'txtYFullID
         '
@@ -95,7 +95,7 @@ Partial Class frmMembers
         Me.txtYFullID.Location = New System.Drawing.Point(93, 138)
         Me.txtYFullID.Name = "txtYFullID"
         Me.txtYFullID.Size = New System.Drawing.Size(216, 20)
-        Me.txtYFullID.TabIndex = 19
+        Me.txtYFullID.TabIndex = 2
         '
         'lblYFullID
         '
@@ -130,7 +130,7 @@ Partial Class frmMembers
         Me.btnSave.Location = New System.Drawing.Point(234, 188)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 23)
-        Me.btnSave.TabIndex = 24
+        Me.btnSave.TabIndex = 5
         Me.btnSave.Text = "Save"
         Me.btnSave.UseVisualStyleBackColor = True
         '
@@ -178,7 +178,7 @@ Partial Class frmMembers
         Me.btnDelete.Location = New System.Drawing.Point(13, 188)
         Me.btnDelete.Name = "btnDelete"
         Me.btnDelete.Size = New System.Drawing.Size(75, 23)
-        Me.btnDelete.TabIndex = 29
+        Me.btnDelete.TabIndex = 3
         Me.btnDelete.Text = "Delete"
         Me.btnDelete.UseVisualStyleBackColor = True
         '
@@ -187,7 +187,7 @@ Partial Class frmMembers
         Me.btnClear.Location = New System.Drawing.Point(122, 188)
         Me.btnClear.Name = "btnClear"
         Me.btnClear.Size = New System.Drawing.Size(75, 23)
-        Me.btnClear.TabIndex = 28
+        Me.btnClear.TabIndex = 4
         Me.btnClear.Text = "Clear"
         Me.btnClear.UseVisualStyleBackColor = True
         '

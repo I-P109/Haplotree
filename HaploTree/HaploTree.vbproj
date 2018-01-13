@@ -106,6 +106,12 @@
     <Compile Include="frmAddNode.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmEditNode.Designer.vb">
+      <DependentUpon>frmEditNode.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmEditNode.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmMain.Designer.vb">
       <DependentUpon>frmMain.vb</DependentUpon>
     </Compile>
@@ -184,6 +190,9 @@
   <ItemGroup>
     <EmbeddedResource Include="frmAddNode.resx">
       <DependentUpon>frmAddNode.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmEditNode.resx">
+      <DependentUpon>frmEditNode.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.vb</DependentUpon>

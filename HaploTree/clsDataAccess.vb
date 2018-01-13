@@ -439,6 +439,37 @@ Public Class clsDataAccess
     End Function
 
 
+    Public Function GetBranchesByID(ByVal vintID As String) As DataSet
+        Dim sql As String
+        sql = " SELECT * FROM tblBranches WHERE ID =" & vintID
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnection()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            Return dataSet
+            dbCommandAccess.Connection.Close()
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+        End Try
+    End Function
+
+
+
+
+
+
     Public Function GetAllTree() As DataSet
 
         Dim sql As String
@@ -666,6 +697,86 @@ Public Class clsDataAccess
         End Try
 
     End Function
+
+
+    Public Function UpdateSNPInfo(ByVal vintID As Integer,
+                                  ByVal vintPos As Integer,
+                                  ByVal vstrAlt As String,
+                                  ByVal vstrRef As String) As Integer
+
+        Dim sql As String
+        sql = " UPDATE  tblBranches SET Pos = " & vintPos
+        sql = sql & ", Alt = " & Chr(34) & vstrAlt & Chr(34)
+        sql = sql & ", Ref = " & Chr(34) & vstrRef & Chr(34)
+        sql = sql & " WHERE ID = " & vintID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnection()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            dbCommandAccess.Connection.Close()
+
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+        End Try
+
+    End Function
+
+
+    Public Function UpdateSNPName(ByVal vintID As Integer,
+                                  ByVal vstrSNPName As String) As Integer
+
+        Dim sql As String
+        sql = " UPDATE  tblBranches SET BranchName = " & Chr(34) & vstrSNPName & Chr(34)
+        sql = sql & " WHERE ID = " & vintID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnection()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+        End Try
+
+    End Function
+
+
+    Public Function UpdateSNPParentBranch(ByVal vstrSNPName As String,
+                                          ByVal vstrOldSNPName As String) As Integer
+
+        Dim sql As String
+        sql = " UPDATE  tblBranches SET ParentBranch = " & Chr(34) & vstrSNPName & Chr(34)
+        sql = sql & " WHERE ParentBranch  = " & Chr(34) & vstrOldSNPName & Chr(34)
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnection()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+        End Try
+
+    End Function
+
 
     Public Function UpdateTextColorByID(ByVal vintID As Integer,
                                              ByVal vintColor As Integer) As Integer

@@ -51,124 +51,11 @@ Public Class frmImport
             End Select
 
 
-            ''Add the column headers for the listview
-            'Me.lvwImport.Columns.Add("Position", 80, HorizontalAlignment.Left)
-            'lvwImport.Columns.Add("Ref", 50, HorizontalAlignment.Left)
-            'lvwImport.Columns.Add("Alt", 50, HorizontalAlignment.Left)
-            'lvwImport.Columns.Add("Qual", 70, HorizontalAlignment.Left)
-            'lvwImport.Columns.Add("Filter", 60, HorizontalAlignment.Left)
-            'lvwImport.Columns.Add("Info", 140, HorizontalAlignment.Left)
-            'lvwImport.Columns.Add("Format", 140, HorizontalAlignment.Left)
-            'lvwImport.Columns.Add("Mutation", 140, HorizontalAlignment.Left)
 
-            'Dim LineItemsArr() As String
-
-            ''Start the timer
-            'dtmStart = Now
-            'Me.Cursor = Cursors.WaitCursor
-
-            'Dim strFile As New FileStream(OpenFileDialog1.FileName, FileMode.Open)
-            'Dim strReader As New StreamReader(strFile)
-
-            ''Read first line.
-            'strLine = Replace(strReader.ReadLine, Chr(9), "", 1, -1)
-
-            ''Write to log file
-            'GenFunc.WriteLogEntry(dtmStart.ToLongTimeString & " Start import")
-            'Dim intGV As Integer = 0
-
-            ''Loop over each line in file, While list is Not Nothing.
-            'Do While (Not strLine Is Nothing)
-            '    If strLine.Substring(0, 4) = "##co" Then
-            '        intGV = strLine.IndexOf("hg19")
-            '        If intGV > 0 Then
-            '            lblGenomeVersion.Text = "HG 19"
-            '        Else
-            '            intGV = strLine.IndexOf("hg38")
-            '            If intGV > 0 Then
-            '                lblGenomeVersion.Text = "HG 38"
-            '            Else
-            '                lblGenomeVersion.Text = "Unknown"
-            '            End If
-            '        End If
-
-            '    End If
-
-            '    'lblGenomeVersion
-            '    If strLine.Substring(0, 4) = "chrY" Then 'If we do not run into the ChrY then we need to keep skipping lines.
-            '        Application.DoEvents()
-
-            '        'Parses the line into an array.
-            '        LineItemsArr = strLine.Split(Chr(9))
-
-            '        'Assigns the the array as variables
-            '        strChrom = Replace(LineItemsArr(0).ToString.Trim.PadLeft(8, "0"), Chr(34), "", 1, -1)
-            '        strPosition = Replace(LineItemsArr(1).ToString.Trim, Chr(34), "", 1, -1)
-            '        strRef = Replace(LineItemsArr(3).ToString.Trim, Chr(34), "", 1, -1)
-            '        strAlt = Replace(LineItemsArr(4).ToString.Trim, Chr(34), "", 1, -1)
-            '        strQual = Replace(LineItemsArr(5).ToString.Trim, Chr(34), "", 1, -1)
-            '        strFilter = Replace(LineItemsArr(6).ToString.Trim, Chr(34), "", 1, -1)
-            '        strInfo = Replace(LineItemsArr(7).ToString.Trim, Chr(34), "", 1, -1)
-            '        strFormat = Replace(LineItemsArr(8).ToString.Trim, Chr(34), "", 1, -1)
-            '        strMutation = Replace(LineItemsArr(9).ToString.Trim, Chr(34), "", 1, -1)
-
-            '        'Assembles the variables that we want into an array
-            '        Dim str(9) As String
-            '        str(0) = strPosition
-            '        str(1) = strRef
-            '        str(2) = strAlt
-            '        str(3) = strQual
-            '        str(4) = strFilter
-            '        str(5) = strInfo
-            '        str(6) = strFormat
-            '        str(7) = strMutation
-
-            '        'This is the logic that tells us whether or not we will be adding the row to the database OR rejecting it.
-            '        If strFilter = "PASS" Then
-            '            'The alt and ref MUST be diferent
-            '            If strAlt <> strRef Then
-            '                If strMutation.Substring(0, 3) = "1/1" Then
-            '                    'This is a good record and will be added to the database
-            '                    Dim itm As New ListViewItem(str)
-            '                    lvwImport.Items.Add(itm)
-            '                Else
-
-            '                End If
-            '            Else 'The alt and the ref are the same
-            '            End If
-            '        End If
-
-            '        'reset the variables
-            '        strChrom = ""
-            '        strPosition = ""
-            '        strID = ""
-            '        strRef = ""
-            '        strAlt = ""
-            '        strQual = ""
-            '        strFilter = ""
-            '        strInfo = ""
-            '        strFormat = ""
-            '        strMutation = ""
-
-            '        ' Read in the next line.
-            '        strLine = strReader.ReadLine
-            '    Else
-            '        strLine = strReader.ReadLine
-            '    End If
-            'Loop
-            'Me.Cursor = Cursors.Arrow
-
-            'strFile.Close()
-
-            'lblPassingPositions.Text = lvwImport.Items.Count
-            'dtmEnd = Now
-
-            ''Write to log file
-            'GenFunc.WriteLogEntry(dtmEnd.ToLongTimeString & " End import")
 
             lvwHide.Visible = False
             lvwImport.Visible = True
-            MsgBox("Import Complete!", MsgBoxStyle.Information, "IMPORT COMPLETE")
+            MsgBox("Read Complete!", MsgBoxStyle.Information, "READ COMPLETE")
 
 
         End If
@@ -519,7 +406,7 @@ Public Class frmImport
                 Me.lblYFullID.Text = ""
             End If
 
-            Me.btnBrowse.Enabled = True
+
 
             'First remove all records from the listview
             Me.lvwImport.Clear()
@@ -529,6 +416,10 @@ Public Class frmImport
             If dsPositions.Tables(0).Rows.Count > 0 Then
                 ' Call FillListview(dsPositions)
                 MsgBox("This individual already has a record imported!")
+                Me.btnSave.Enabled = False
+                Me.btnBrowse.Enabled = False
+            Else
+                Me.btnBrowse.Enabled = True
             End If
 
 
@@ -608,6 +499,8 @@ Public Class frmImport
             Case "HG 19"
                 Call SaveFile19()
         End Select
+        Me.btnSave.Enabled = False
+
     End Sub
 
 
@@ -654,7 +547,7 @@ Public Class frmImport
         Next
 
 
-        MsgBox("Import Complete", MsgBoxStyle.Exclamation, "COMPLETE")
+        MsgBox("Import Complete", MsgBoxStyle.Exclamation, "IMPORT COMPLETE")
 
     End Sub
 
@@ -845,6 +738,8 @@ Public Class frmImport
         strFile.Close()
 
         lblPassingPositions.Text = lvwImport.Items.Count
+        Me.btnSave.Enabled = True
+
         lvwHide.Visible = False
         lvwImport.Visible = True
     End Sub
@@ -960,7 +855,7 @@ Public Class frmImport
         strFile.Close()
 
         lblPassingPositions.Text = lvwImport.Items.Count
-
+        Me.btnSave.Enabled = True
     End Sub
 
 

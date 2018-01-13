@@ -61,24 +61,30 @@ Partial Class frmSNPInfo
         '
         'txtAlt
         '
+        Me.txtAlt.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.txtAlt.ForeColor = System.Drawing.Color.Blue
         Me.txtAlt.Location = New System.Drawing.Point(103, 79)
         Me.txtAlt.Name = "txtAlt"
         Me.txtAlt.Size = New System.Drawing.Size(100, 20)
-        Me.txtAlt.TabIndex = 3
+        Me.txtAlt.TabIndex = 2
         '
         'txtRef
         '
+        Me.txtRef.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.txtRef.ForeColor = System.Drawing.Color.Blue
         Me.txtRef.Location = New System.Drawing.Point(103, 48)
         Me.txtRef.Name = "txtRef"
         Me.txtRef.Size = New System.Drawing.Size(100, 20)
-        Me.txtRef.TabIndex = 4
+        Me.txtRef.TabIndex = 1
         '
         'txtPosition
         '
+        Me.txtPosition.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.txtPosition.ForeColor = System.Drawing.Color.Blue
         Me.txtPosition.Location = New System.Drawing.Point(103, 22)
         Me.txtPosition.Name = "txtPosition"
         Me.txtPosition.Size = New System.Drawing.Size(100, 20)
-        Me.txtPosition.TabIndex = 5
+        Me.txtPosition.TabIndex = 0
         '
         'btnOK
         '

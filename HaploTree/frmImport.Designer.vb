@@ -160,6 +160,7 @@ Partial Class frmImport
         '
         'btnSave
         '
+        Me.btnSave.Enabled = False
         Me.btnSave.Location = New System.Drawing.Point(987, 759)
         Me.btnSave.Name = "btnSave"
         Me.btnSave.Size = New System.Drawing.Size(75, 23)
@@ -246,7 +247,7 @@ Partial Class frmImport
         Me.lvwHide.ForeColor = System.Drawing.Color.Blue
         Me.lvwHide.FullRowSelect = True
         Me.lvwHide.GridLines = True
-        Me.lvwHide.Location = New System.Drawing.Point(157, 170)
+        Me.lvwHide.Location = New System.Drawing.Point(97, 170)
         Me.lvwHide.Name = "lvwHide"
         Me.lvwHide.Size = New System.Drawing.Size(965, 573)
         Me.lvwHide.TabIndex = 56

@@ -34,3 +34,4 @@ G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.pdb
 G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.frmTest.resources
 G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.frmSNPInfo.resources
 G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.frmAddNode.resources
+G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.frmEditNode.resources
