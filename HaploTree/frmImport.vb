@@ -382,7 +382,23 @@ Public Class frmImport
 
     Public Sub PopulateForm()
         Dim ds As DataSet
+        Dim dsVariantFile As DataSet
         Dim dsPositions As New DataSet
+
+        'First check to see if the person has a variant file loaded already;
+        dsVariantFile = cDataAccess.GetPositionsByMemberID38(mintMemberID)
+        If dsVariantFile.Tables(0).Rows.Count > 0 Then
+            MsgBox("This individual already has a variant file loaded!")
+            Exit Sub
+        Else
+            dsVariantFile = cDataAccess.GetPositionsByMemberID19(mintMemberID)
+            If dsVariantFile.Tables(0).Rows.Count > 0 Then
+                MsgBox("This individual already has a variant file loaded!")
+                Exit Sub
+            End If
+        End If
+
+
 
         ds = cDataAccess.GetMemberByID(mintMemberID)
         If ds.Tables(0).Rows.Count > 0 Then
@@ -406,8 +422,6 @@ Public Class frmImport
                 Me.lblYFullID.Text = ""
             End If
 
-
-
             'First remove all records from the listview
             Me.lvwImport.Clear()
 
@@ -421,11 +435,6 @@ Public Class frmImport
             Else
                 Me.btnBrowse.Enabled = True
             End If
-
-
-
-
-
         End If
     End Sub
 

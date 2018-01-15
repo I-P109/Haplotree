@@ -122,7 +122,36 @@ Public Class clsDataAccess
     Public Function GetPositionsByMemberID38(ByVal vintMemberID As Integer) As DataSet
         Dim sql As String
 
-        sql = "  SELECT * FROM  tblMemberPositions38 WHERE FK_MemberID =" & vintMemberID
+        sql = "  SELECT * FROM  tblMemberVariantHg38 WHERE FK_MemberID =" & vintMemberID
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnection()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+        End Try
+#Disable Warning BC42105 ' Function doesn't return a value on all code paths
+    End Function
+#Enable Warning BC42105 ' Function doesn't return a value on all code paths
+
+    Public Function GetPositionsByMemberID19(ByVal vintMemberID As Integer) As DataSet
+        Dim sql As String
+
+        sql = "  SELECT * FROM  tblMemberVariantHg19 WHERE FK_MemberID =" & vintMemberID
         Try
             Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
             dbCommandAccess.CommandText = sql
@@ -153,7 +182,7 @@ Public Class clsDataAccess
                                            ByVal vstrAlt As String) As DataSet
         Dim sql As String
 
-        sql = " SELECT tblMemberPositions38.ID,MemberName,Pos,Ref,Alt,Qual,Filter FROM tblMemberPositions38, tblMembers WHERE tblMemberPositions38.FK_MemberID = tblMembers.ID "
+        sql = " SELECT tblMemberVariantHg38.ID,MemberName,Pos,Ref,Alt,Qual,Filter FROM tblMemberVariantHg38, tblMembers WHERE tblMemberVariantHg38.FK_MemberID = tblMembers.ID "
         sql = sql & " AND Pos=" & vintPosition
         sql = sql & " AND Ref=" & Chr(34) & vstrRef & Chr(34)
         sql = sql & " AND Alt=" & Chr(34) & vstrAlt & Chr(34)
@@ -219,7 +248,7 @@ Public Class clsDataAccess
 #Enable Warning BC42105 ' Function doesn't return a value on all code paths
 
     Public Function InsertMember(ByVal vstrMemberName As String,
-                                 ByVal vstrFTDNAID As String, _
+                                 ByVal vstrFTDNAID As String,
                                  ByVal vstrYFullID As String) As Integer
         Dim sql As String
         Dim rowsAffected As Integer
@@ -267,7 +296,7 @@ Public Class clsDataAccess
         Dim rowsAffected As Integer
         Try
 
-            sql = "  INSERT INTO tblMemberPositions38 (FK_MemberID, Pos, Ref, Alt, Qual, Filter, Info,  Mutation) VALUES ("
+            sql = "  INSERT INTO tblMemberVariantHg38 (FK_MemberID, Pos, Ref, Alt, Qual, Filter, Info,  Mutation) VALUES ("
 
             sql = sql & vstrFK_MemberID
             sql = sql & "," & vintPosition
@@ -322,7 +351,7 @@ Public Class clsDataAccess
         Dim rowsAffected As Integer
         Try
 
-            sql = "  INSERT INTO tblMemberPositions19(FK_MemberID, Pos, Ref, Alt, Qual, Filter, Info, Format, Mutation) VALUES ("
+            sql = "  INSERT INTO tblMemberVariantHg19(FK_MemberID, Pos, Ref, Alt, Qual, Filter, Info, Format, Mutation) VALUES ("
 
             sql = sql & vstrFK_MemberID
             sql = sql & "," & vintPosition
