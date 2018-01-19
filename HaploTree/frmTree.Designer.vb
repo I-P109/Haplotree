@@ -27,12 +27,13 @@ Partial Class frmTree
         Me.ContextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.cmnuAddNode = New System.Windows.Forms.ToolStripMenuItem()
         Me.cmnuRemoveNode = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.cmnuAddBackgroundColor = New System.Windows.Forms.ToolStripMenuItem()
         Me.cmnuAddTextColor = New System.Windows.Forms.ToolStripMenuItem()
-        Me.cmnuSNPInfo = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.cmnuSNPInfo = New System.Windows.Forms.ToolStripMenuItem()
         Me.ColorDialog1 = New System.Windows.Forms.ColorDialog()
+        Me.cmnuEditNodeName = New System.Windows.Forms.ToolStripMenuItem()
         Me.ContextMenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -46,9 +47,9 @@ Partial Class frmTree
         '
         'ContextMenuStrip1
         '
-        Me.ContextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cmnuAddNode, Me.cmnuRemoveNode, Me.ToolStripSeparator1, Me.cmnuAddBackgroundColor, Me.cmnuAddTextColor, Me.ToolStripSeparator2, Me.cmnuSNPInfo})
+        Me.ContextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cmnuAddNode, Me.cmnuEditNodeName, Me.cmnuRemoveNode, Me.ToolStripSeparator1, Me.cmnuAddBackgroundColor, Me.cmnuAddTextColor, Me.ToolStripSeparator2, Me.cmnuSNPInfo})
         Me.ContextMenuStrip1.Name = "ContextMenuStrip1"
-        Me.ContextMenuStrip1.Size = New System.Drawing.Size(196, 148)
+        Me.ContextMenuStrip1.Size = New System.Drawing.Size(196, 170)
         '
         'cmnuAddNode
         '
@@ -62,6 +63,11 @@ Partial Class frmTree
         Me.cmnuRemoveNode.Size = New System.Drawing.Size(195, 22)
         Me.cmnuRemoveNode.Text = "Remove Node"
         '
+        'ToolStripSeparator1
+        '
+        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(192, 6)
+        '
         'cmnuAddBackgroundColor
         '
         Me.cmnuAddBackgroundColor.Name = "cmnuAddBackgroundColor"
@@ -74,21 +80,22 @@ Partial Class frmTree
         Me.cmnuAddTextColor.Size = New System.Drawing.Size(195, 22)
         Me.cmnuAddTextColor.Text = "Add Text Color"
         '
+        'ToolStripSeparator2
+        '
+        Me.ToolStripSeparator2.Name = "ToolStripSeparator2"
+        Me.ToolStripSeparator2.Size = New System.Drawing.Size(192, 6)
+        '
         'cmnuSNPInfo
         '
         Me.cmnuSNPInfo.Name = "cmnuSNPInfo"
         Me.cmnuSNPInfo.Size = New System.Drawing.Size(195, 22)
         Me.cmnuSNPInfo.Text = "SNP Info"
         '
-        'ToolStripSeparator1
+        'cmnuEditNodeName
         '
-        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
-        Me.ToolStripSeparator1.Size = New System.Drawing.Size(192, 6)
-        '
-        'ToolStripSeparator2
-        '
-        Me.ToolStripSeparator2.Name = "ToolStripSeparator2"
-        Me.ToolStripSeparator2.Size = New System.Drawing.Size(192, 6)
+        Me.cmnuEditNodeName.Name = "cmnuEditNodeName"
+        Me.cmnuEditNodeName.Size = New System.Drawing.Size(195, 22)
+        Me.cmnuEditNodeName.Text = "Edit Node Name"
         '
         'frmTree
         '
@@ -113,4 +120,5 @@ Partial Class frmTree
     Friend WithEvents ToolStripSeparator1 As ToolStripSeparator
     Friend WithEvents ToolStripSeparator2 As ToolStripSeparator
     Friend WithEvents ColorDialog1 As ColorDialog
+    Friend WithEvents cmnuEditNodeName As ToolStripMenuItem
 End Class

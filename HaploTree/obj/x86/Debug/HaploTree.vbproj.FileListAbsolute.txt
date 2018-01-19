@@ -34,6 +34,7 @@ G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.pdb
 G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.frmTest.resources
 G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.frmSNPInfo.resources
 G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.frmAddNode.resources
+<<<<<<< HEAD
 C:\Users\Nicolas\source\repos\Haplotree\HaploTree\bin\x86\Debug\HaploTree.exe
 C:\Users\Nicolas\source\repos\Haplotree\HaploTree\bin\x86\Debug\HaploTree.pdb
 C:\Users\Nicolas\source\repos\Haplotree\HaploTree\bin\x86\Debug\HaploTree.xml
@@ -54,3 +55,6 @@ C:\Users\Nicolas\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.vbproj
 C:\Users\Nicolas\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.exe
 C:\Users\Nicolas\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.xml
 C:\Users\Nicolas\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.pdb
+=======
+G:\Development\HaploTree\HaploTree\obj\x86\Debug\HaploTree.frmEditNode.resources
+>>>>>>> remotes/origin/master

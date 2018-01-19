@@ -252,4 +252,17 @@
             MsgBox("ERROR:" & ex.Message)
         End Try
     End Sub
+
+    Private Sub cmnuEditNodeName_Click(sender As Object, e As EventArgs) Handles cmnuEditNodeName.Click
+        Dim intReturn As Integer
+
+        Dim n As New frmEditNode
+
+        n.OldNodeText = tvwTree.SelectedNode.Text
+        n.ID = tvwTree.SelectedNode.Tag
+        n.ShowDialog()
+
+
+
+    End Sub
 End Class

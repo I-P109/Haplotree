@@ -151,10 +151,10 @@
     Private Sub txtName_TextChanged(sender As Object, e As EventArgs) Handles txtName.TextChanged
         If txtName.Text.Length > 0 Then
             Me.btnSave.Enabled = True
-            Me.btnDelete.Enabled = True
+
         Else
             Me.btnSave.Enabled = False
-            Me.btnDelete.Enabled = False
+
         End If
     End Sub
 
@@ -166,7 +166,7 @@
         Dim blnExists As Boolean
         Dim intReturn As Integer
 
-        msg = "Save this records?"   ' Define message.
+        msg = "Save this record?"   ' Define message.
         style = MsgBoxStyle.DefaultButton2 Or MsgBoxStyle.Information Or MsgBoxStyle.YesNo
         title = "SAVE"   ' Define title.
 
@@ -233,6 +233,18 @@
 #Enable Warning BC42353 ' Function doesn't return a value on all code paths
 
     Private Sub lvwMembers_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lvwMembers.SelectedIndexChanged
+
+    End Sub
+
+
+
+    Private Sub lblID_TextChanged(sender As Object, e As EventArgs) Handles lblID.TextChanged
+        If Me.lblID.Text.Length > 0 Then
+            Me.btnDelete.Enabled = True
+        End If
+    End Sub
+
+    Private Sub txtFTDNAID_TextChanged(sender As Object, e As EventArgs) Handles txtFTDNAID.TextChanged
 
     End Sub
 End Class
