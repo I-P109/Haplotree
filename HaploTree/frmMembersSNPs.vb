@@ -45,17 +45,11 @@
                 Me.lblYFullID.Text = ""
             End If
 
-
-
             'Now see if this person has records stored
             dsPositions = cDataAccess.GetPositionsByMemberID38(mintMemberID)
             If dsPositions.Tables(0).Rows.Count > 0 Then
                 Call FillListview(dsPositions)
             End If
-
-
-
-
 
         End If
     End Sub
@@ -79,7 +73,7 @@
                 lvwSNPs.Columns.Add("Qual", 70, HorizontalAlignment.Left)
                 lvwSNPs.Columns.Add("Filter", 60, HorizontalAlignment.Left)
                 lvwSNPs.Columns.Add("Info", 140, HorizontalAlignment.Left)
-                lvwSNPs.Columns.Add("Format", 140, HorizontalAlignment.Left)
+                'lvwSNPs.Columns.Add("Format", 140, HorizontalAlignment.Left)
                 lvwSNPs.Columns.Add("Mutation", 140, HorizontalAlignment.Left)
 
                 For i = 0 To dsPositions.Tables(0).Rows.Count - 1
@@ -240,8 +234,8 @@
                 Me.lblQuality.Text = Me.lvwSNPs.Items(index).SubItems(4).Text
                 Me.lblFilter.Text = Me.lvwSNPs.Items(index).SubItems(5).Text
                 Me.lblInfo.Text = Me.lvwSNPs.Items(index).SubItems(6).Text
-                Me.lblFormat.Text = Me.lvwSNPs.Items(index).SubItems(7).Text
-                Me.lblMutation.Text = Me.lvwSNPs.Items(index).SubItems(8).Text
+                'Me.lblFormat.Text = Me.lvwSNPs.Items(index).SubItems(7).Text
+                Me.lblMutation.Text = Me.lvwSNPs.Items(index).SubItems(7).Text
 
                 'Find others with this SNP and put them in the listvew on the tabMembersWithSNP tabl
                 Call OtherMemberswithSNP(Me.lblPosition.Text, Me.lblRef.Text, Me.lblAlt.Text)

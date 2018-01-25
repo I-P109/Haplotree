@@ -9,6 +9,7 @@ Public Class Node
     Private p_ChildrenMembersIDs As String() 'Members are particular nodes = terminations/leaves in the tree
     Private p_MutationsIDs As String() 'All mutations that define that node ... ultimately we want only 1 mutation per node
     Private p_IsSavedToDB As Boolean
+    Private p_ds As DataSet 'from Member table in HaploTreeDB
 
     Public Property ChildrenNodesIDs As String()
         Get
@@ -221,6 +222,7 @@ Public Class Node
         p_MutationsIDs = Nothing
         p_HasParent = False
         p_IsSavedToDB = False
+        p_ds = Nothing
     End Sub
 
     Public Sub New(ByVal NodeID As String, ByVal NodeName As String, Optional ByVal ParentID As String = "")
@@ -236,6 +238,7 @@ Public Class Node
             p_HasParent = True
         End If
         p_IsSavedToDB = False
+        p_ds = Nothing
     End Sub
 
     Public Function HasMutation(MutationID As String) As Boolean
@@ -253,33 +256,159 @@ Public Class Node
         Return HasMut
     End Function
 
-    Public Sub AddChild(NodeID As String)
-        'do it
-        MsgBox("we need to write the code to add a childnode Id to a node!")
-        p_IsSavedToDB = False
-    End Sub
-
     Public Sub LoadWithName(ByVal NodeName As String) 'load from the DB
-        'do it
-        MsgBox("we need to load node " & NodeName & " from db using its name!")
+        Dim cDataAccess As New clsDataAccess
+
+        p_ds = cDataAccess.GetNodeByName(NodeName)
+        If Not IsNothing(p_ds) Then
+            If p_ds.Tables(0).Rows.Count > 0 Then
+                p_Name = NodeName
+                If p_ds.Tables(0).Rows(0).IsNull("ID") = False Then
+                    p_ID = p_ds.Tables(0).Rows(0).Item("ID")
+                Else
+                    MsgBox("This Node has no ID!") 'should not be possible
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("ChildrenNodesIDs") = False Then
+                    ReDim p_ChildrenNodesIDs(1)
+                    p_ChildrenNodesIDs = {""}
+                    'p_ChildrenNodesIDs = p_ds.Tables(0).Rows(0).Item("ChildrenNodesIDs") 'find a proper way to get all the ChildrenNodesIDs into an array
+                Else
+                    MsgBox("This Node has no ChildrenNodesID!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("ChildrenMembersIDs") = False Then
+                    ReDim p_ChildrenMembersIDs(1)
+                    p_ChildrenMembersIDs = {""}
+                    'p_ChildrenMembersIDs = p_ds.Tables(0).Rows(0).Item("ChildrenMembersIDs") 'find a proper way to get all the ChildrenMembersIDs into an array
+                Else
+                    MsgBox("This Node has no ChildrenNodesID!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("MutationsIDs") = False Then
+                    ReDim p_MutationsIDs(1)
+                    p_MutationsIDs = {""}
+                    'p_MutationsIDs = p_ds.Tables(0).Rows(0).Item("MutationsIDs") 'find a proper way to get all the MutationsIDs into an array
+                Else
+                    MsgBox("This Node has no MutationsIDs!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("HasParent") = False Then
+                    p_HasParent = p_ds.Tables(0).Rows(0).Item("HasParent")
+                Else
+                    MsgBox("This Node has no IsISOGGOfficial Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("ParentNodeID") = False Then
+                    p_ParentNodeID = p_ds.Tables(0).Rows(0).Item("ParentNodeID")
+                Else
+                    MsgBox("This Node has no ParentNodeID Loaded!")
+                End If
+            End If
+        Else
+            MsgBox("Could not load Node with ID " & NodeName & "!")
+        End If
         p_IsSavedToDB = True
     End Sub
 
     Public Sub LoadWithID(ByVal NodeID As String) 'load from the DB
-        'do it
-        MsgBox("we need to load a node with ID " & NodeID & " from db using its ID!")
+        Dim cDataAccess As New clsDataAccess
+
+        p_ds = cDataAccess.GetMutationByID(NodeID)
+        If Not IsNothing(p_ds) Then
+            If p_ds.Tables(0).Rows.Count > 0 Then
+                p_ID = NodeID
+                If p_ds.Tables(0).Rows(0).IsNull("Name") = False Then
+                    p_Name = p_ds.Tables(0).Rows(0).Item("Name")
+                Else
+                    MsgBox("This Node has no Name!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("ChildrenNodesIDs") = False Then
+                    ReDim p_ChildrenNodesIDs(1)
+                    p_ChildrenNodesIDs = {""}
+                    'p_ChildrenNodesIDs = p_ds.Tables(0).Rows(0).Item("ChildrenNodesIDs") 'find a proper way to get all the ChildrenNodesIDs into an array
+                Else
+                    MsgBox("This Node has no ChildrenNodesID!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("ChildrenMembersIDs") = False Then
+                    ReDim p_ChildrenMembersIDs(1)
+                    p_ChildrenMembersIDs = {""}
+                    'p_ChildrenMembersIDs = p_ds.Tables(0).Rows(0).Item("ChildrenMembersIDs") 'find a proper way to get all the ChildrenMembersIDs into an array
+                Else
+                    MsgBox("This Node has no ChildrenNodesID!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("MutationsIDs") = False Then
+                    ReDim p_MutationsIDs(1)
+                    p_MutationsIDs = {""}
+                    'p_MutationsIDs = p_ds.Tables(0).Rows(0).Item("MutationsIDs") 'find a proper way to get all the MutationsIDs into an array
+                Else
+                    MsgBox("This Node has no MutationsIDs!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("HasParent") = False Then
+                    p_HasParent = p_ds.Tables(0).Rows(0).Item("HasParent")
+                Else
+                    MsgBox("This Node has no HasParent Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("ParentNodeID") = False Then
+                    p_ParentNodeID = p_ds.Tables(0).Rows(0).Item("ParentNodeID")
+                Else
+                    MsgBox("This Node has no ParentNodeID Loaded!")
+                End If
+            End If
+        Else
+            MsgBox("Could not load Node with ID " & NodeID & "!")
+        End If
         p_IsSavedToDB = True
     End Sub
 
-    Public Sub SavetoDB()
-        'do it
-        MsgBox("we need to save changes to node " & p_Name & " to the db!")
-        If p_ID = "" Then
-            'Save as new node
+    Private Function AlreadyExistsInDB() As String 'returns the ID if exists, "" if not
+        Dim ds As DataSet
+        Dim cDataAccess As New clsDataAccess
 
+        ds = cDataAccess.GetNodeByName(p_Name) 'from HaploTreeDB
+        If Not IsNothing(ds) Then
+            If ds.Tables(0).Rows.Count > 0 Then
+                If ds.Tables(0).Rows(0).IsNull("ParentNodeID") = False Then
+                    If p_ParentNodeID = ds.Tables(0).Rows(0).Item("ParentNodeID") Then 'same name and same parent = same node
+                        Return ds.Tables(0).Rows(0).Item("ID")
+                    Else 'same name but different parent = different node (and we have an issue!)
+                        Return ""
+                    End If
+                Else
+                    If p_ParentNodeID = "" Then 'same name and no parent in both cases = same node
+                        Return ds.Tables(0).Rows(0).Item("ID")
+                    Else 'same name but different parent = different node (and we have an issue!)
+                        Return ""
+                    End If
+                End If
+            Else
+                Return ""
+            End If
+        Else
+            Return ""
+        End If
+    End Function
+
+    Public Sub SavetoDB() 'into HaploTreeDB
+        Dim cDataAccess As New clsDataAccess
+
+        If p_ID = "" Then 'insert 
+            'Save as new node, but check if exists in first
+            p_ID = AlreadyExistsInDB()
+            If p_ID = "" Then 'This is an insert
+                cDataAccess.InsertNodeInTree(p_Name, p_ParentNodeID, p_ChildrenNodesIDs, p_ChildrenMembersIDs, p_MutationsIDs, p_HasParent)
+                p_ID = AlreadyExistsInDB() 'now should have got a ID!
+            Else 'This is an update - be carefull we may have encountered an node with same name
+                cDataAccess.UpdateNodeInTree(p_Name, p_ParentNodeID, p_ChildrenNodesIDs, p_ChildrenMembersIDs, p_MutationsIDs, p_HasParent, p_ID)
+            End If
         Else
             'Save updates
-
+            cDataAccess.UpdateNodeinTree(p_Name, p_ParentNodeID, p_ChildrenNodesIDs, p_ChildrenMembersIDs, p_MutationsIDs, p_HasParent, p_ID)
         End If
         p_IsSavedToDB = True
     End Sub

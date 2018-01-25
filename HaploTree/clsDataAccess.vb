@@ -264,7 +264,8 @@ Public Class clsDataAccess
             dbCommandAccess.CommandType = CommandType.Text
 
             '  If conn.State = ConnectionState.Closed Then
-            dbCommandAccess.Connection = GetConnectionDocFiles()
+            'dbCommandAccess.Connection = GetConnectionDocFiles() '=old code!?
+            dbCommandAccess.Connection = GetConnection()
             dbCommandAccess.Connection.Open()
             ' End If
 
@@ -277,10 +278,58 @@ Public Class clsDataAccess
             Return rowsAffected
         Catch ex As Exception
             MsgBox("Error:" & ex.Message)
+            Return 0
         End Try
-#Disable Warning BC42353 ' Function doesn't return a value on all code paths
     End Function
-#Enable Warning BC42353 ' Function doesn't return a value on all code paths
+
+    Public Function InsertMember(ByVal vstrMemberName As String,
+                                 ByVal vstrFTDNAID As String,
+                                 ByVal vstrYFullID As String,
+                                 ByVal vstrMutationsIDs As String(), 'need to find a way to store arrays first
+                                 ByVal vstrPrivateMutationsIDs As String(),
+                                 ByVal vstrPutativeMutationsIDs As String(),
+                                 ByVal vstrCurrentParentNodeID As String,
+                                 ByVal vstrIsPlacedInTheTree As Boolean) As Integer
+
+
+        Dim sql As String
+        Dim rowsAffected As Integer
+        Try
+            'sql = "  INSERT INTO tblMembers (MemberName, FTDNAID, YFullID,MutationsIDs,PrivateMutationsIDs,PutativeMutationsIDs,CurrentParentNodeID,IsPlacedInTheTree) VALUES ("
+            sql = "  INSERT INTO tblMembers (MemberName, FTDNAID, YFullID,CurrentParentNodeID,IsPlacedInTheTree) VALUES ("
+            sql = sql & Chr(34) & vstrMemberName & Chr(34)
+            sql = sql & "," & Chr(34) & vstrFTDNAID & Chr(34)
+            sql = sql & "," & Chr(34) & vstrYFullID & Chr(34)
+            'sql = sql & "," & Chr(34) & vstrMutationsIDs & Chr(34)
+            'sql = sql & "," & Chr(34) & vstrPrivateMutationsIDs & Chr(34)
+            'sql = sql & "," & Chr(34) & vstrPutativeMutationsIDs & Chr(34)
+            sql = sql & "," & Chr(34) & vstrCurrentParentNodeID & Chr(34)
+            sql = sql & "," & Chr(34) & vstrIsPlacedInTheTree & Chr(34)
+            sql = sql & ")"
+
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            'dbCommandAccess.Connection = GetConnectionDocFiles() '=old code!?
+            dbCommandAccess.Connection = GetConnection()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            ' End If
+
+
+            dbCommandAccess.Connection.Close()
+
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
 
     Public Function InsertPositionByMemberID38(ByVal vstrFK_MemberID As Integer,
                                              ByVal vintPosition As Integer,
@@ -321,10 +370,6 @@ Public Class clsDataAccess
                 dbCommandAccess.Connection = conn
                 rowsAffected = dbCommandAccess.ExecuteNonQuery()
             End If
-
-
-
-
 
             '     dbCommandAccess.Connection.Close()
 
@@ -390,13 +435,6 @@ Public Class clsDataAccess
 #Disable Warning BC42353 ' Function doesn't return a value on all code paths
     End Function
 
-
-
-
-
-
-
-
     Public Function UpdateMember(ByVal vstrMemberName As String,
                                  ByVal vstrFTDNAID As String,
                                  ByVal vstrYFullID As String,
@@ -416,7 +454,7 @@ Public Class clsDataAccess
             dbCommandAccess.CommandType = CommandType.Text
 
             '  If conn.State = ConnectionState.Closed Then
-            dbCommandAccess.Connection = GetConnectionDocFiles()
+            dbCommandAccess.Connection = GetConnection()
             dbCommandAccess.Connection.Open()
             ' End If
 
@@ -434,6 +472,52 @@ Public Class clsDataAccess
     End Function
 #Enable Warning BC42353 ' Function doesn't return a value on all code paths
 
+    Public Function UpdateMember(ByVal vstrMemberName As String,
+                                 ByVal vstrFTDNAID As String,
+                                 ByVal vstrYFullID As String,
+                                 ByVal vstrMutationsIDs As String(), 'need to find a way to store arrays first
+                                 ByVal vstrPrivateMutationsIDs As String(),
+                                 ByVal vstrPutativeMutationsIDs As String(),
+                                 ByVal vstrCurrentParentNodeID As String,
+                                 ByVal vstrIsPlacedInTheTree As Boolean,
+                                 ByVal vintID As Integer) As Integer
+        Dim sql As String
+        Dim rowsAffected As Integer
+        Try
+
+            sql = "  UPDATE tblMembers "
+            sql = sql & " SET MemberName= " & Chr(34) & vstrMemberName & Chr(34)
+            sql = sql & ",FTDNAID=" & Chr(34) & vstrFTDNAID & Chr(34)
+            sql = sql & ",YFullID=" & Chr(34) & vstrYFullID & Chr(34)
+            'sql = sql & ",MutationsIDs=" & Chr(34) & vstrMutationsIDs & Chr(34)
+            'sql = sql & ",PrivateMutationsIDs=" & Chr(34) & vstrPrivateMutationsIDs & Chr(34)
+            'sql = sql & ",PutativeMutationsIDs=" & Chr(34) & vstrPutativeMutationsIDs & Chr(34)
+            sql = sql & ",CurrentParentNodeID=" & Chr(34) & vstrCurrentParentNodeID & Chr(34)
+            sql = sql & ",IsPlacedInTheTree=" & Chr(34) & vstrIsPlacedInTheTree & Chr(34)
+            sql = sql & " WHERE ID=" & vintID
+
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnection()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            ' End If
+
+
+            dbCommandAccess.Connection.Close()
+
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+        End Try
+#Disable Warning BC42353 ' Function doesn't return a value on all code paths
+    End Function
+#Enable Warning BC42353 ' Function doesn't return a value on all code paths
 
     Public Function GetBranchByParentBranch(ByVal vstrParentBranch As String) As DataSet
 

@@ -11,6 +11,9 @@ Public Class Member
     Private p_PutativeMutationsIDs As String() ' mutations that have not been tested or results are too bad to be interpreted but we/admin have strong presumptions that this member has the mutation
     Private p_IsSavedToDB As Boolean
     Private p_IsPlacedInTheTree As Boolean
+    Private p_ds As DataSet 'from Member table in VariantDB
+    Private p_dsPositions As DataSet 'from Position table in VariantDB
+    Private p_VariantLoaded As Boolean
 
     Public Property PutativeMutationsIDs As String()
         Get
@@ -236,6 +239,12 @@ Public Class Member
         End Get
     End Property
 
+    Public ReadOnly Property VariantLoaded As Boolean
+        Get
+            Return p_VariantLoaded
+        End Get
+    End Property
+
     Public Sub New()
         p_ID = ""
         p_Name = ""
@@ -247,6 +256,9 @@ Public Class Member
         p_PrivateMutationsIDs = Nothing
         p_IsSavedToDB = False
         p_IsPlacedInTheTree = False
+        p_VariantLoaded = False
+        p_ds = Nothing
+        p_dsPositions = Nothing
     End Sub
 
     Public Sub New(ByVal memberID As String, ByVal memberName As String, Optional ByVal FTDNAkitval As String = "-999", Optional ByVal YFullKitval As String = "-999")
@@ -260,6 +272,9 @@ Public Class Member
         p_PrivateMutationsIDs = Nothing
         p_IsSavedToDB = False
         p_IsPlacedInTheTree = False
+        p_VariantLoaded = False
+        p_ds = Nothing
+        p_dsPositions = Nothing
     End Sub
 
     Public Function HasMutation(MutationID As String) As Boolean
@@ -307,24 +322,114 @@ Public Class Member
         Return HasMut
     End Function
 
-    Public Function GetPositionHg38AtRow(Item As Integer) As Long 'returns preferably from the HG38 variant data, from HG19 if not, position is transformed into hg38 in any case
-        Return 0
+    Public Sub LoadVariantsHG38(MemberID As Integer) ' only when a member is already loaded
+        Dim cDataAccess As New clsDataAccess
+
+        p_VariantLoaded = False
+        p_ds = cDataAccess.GetMemberByID(MemberID)
+        If Not IsNothing(p_ds) Then
+            If p_ds.Tables(0).Rows.Count > 0 Then
+
+                If p_ds.Tables(0).Rows(0).IsNull("MemberName") = False Then
+                    If Not p_Name = p_ds.Tables(0).Rows(0).Item("MemberName") Then
+                        MsgBox("Member Name Mismatch!")
+                        Exit Sub
+                    End If
+                Else
+                    MsgBox("This Member has no name!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("FTDNAID") = False Then
+                    If Not p_FTDNAKit = p_ds.Tables(0).Rows(0).Item("FTDNAID") Then
+                        MsgBox("Member FTDNA kit number Mismatch!")
+                        Exit Sub
+                    End If
+                Else
+                    MsgBox("This Member has no FTDNA kit number!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("YFullID") = False Then
+                    If Not p_YFullKit = p_ds.Tables(0).Rows(0).Item("YFullID") Then
+                        MsgBox("Member YFull kit number Mismatch!")
+                        Exit Sub
+                    End If
+                Else
+                    MsgBox("This Member has no YFull kit number!")
+                End If
+
+                'Now see if this person has records stored
+                p_dsPositions = cDataAccess.GetPositionsByMemberID38(MemberID)
+                If Not IsNothing(p_dsPositions) Then
+                    If Not p_dsPositions.Tables(0).Rows.Count > 0 Then
+                        MsgBox("Member has no variant data loaded!")
+                        Exit Sub
+                    End If
+                    p_VariantLoaded = True
+                Else
+                    MsgBox("Member with ID " & MemberID & " has no variant loaded!")
+                End If
+            End If
+        Else
+            MsgBox("Could not load member with ID " & MemberID & "!")
+        End If
+    End Sub
+
+    Public Function GetPositionHg38AtRow(Itemi As Integer) As Long 'returns preferably from the HG38 variant data, from HG19 if not, position is transformed into hg38 in any case
+        If Not IsNothing(p_dsPositions) Then
+            Return p_dsPositions.Tables(0).Rows(Itemi).Item("Pos")
+        Else
+            Return 0
+        End If
     End Function
 
-    Public Function GetRefCallAtRow(Item As Integer) As String 'returns preferably from the HG38 variant data, from HG19 if not
-        Return ""
+    Public Function GetRefCallAtRow(Itemi As Integer) As String 'returns preferably from the HG38 variant data, from HG19 if not
+        If Not IsNothing(p_dsPositions) Then
+            Return p_dsPositions.Tables(0).Rows(Itemi).Item("Ref")
+        Else
+            Return ""
+        End If
     End Function
 
-    Public Function GetAltCallAtRow(Item As Integer) As String 'returns preferably from the HG38 variant data, from HG19 if not
-        Return ""
+    Public Function GetAltCallAtRow(Itemi As Integer) As String 'returns preferably from the HG38 variant data, from HG19 if not
+        If Not IsNothing(p_dsPositions) Then
+            Return p_dsPositions.Tables(0).Rows(Itemi).Item("Alt")
+        Else
+            Return ""
+        End If
     End Function
 
-    Public Function GetRefCallHg19AtRow(Item As Integer) As String 'returns only from HG19 variant data, "" if HG19 does not exist
-        Return ""
+    Public Function GetAltCallDepthAtRow(Itemi As Integer) As String 'returns preferably from the HG38 variant data, from HG19 if not
+        If Not IsNothing(p_dsPositions) Then
+            'use p_dsPositions.Tables(0).Rows(Itemi).Item("Mutation") and extract depth
+            Return ""
+        Else
+            Return ""
+        End If
     End Function
 
-    Public Function GetAltCallHg19AtRow(Item As Integer) As String 'returns only from HG19 variant data, "" if HG19 does not exist
-        Return ""
+    Public Function GetTotalDepthAtRow(Itemi As Integer) As String 'returns preferably from the HG38 variant data, from HG19 if not
+        If Not IsNothing(p_dsPositions) Then
+            'use p_dsPositions.Tables(0).Rows(Itemi).Item("Mutation") and extract depth
+            Return ""
+        Else
+            Return ""
+        End If
+    End Function
+
+    Public Function GetRefCallHg19AtRow(Itemi As Integer) As String 'returns only from HG19 variant data, "" if HG19 does not exist
+        If Not IsNothing(p_dsPositions) Then
+            Return ""
+        Else
+            Return ""
+        End If
+    End Function
+
+    Public Function GetAltCallHg19AtRow(Itemi As Integer) As String 'returns only from HG19 variant data, "" if HG19 does not exist
+        If Not IsNothing(p_dsPositions) Then
+            Return ""
+        Else
+            Return ""
+        End If
     End Function
 
     Public Sub LoadWithName(ByVal memberName As String) 'load from the DB
@@ -333,29 +438,289 @@ Public Class Member
         p_IsSavedToDB = True
     End Sub
 
-    Public Sub LoadWithID(ByVal memberID As String) 'load from the DB
-        'do it
-        MsgBox("we need to load a member with ID " & memberID & " from db using its ID!")
+    Public Sub LoadWithFTDNAID(ByVal FTDNAID As String) 'load from the DB
+        Dim cDataAccess As New clsDataAccess
+
+        p_VariantLoaded = False
+        p_ds = cDataAccess.GetMemberByFTDNAID(FTDNAID)
+        If Not IsNothing(p_ds) Then
+            If p_ds.Tables(0).Rows.Count > 0 Then
+                p_FTDNAKit = FTDNAID
+                If p_ds.Tables(0).Rows(0).IsNull("MemberName") = False Then
+                    p_Name = p_ds.Tables(0).Rows(0).Item("MemberName")
+                Else
+                    MsgBox("This Member has no name!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("YFullKit") = False Then
+                    p_YFullKit = p_ds.Tables(0).Rows(0).Item("YFullKit")
+                Else
+                    MsgBox("This Member has no YFull kit number!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("ID") = False Then
+                    p_ID = p_ds.Tables(0).Rows(0).Item("ID")
+                Else
+                    MsgBox("This Member has no ID!") 'should not realy happen
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("MutationsID") = False Then
+                    'p_MutationsIDs = p_ds.Tables(0).Rows(0).Item("MutationsID") 'find a proper way to get all the mutationsIDs into an array
+                Else
+                    MsgBox("This Member has no Mutations Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("PrivateMutationsID") = False Then
+                    'p_PrivateMutationsIDs = p_ds.Tables(0).Rows(0).Item("PrivateMutationsID") 'find a proper way to get all the private mutationsIDs into an array
+                Else
+                    MsgBox("This Member has no Private Mutations Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("PutativeMutationsID") = False Then
+                    'p_PutativeMutationsIDs = p_ds.Tables(0).Rows(0).Item("PutativeMutationsID") 'find a proper way to get all the putative mutationsIDs into an array
+                Else
+                    MsgBox("This Member has no Putative Mutations Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("CurrentParentnodeID") = False Then
+                    p_CurrentParentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentParentnodeID")
+                Else
+                    MsgBox("This Member has no CurrentParentnodeID yet!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("IsPlacedInTheTree") = False Then
+                    p_IsPlacedInTheTree = p_ds.Tables(0).Rows(0).Item("IsPlacedInTheTree")
+                Else
+                    MsgBox("This Member is not placed in the tree yet!")
+                    p_IsPlacedInTheTree = False
+                End If
+
+                'Now see if this person has variant records stored
+                p_dsPositions = cDataAccess.GetPositionsByMemberID38(p_ID)
+                If Not IsNothing(p_dsPositions) Then
+                    If Not p_dsPositions.Tables(0).Rows.Count > 0 Then
+                        MsgBox("Member has no variant data loaded")
+                    Else
+                        p_VariantLoaded = True
+                    End If
+                Else
+                    MsgBox("Member with FTDNA Kit number " & FTDNAID & " has no variant loaded!")
+                End If
+            End If
+        Else
+            MsgBox("Could not load member with FTDNA Kit number " & FTDNAID & "!")
+        End If
         p_IsSavedToDB = True
     End Sub
 
-    Public Sub SavetoDB() 'note that a member should always exists already in the DB,
-        'we do Not save New members in the DB from here, only changes.
-        'do it
-        MsgBox("we need to save changes to member " & p_Name & " to the db!")
-        If p_ID = "" Then
-            'Save as new Member - unsure if this should be possible
+    Public Sub LoadWithYFullID(ByVal YFullID As String) 'load from the DB
+        Dim cDataAccess As New clsDataAccess
 
+        p_VariantLoaded = False
+        p_ds = cDataAccess.GetMemberByYFullID(YFullKit)
+        If Not IsNothing(p_ds) Then
+            If p_ds.Tables(0).Rows.Count > 0 Then
+                p_YFullKit = YFullID
+                If p_ds.Tables(0).Rows(0).IsNull("MemberName") = False Then
+                    p_Name = p_ds.Tables(0).Rows(0).Item("MemberName")
+                Else
+                    MsgBox("This Member has no name!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("FTDNAKit") = False Then
+                    p_FTDNAKit = p_ds.Tables(0).Rows(0).Item("FTDNAKit")
+                Else
+                    MsgBox("This Member has no FTDNA kit number!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("ID") = False Then
+                    p_ID = p_ds.Tables(0).Rows(0).Item("ID")
+                Else
+                    MsgBox("This Member has no ID!") 'should not realy happen
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("MutationsID") = False Then
+                    'p_MutationsIDs = p_ds.Tables(0).Rows(0).Item("MutationsID") 'find a proper way to get all the mutationsIDs into an array
+                Else
+                    MsgBox("This Member has no Mutations Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("PrivateMutationsID") = False Then
+                    'p_PrivateMutationsIDs = p_ds.Tables(0).Rows(0).Item("PrivateMutationsID") 'find a proper way to get all the private mutationsIDs into an array
+                Else
+                    MsgBox("This Member has no Private Mutations Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("PutativeMutationsID") = False Then
+                    'p_PutativeMutationsIDs = p_ds.Tables(0).Rows(0).Item("PutativeMutationsID") 'find a proper way to get all the putative mutationsIDs into an array
+                Else
+                    MsgBox("This Member has no Putative Mutations Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("CurrentParentnodeID") = False Then
+                    p_CurrentParentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentParentnodeID")
+                Else
+                    MsgBox("This Member has no CurrentParentnodeID yet!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("IsPlacedInTheTree") = False Then
+                    p_IsPlacedInTheTree = p_ds.Tables(0).Rows(0).Item("IsPlacedInTheTree")
+                Else
+                    MsgBox("This Member is not placed in the tree yet!")
+                    p_IsPlacedInTheTree = False
+                End If
+
+                'Now see if this person has variant records stored
+                p_dsPositions = cDataAccess.GetPositionsByMemberID38(p_ID)
+                If Not IsNothing(p_dsPositions) Then
+                    If Not p_dsPositions.Tables(0).Rows.Count > 0 Then
+                        MsgBox("Member has no variant data loaded")
+                    Else
+                        p_VariantLoaded = True
+                    End If
+                Else
+                    MsgBox("Member with YFull Kit number " & YFullID & " has no variant loaded!")
+                End If
+            End If
+        Else
+            MsgBox("Could not load member with YFull Kit number " & YFullID & "!")
+        End If
+        p_IsSavedToDB = True
+    End Sub
+
+    Public Sub LoadWithID(ByVal memberID As String) 'load from the VariantDB
+        Dim cDataAccess As New clsDataAccess
+
+        p_VariantLoaded = False
+        p_ds = cDataAccess.GetMemberByID(memberID)
+        If Not IsNothing(p_ds) Then
+            If p_ds.Tables(0).Rows.Count > 0 Then
+                p_ID = memberID
+                If p_ds.Tables(0).Rows(0).IsNull("MemberName") = False Then
+                    p_Name = p_ds.Tables(0).Rows(0).Item("MemberName")
+                Else
+                    MsgBox("This Member has no name!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("FTDNAID") = False Then
+                    p_FTDNAKit = p_ds.Tables(0).Rows(0).Item("FTDNAID")
+                Else
+                    MsgBox("This Member has no FTDNA kit number!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("YFullID") = False Then
+                    p_YFullKit = p_ds.Tables(0).Rows(0).Item("YFullID")
+                Else
+                    MsgBox("This Member has no YFull kit number!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("MutationsID") = False Then
+                    'p_MutationsIDs = p_ds.Tables(0).Rows(0).Item("MutationsID") 'find a proper way to get all the mutationsIDs into an array
+                Else
+                    MsgBox("This Member has no Mutations Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("PrivateMutationsID") = False Then
+                    'p_PrivateMutationsIDs = p_ds.Tables(0).Rows(0).Item("PrivateMutationsID") 'find a proper way to get all the private mutationsIDs into an array
+                Else
+                    MsgBox("This Member has no Private Mutations Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("PutativeMutationsID") = False Then
+                    'p_PutativeMutationsIDs = p_ds.Tables(0).Rows(0).Item("PutativeMutationsID") 'find a proper way to get all the putative mutationsIDs into an array
+                Else
+                    MsgBox("This Member has no Putative Mutations Loaded!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("CurrentParentnodeID") = False Then
+                    p_CurrentParentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentParentnodeID")
+                Else
+                    MsgBox("This Member has no CurrentParentnodeID yet!")
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("IsSavedToDB") = False Then ' a bit useless!
+                    p_IsSavedToDB = p_ds.Tables(0).Rows(0).Item("IsSavedToDB")
+                Else
+
+                End If
+
+                If p_ds.Tables(0).Rows(0).IsNull("IsPlacedInTheTree") = False Then
+                    p_IsPlacedInTheTree = p_ds.Tables(0).Rows(0).Item("IsPlacedInTheTree")
+                Else
+                    MsgBox("This Member is not placed in the tree yet!")
+                    p_IsPlacedInTheTree = False
+                End If
+
+                'Now see if this person has variant records stored
+                p_dsPositions = cDataAccess.GetPositionsByMemberID38(memberID)
+                If Not IsNothing(p_dsPositions) Then
+                    If Not p_dsPositions.Tables(0).Rows.Count > 0 Then
+                        MsgBox("Member has no variant data loaded")
+                    Else
+                        p_VariantLoaded = True
+                    End If
+                Else
+                    MsgBox("Member with ID " & memberID & " has no variant loaded!")
+                End If
+            End If
+        Else
+            MsgBox("Could not load member with ID " & memberID & "!")
+        End If
+        p_IsSavedToDB = True
+    End Sub
+
+    Private Function AlreadyExistsInDB() As String 'returns the ID if exists, "" if not
+        Dim ds As DataSet
+        Dim cDataAccess As New clsDataAccess
+
+        ds = cDataAccess.GetMemberByName(p_Name)
+        If Not IsNothing(ds) Then
+            If ds.Tables(0).Rows.Count > 0 Then
+                Return ds.Tables(0).Rows(0).Item("ID")
+            End If
+        End If
+        ds = Nothing
+        ds = cDataAccess.GetMemberByFTDNAID(p_FTDNAKit)
+        If Not IsNothing(ds) Then
+            If ds.Tables(0).Rows.Count > 0 Then
+                Return ds.Tables(0).Rows(0).Item("ID")
+            End If
+        End If
+        ds = Nothing
+        ds = cDataAccess.GetMemberByYFullID(p_YFullKit)
+        If Not IsNothing(ds) Then
+            If ds.Tables(0).Rows.Count > 0 Then
+                Return ds.Tables(0).Rows(0).Item("ID")
+            Else
+                Return ""
+            End If
+        Else
+            Return ""
+        End If
+    End Function
+
+    Public Sub SavetoDB()  'we save the member and eventual changes in the Member table of the VariantDB, not the variant positions
+        Dim cDataAccess As New clsDataAccess
+
+        If p_ID = "" Then 'insert - this should not realy happen here!
+            'Save as new Member, but check if exists in first
+            p_ID = AlreadyExistsInDB()
+            If p_ID = "" Then 'This is an insert, but should not happen!
+                cDataAccess.InsertMember(p_Name, p_FTDNAKit, p_YFullKit, p_MutationsIDs, p_PrivateMutationsIDs, p_PutativeMutationsIDs, p_CurrentParentNodeID, p_IsPlacedInTheTree)
+                p_ID = AlreadyExistsInDB() 'now should have got a ID!
+            Else 'This is an update
+                cDataAccess.UpdateMember(p_Name, p_FTDNAKit, p_YFullKit, p_MutationsIDs, p_PrivateMutationsIDs, p_PutativeMutationsIDs, p_CurrentParentNodeID, p_IsPlacedInTheTree, p_ID)
+            End If
         Else
             'Save updates
-
+            cDataAccess.UpdateMember(p_Name, p_FTDNAKit, p_YFullKit, p_MutationsIDs, p_PrivateMutationsIDs, p_PutativeMutationsIDs, p_CurrentParentNodeID, p_IsPlacedInTheTree, p_ID)
         End If
         p_IsSavedToDB = True
     End Sub
 
     Protected Overrides Sub Finalize()
         If p_IsSavedToDB = False Then
-            If MsgBox("Member " & p_Name & " has been modified! Do you want to save changes to the DB?") = MsgBoxResult.Ok Then
+            If MsgBox("Member " & p_Name & " has been modified! Do you want to save changes to the DB?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
                 'do it
                 Me.SavetoDB()
             End If

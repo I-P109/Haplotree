@@ -54,7 +54,7 @@ Module DataConn
 
     '***************************************************************************************************
     Public Function GetConnectionDocFiles() As OleDb.OleDbConnection
-        Dim strConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & App_Path() & "Haplotree.accdb;Persist Security Info=False"
+        Dim strConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & App_Path() & "VariantDB.accdb;Persist Security Info=False"
 
         Try
             connDoc = New OleDbConnection

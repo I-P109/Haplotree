@@ -178,13 +178,13 @@
             If lblID.Text.Length = 0 Then
                 blnExists = AlreadyExists()
                 If blnExists = False Then
-                    intReturn = SaveRecord
+                    intReturn = SaveRecord()
                     If intReturn > 0 Then
                         MsgBox("Record has been saved!")
                     End If
 
                 Else
-                    MsgBox("A record already exists with this FTDNA IS or YFull ID. Record was NOT saved")
+                    MsgBox("A record already exists with this FTDNA ID or YFull ID. Record was NOT saved")
                 End If
             Else
                 intReturn = SaveRecord()
