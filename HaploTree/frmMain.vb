@@ -14,10 +14,21 @@ Public Class frmMain
 
     End Sub
 
-    Private Sub mnuEditMembers_Click(sender As Object, e As EventArgs) Handles mnuEditMembers.Click
+    Private Sub mnuEditMembersDetails_Click(sender As Object, e As EventArgs) Handles mnuEditMembersDetails.Click
         Dim frmMembers As New frmMembers
         frmMembers.MdiParent = Me
         frmMembers.Show()
+    End Sub
+
+    Private Sub mnuEditMembersLoadToTree_Click(sender As Object, e As EventArgs) Handles mnuEditMembersUploadToTree.Click
+        Dim frmMembSearch As New frmMembersSearch
+        frmMembSearch.MdiParent = Me
+        frmMembSearch.btnEdit.Enabled = False
+
+        frmMembSearch.ShowDialog()
+
+        If frmMembersSearch.ID > 0 Then InsertNewKitInTree(frmMembersSearch.ID)
+
     End Sub
 
     Private Sub mnuViewMembersSNPs_Click(sender As Object, e As EventArgs) Handles mnuViewMembersSNPs.Click
@@ -29,6 +40,7 @@ Public Class frmMain
     Private Sub mnuViewTree_Click(sender As Object, e As EventArgs) Handles mnuViewTree.Click
         Dim frmTree As New frmTree
         frmTree.MdiParent = Me
+        frmTree.SelectOnly = False
         frmTree.Show()
     End Sub
 

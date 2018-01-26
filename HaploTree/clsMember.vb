@@ -588,7 +588,7 @@ Public Class Member
         p_IsSavedToDB = True
     End Sub
 
-    Public Sub LoadWithID(ByVal memberID As String) 'load from the VariantDB
+    Public Sub LoadWithID(ByVal memberID As Integer) 'load from the VariantDB
         Dim cDataAccess As New clsDataAccess
 
         p_VariantLoaded = False

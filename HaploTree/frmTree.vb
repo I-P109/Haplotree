@@ -1,40 +1,71 @@
 ﻿Public Class frmTree
     Dim cDataAccess As New clsDataAccess
+    Private p_SelectedNode As String
+    Private p_SelectOnly As Boolean 'to handle menus so that only the Select one is visible
+
+    Public Property SelectOnly As Boolean
+        Get
+            Return p_SelectOnly
+        End Get
+        Set(value As Boolean)
+            p_SelectOnly = value
+            If value = True Then
+                cmnuAddNode.Enabled = True
+                cmnuRemoveNode.Enabled = True
+                cmnuAddTextColor.Enabled = True
+                cmnuAddBackgroundColor.Enabled = True
+                cmnuSNPInfo.Enabled = True
+                cmnuSelectNode.Enabled = False
+                p_SelectedNode = ""
+            Else
+                cmnuAddNode.Enabled = False
+                cmnuRemoveNode.Enabled = False
+                cmnuAddTextColor.Enabled = False
+                cmnuAddBackgroundColor.Enabled = False
+                cmnuSNPInfo.Enabled = False
+                cmnuSelectNode.Enabled = True
+            End If
+        End Set
+    End Property
+
+    Public ReadOnly Property SelectedNode As String
+        Get
+            Return p_SelectedNode
+        End Get
+    End Property
+
     Private Sub frmTree_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Left = 0
         Me.Top = 0
         Me.Width = Me.Parent.Width
         Me.Height = Me.Parent.Height
 
-
         Me.tvwTree.Height = Me.Height - 150
-
-
 
         Call PopulateTreeView()
     End Sub
 
-    Public Function PopulateTreeView()
+    Private Sub PopulateTreeView()
         Dim ds As New DataSet
-        Dim dsNodes As New DataSet
-        Dim strMainNodeText As String = ""
-        Dim strMainNodeName As String = ""
+        'Dim dsNodes As New DataSet
+        'Dim strMainNodeText As String = ""
+        'Dim strMainNodeName As String = ""
         Try
             ds = cDataAccess.GetBranchByParentBranch(0)
             If ds.Tables(0).Rows.Count > 0 Then
                 'first lets set the main node
-                strMainNodeText = ds.Tables(0).Rows(0).Item("BranchName")
+                'strMainNodeText = ds.Tables(0).Rows(0).Item("BranchName")
 
                 ' start off by adding a base treeview node
-                Dim mainNode As New TreeNode()
-                mainNode.Name = strMainNodeText
-                mainNode.Text = strMainNodeText
-                Me.tvwTree.Nodes.Add(mainNode)
+                'Dim mainNode As New TreeNode()
+                'mainNode.Name = strMainNodeText
+                'mainNode.Text = strMainNodeText
+                'Me.tvwTree.Nodes.Add(mainNode)
 
-                dsNodes = cDataAccess.GetAllTree
+                'dsNodes = cDataAccess.GetAllTree
 
-                tvwTree.Update()
-                tvwTree.Nodes.Clear()
+                'tvwTree.Update()
+                'tvwTree.Nodes.Clear()
                 Dim parent As TreeNode
                 parent = New TreeNode("Root")
                 tvwTree.Nodes.Add(parent)
@@ -48,11 +79,9 @@
             MsgBox("ERROR:" & ex.Message)
         End Try
 
+    End Sub
 
-
-    End Function
-
-    Public Sub AddMoreChildren(ByVal parent As TreeNode)
+    Private Sub AddMoreChildren(ByVal parent As TreeNode)
         Dim ds As New DataSet
         Dim dsExists As DataSet
         Dim adptr As New DataSet
@@ -61,8 +90,6 @@
             'Do an quick select to see if the ParentBranch exists
             dsExists = cDataAccess.ExistsBranchByParentBranch(parent.Text)
             If dsExists.Tables(0).Rows.Count > 0 Then
-
-
                 ds = cDataAccess.GetBranchByParentBranch(parent.Text)
                 '  ds.Clear()
                 '  adptr.Fill(ds)
@@ -104,17 +131,12 @@
             MsgBox("ERROR:" & ex.Message)
         End Try
 
-
     End Sub
 
     Private Sub ContextMenuStrip1_Opening(sender As Object, e As System.ComponentModel.CancelEventArgs) Handles ContextMenuStrip1.Opening
         If Me.tvwTree.SelectedNode Is Nothing Then
             e.Cancel = True
         End If
-
-
-
-
 
     End Sub
 
@@ -159,7 +181,7 @@
         End If
     End Sub
 
-    Public Function DeleteNodes()
+    Public Sub DeleteNodes()
         Dim ds As DataSet
         Dim strBranchName As String = ""
         Dim i As Integer = 0
@@ -180,7 +202,7 @@
                 End If
             Next
         End If
-    End Function
+    End Sub
 
     Private Sub cmnuSNPInfo_Click(sender As Object, e As EventArgs) Handles cmnuSNPInfo.Click
         Dim f As New frmSNPInfo
@@ -254,7 +276,6 @@
     End Sub
 
     Private Sub cmnuEditNodeName_Click(sender As Object, e As EventArgs) Handles cmnuEditNodeName.Click
-        Dim intReturn As Integer
 
         Dim n As New frmEditNode
 
@@ -262,7 +283,10 @@
         n.ID = tvwTree.SelectedNode.Tag
         n.ShowDialog()
 
+    End Sub
 
-
+    Private Sub cmnuSelectNode_Click(sender As Object, e As EventArgs) Handles cmnuSelectNode.Click
+        p_SelectedNode = tvwTree.SelectedNode.Text
+        Me.Close()
     End Sub
 End Class

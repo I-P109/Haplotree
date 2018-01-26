@@ -11,7 +11,7 @@ Public Class Mutation
     Private p_IsSavedToDB As Boolean
     Private p_IsIgnored As Boolean 'In case we do not want to use it in the tree building process - not in use right now
     Private p_ds As DataSet 'from Mutation table in HaploTreeDB
-    Private p_CurrentNodeID As String
+    Private p_CurrentParentNodeID As String
 
     Public ReadOnly Property ID As String
         Get
@@ -98,12 +98,12 @@ Public Class Mutation
         End Set
     End Property
 
-    Public Property CurrentNodeID As String
+    Public Property CurrentParentNodeID As String
         Get
-            Return p_CurrentNodeID
+            Return p_CurrentParentNodeID
         End Get
         Set(value As String)
-            p_CurrentNodeID = value
+            p_CurrentParentNodeID = value
         End Set
     End Property
 
@@ -119,10 +119,10 @@ Public Class Mutation
         p_IsPrivate = False
         p_IsIgnored = False
         p_IsSavedToDB = False
-        p_CurrentNodeID = ""
+        p_CurrentParentNodeID = ""
     End Sub
 
-    Public Sub New(ByVal MutID As String, ByVal PosID As String, ByVal AlternateCall As String, Optional ByVal ReferenceSNPID As String = "", Optional IsPrivateSNP As Boolean = False, Optional IsIgnoredInTree As Boolean = False, Optional CurrNodeID As String = "")
+    Public Sub New(ByVal MutID As String, ByVal PosID As String, ByVal AlternateCall As String, Optional ByVal ReferenceSNPID As String = "", Optional IsPrivateSNP As Boolean = False, Optional IsIgnoredInTree As Boolean = False, Optional CurrParNodeID As String = "")
         p_ID = MutID
         p_PositionID = PosID
         p_AltCall = AlternateCall
@@ -138,7 +138,7 @@ Public Class Mutation
         p_IsPrivate = IsPrivateSNP
         p_IsIgnored = IsIgnoredInTree
         p_IsSavedToDB = False
-        p_CurrentNodeID = CurrNodeID
+        p_CurrentParentNodeID = CurrParNodeID
     End Sub
 
     Public Function HasName(Nam As String) As Boolean
@@ -246,8 +246,8 @@ Public Class Mutation
                     MsgBox("This Mutation has no IsIgnored loaded!")
                 End If
 
-                If p_ds.Tables(0).Rows(0).IsNull("CurrentNodeID") = False Then
-                    p_CurrentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentNodeID")
+                If p_ds.Tables(0).Rows(0).IsNull("CurrentParentNodeID") = False Then
+                    p_CurrentParentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentParentNodeID")
                 Else
                     MsgBox("This Mutation has no CurrentNodeID yet!")
                 End If
@@ -304,8 +304,8 @@ Public Class Mutation
                     MsgBox("This Mutation has no IsIgnored loaded!")
                 End If
 
-                If p_ds.Tables(0).Rows(0).IsNull("CurrentNodeID") = False Then
-                    p_CurrentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentNodeID")
+                If p_ds.Tables(0).Rows(0).IsNull("CurrentParentNodeID") = False Then
+                    p_CurrentParentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentParentNodeID")
                 Else
                     MsgBox("This Mutation has no CurrentNodeID yet!")
                 End If

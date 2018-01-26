@@ -368,10 +368,6 @@ Public Class frmImport
     End Sub
 
     Private Sub btnSearch_Click(sender As Object, e As EventArgs) Handles btnSearch.Click
-        'Dim frmMembers As New frmMembers
-        'frmMembers.ShowDialog()
-
-
         Dim frmMembersSearch As New frmMembersSearch
         frmMembersSearch.ShowDialog()
 

@@ -144,4 +144,9 @@
         frmMembers.ShowDialog()
         Call PopulateMembers()
     End Sub
+
+    Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
+        mintMemberID = 0
+        Me.Close()
+    End Sub
 End Class

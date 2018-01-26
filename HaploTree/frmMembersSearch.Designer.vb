@@ -33,18 +33,20 @@ Partial Class frmMembersSearch
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(94, 541)
+        Me.Label1.Location = New System.Drawing.Point(125, 666)
+        Me.Label1.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(83, 13)
+        Me.Label1.Size = New System.Drawing.Size(110, 17)
         Me.Label1.TabIndex = 29
         Me.Label1.Text = "Total Members: "
         '
         'lblMembers
         '
         Me.lblMembers.AutoSize = True
-        Me.lblMembers.Location = New System.Drawing.Point(183, 541)
+        Me.lblMembers.Location = New System.Drawing.Point(244, 666)
+        Me.lblMembers.Margin = New System.Windows.Forms.Padding(4, 0, 4, 0)
         Me.lblMembers.Name = "lblMembers"
-        Me.lblMembers.Size = New System.Drawing.Size(60, 13)
+        Me.lblMembers.Size = New System.Drawing.Size(80, 17)
         Me.lblMembers.TabIndex = 28
         Me.lblMembers.Text = "lblMembers"
         '
@@ -53,52 +55,57 @@ Partial Class frmMembersSearch
         Me.lvwMembers.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lvwMembers.ForeColor = System.Drawing.Color.Blue
         Me.lvwMembers.FullRowSelect = True
-        Me.lvwMembers.Location = New System.Drawing.Point(93, 34)
+        Me.lvwMembers.Location = New System.Drawing.Point(124, 42)
+        Me.lvwMembers.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.lvwMembers.MultiSelect = False
         Me.lvwMembers.Name = "lvwMembers"
-        Me.lvwMembers.Size = New System.Drawing.Size(450, 504)
+        Me.lvwMembers.Size = New System.Drawing.Size(599, 619)
         Me.lvwMembers.TabIndex = 27
         Me.lvwMembers.UseCompatibleStateImageBehavior = False
         Me.lvwMembers.View = System.Windows.Forms.View.Details
         '
         'btnSelect
         '
-        Me.btnSelect.Location = New System.Drawing.Point(12, 34)
+        Me.btnSelect.Location = New System.Drawing.Point(16, 42)
+        Me.btnSelect.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.btnSelect.Name = "btnSelect"
-        Me.btnSelect.Size = New System.Drawing.Size(75, 23)
+        Me.btnSelect.Size = New System.Drawing.Size(100, 28)
         Me.btnSelect.TabIndex = 30
         Me.btnSelect.Text = "Select"
         Me.btnSelect.UseVisualStyleBackColor = True
         '
         'btnClose
         '
-        Me.btnClose.Location = New System.Drawing.Point(468, 551)
+        Me.btnClose.Location = New System.Drawing.Point(624, 678)
+        Me.btnClose.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.btnClose.Name = "btnClose"
-        Me.btnClose.Size = New System.Drawing.Size(75, 23)
+        Me.btnClose.Size = New System.Drawing.Size(100, 28)
         Me.btnClose.TabIndex = 31
         Me.btnClose.Text = "Close"
         Me.btnClose.UseVisualStyleBackColor = True
         '
         'btnEdit
         '
-        Me.btnEdit.Location = New System.Drawing.Point(347, 551)
+        Me.btnEdit.Location = New System.Drawing.Point(463, 678)
+        Me.btnEdit.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.btnEdit.Name = "btnEdit"
-        Me.btnEdit.Size = New System.Drawing.Size(75, 23)
+        Me.btnEdit.Size = New System.Drawing.Size(100, 28)
         Me.btnEdit.TabIndex = 32
         Me.btnEdit.Text = "Edit"
         Me.btnEdit.UseVisualStyleBackColor = True
         '
         'frmMembersSearch
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(563, 586)
+        Me.ClientSize = New System.Drawing.Size(751, 721)
         Me.Controls.Add(Me.btnEdit)
         Me.Controls.Add(Me.btnClose)
         Me.Controls.Add(Me.btnSelect)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.lblMembers)
         Me.Controls.Add(Me.lvwMembers)
+        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.Name = "frmMembersSearch"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Members Search"
