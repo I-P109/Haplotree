@@ -1,7 +1,7 @@
 ﻿Imports HaploTree
 
 Public Class Mutation
-    Private p_ID As String
+    Private p_ID As Integer
     Private p_PositionID As String
     Private p_AltCall As String
     Private p_Names As String() 'May have several names
@@ -13,7 +13,7 @@ Public Class Mutation
     Private p_ds As DataSet 'from Mutation table in HaploTreeDB
     Private p_CurrentParentNodeID As String
 
-    Public ReadOnly Property ID As String
+    Public ReadOnly Property ID As Integer
         Get
             Return p_ID
         End Get
@@ -46,7 +46,7 @@ Public Class Mutation
         Set(value As String())
             Dim i As Integer
             ReDim p_Names(UBound(value))
-            For i = 0 To UBound(value) - 1
+            For i = 0 To UBound(value)
                 p_Names(i) = value(i)
             Next
             p_IsSavedToDB = False
@@ -108,7 +108,7 @@ Public Class Mutation
     End Property
 
     Public Sub New()
-        p_ID = ""
+        p_ID = 0
         p_PositionID = ""
         p_AltCall = ""
         p_RefSNPID = ""
@@ -122,7 +122,7 @@ Public Class Mutation
         p_CurrentParentNodeID = ""
     End Sub
 
-    Public Sub New(ByVal MutID As String, ByVal PosID As String, ByVal AlternateCall As String, Optional ByVal ReferenceSNPID As String = "", Optional IsPrivateSNP As Boolean = False, Optional IsIgnoredInTree As Boolean = False, Optional CurrParNodeID As String = "")
+    Public Sub New(ByVal MutID As Integer, ByVal PosID As String, ByVal AlternateCall As String, Optional ByVal ReferenceSNPID As String = "", Optional IsPrivateSNP As Boolean = False, Optional IsIgnoredInTree As Boolean = False, Optional CurrParNodeID As String = "")
         p_ID = MutID
         p_PositionID = PosID
         p_AltCall = AlternateCall
@@ -157,11 +157,13 @@ Public Class Mutation
     End Function
 
     Public Sub AppendName(NewName As String)
-        If Not p_Names(0) = "" Then
-            ReDim Preserve p_Names(UBound(p_Names) + 1)
+        If Me.HasName(NewName) = False Then
+            If Not p_Names(0) = "" Then
+                ReDim Preserve p_Names(UBound(p_Names) + 1)
+            End If
+            p_Names(UBound(p_Names)) = NewName
+            p_IsSavedToDB = False
         End If
-        p_Names(UBound(p_Names) - 1) = NewName
-        p_IsSavedToDB = False
     End Sub
 
     Public Sub RemoveName(NameToRemove As String)
@@ -174,7 +176,7 @@ Public Class Mutation
                 Dim i As Integer
                 Dim count As Integer
                 count = 0
-                For i = 0 To UBound(p_Names) - 1
+                For i = 0 To UBound(p_Names)
                     If Not p_Names(i) = NameToRemove Then
                         If count = 0 Then
                             NewStringArray(count) = p_Names(i)
@@ -195,7 +197,13 @@ Public Class Mutation
         p_IsSavedToDB = False
     End Sub
 
-    Public Sub Load(ByVal MutID As String) 'load from the DB
+    Private Function GetStringArrayCommaDelimited(MyStringArray As String) As String()
+
+        Return MyStringArray.Split(",")
+
+    End Function
+
+    Public Sub Load(ByVal MutID As Integer) 'load from the DB
         Dim cDataAccess As New clsDataAccess
 
         p_ds = cDataAccess.GetMutationByID(MutID)
@@ -220,10 +228,8 @@ Public Class Mutation
                     MsgBox("This Mutation has no RefSNPID number!")
                 End If
 
-                If p_ds.Tables(0).Rows(0).IsNull("Names") = False Then
-                    ReDim p_Names(1)
-                    p_Names = {""}
-                    'p_Names = p_ds.Tables(0).Rows(0).Item("Names") 'find a proper way to get all the names into an array
+                If p_ds.Tables(0).Rows(0).IsNull("MutationNames") = False Then
+                    p_Names = GetStringArrayCommaDelimited(p_ds.Tables(0).Rows(0).Item("MutationNames"))
                 Else
                     MsgBox("This Mutation has no name!")
                 End If
@@ -258,7 +264,7 @@ Public Class Mutation
         p_IsSavedToDB = True
     End Sub
 
-    Public Sub Load(ByVal PosID As String, ByVal AlternCall As String) 'load from the DB
+    Public Sub LoadWithPositionIDAndAltCall(ByVal PosID As String, ByVal AlternCall As String) 'load from the DB
         Dim cDataAccess As New clsDataAccess
 
         p_ds = cDataAccess.GetMutationByPosAndAltCall(PosID, AlternCall) 'from HaploTreeDB
@@ -278,10 +284,8 @@ Public Class Mutation
                     MsgBox("This Mutation has no RefSNPID number!")
                 End If
 
-                If p_ds.Tables(0).Rows(0).IsNull("Names") = False Then
-                    ReDim p_Names(1)
-                    p_Names = {""}
-                    'p_Names = p_ds.Tables(0).Rows(0).Item("Names") 'find a proper way to get all the names into an array
+                If p_ds.Tables(0).Rows(0).IsNull("MutationNames") = False Then
+                    p_Names = GetStringArrayCommaDelimited(p_ds.Tables(0).Rows(0).Item("MutationNames"))
                 Else
                     MsgBox("This Mutation has no name!")
                 End If
@@ -316,7 +320,7 @@ Public Class Mutation
         p_IsSavedToDB = True
     End Sub
 
-    Private Function AlreadyExistsInDB() As String 'returns the ID if exists, "" if not
+    Private Function AlreadyExistsInDB() As Integer 'returns the ID if exists, "" if not
         Dim ds As DataSet
         Dim cDataAccess As New clsDataAccess
 
@@ -325,30 +329,42 @@ Public Class Mutation
             If ds.Tables(0).Rows.Count > 0 Then
                 Return ds.Tables(0).Rows(0).Item("ID")
             Else
-                Return ""
+                Return 0
             End If
         Else
-            Return ""
+            Return 0
         End If
     End Function
 
     Public Sub SavetoDB() 'into HaploTreeDB
         Dim cDataAccess As New clsDataAccess
+        Dim AllNames As String
+        Dim i As Integer
 
-        If p_ID = "" Then 'insert 
-            'Save as new Mutation, but check if exists in first
-            p_ID = AlreadyExistsInDB()
-            If p_ID = "" Then 'This is an insert
-                cDataAccess.InsertMutation(p_PositionID, p_AltCall, p_RefSNPID, p_Names, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentNodeID)
-                p_ID = AlreadyExistsInDB() 'now should have got a ID!
-            Else 'This is an update
-                cDataAccess.UpdateMutation(p_PositionID, p_AltCall, p_RefSNPID, p_Names, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentNodeID, p_ID)
+        If p_IsSavedToDB = False Then
+            If Not IsNothing(p_Names) Then
+                AllNames = p_Names(0)
+                For i = 1 To p_Names.Count - 1
+                    AllNames = AllNames & "," & p_Names(i)
+                Next
+            Else
+                AllNames = ""
             End If
-        Else
-            'Save updates
-            cDataAccess.UpdateMutation(p_PositionID, p_AltCall, p_RefSNPID, p_Names, p_IsISOGGOfficial, p_IsPrivate, p_CurrentParentNodeID, p_CurrentNodeID, p_ID)
+            If p_ID = 0 Then 'insert 
+                'Save as new Mutation, but check if exists in first
+                p_ID = AlreadyExistsInDB()
+                If p_ID = 0 Then 'This is an insert
+                    cDataAccess.InsertMutation(p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentParentNodeID)
+                    p_ID = AlreadyExistsInDB() 'now should have got a ID!
+                Else 'This is an update
+                    cDataAccess.UpdateMutation(p_ID, p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentParentNodeID)
+                End If
+            Else
+                'Save updates
+                cDataAccess.UpdateMutation(p_ID, p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentParentNodeID)
+            End If
+            p_IsSavedToDB = True
         End If
-        p_IsSavedToDB = True
     End Sub
 
     Protected Overrides Sub Finalize()

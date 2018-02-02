@@ -382,12 +382,12 @@ Public Class frmImport
         Dim dsPositions As New DataSet
 
         'First check to see if the person has a variant file loaded already;
-        dsVariantFile = cDataAccess.GetPositionsByMemberID38(mintMemberID)
+        dsVariantFile = cDataAccess.GetHg38VariantsByMemberID(mintMemberID)
         If dsVariantFile.Tables(0).Rows.Count > 0 Then
             MsgBox("This individual already has a variant file loaded!")
             Exit Sub
         Else
-            dsVariantFile = cDataAccess.GetPositionsByMemberID19(mintMemberID)
+            dsVariantFile = cDataAccess.GetHg19VariantsByMemberID(mintMemberID)
             If dsVariantFile.Tables(0).Rows.Count > 0 Then
                 MsgBox("This individual already has a variant file loaded!")
                 Exit Sub
@@ -422,7 +422,7 @@ Public Class frmImport
             Me.lvwImport.Clear()
 
             'Now see if this person has records stored
-            dsPositions = cDataAccess.GetPositionsByMemberID38(mintMemberID)
+            dsPositions = cDataAccess.GetHg38VariantsByMemberID(mintMemberID)
             If dsPositions.Tables(0).Rows.Count > 0 Then
                 ' Call FillListview(dsPositions)
                 MsgBox("This individual already has a record imported!")
@@ -542,8 +542,6 @@ Public Class frmImport
             strQual = lvwImport.Items(i).SubItems(3).Text
             strFilter = lvwImport.Items(i).SubItems(4).Text
             strInfo = lvwImport.Items(i).SubItems(5).Text
-
-            ' strFormat = lvwImport.Items(i).SubItems(6).Text
             strMutation = lvwImport.Items(i).SubItems(6).Text
             '  strMutation = Mid(lvwImport.Items(i).SubItems(7).Text, 1, 1)
 
@@ -567,7 +565,6 @@ Public Class frmImport
         Dim strQual As String
         Dim strFilter As String
         Dim strInfo As String
-        Dim strFormat As String = ""
         Dim strMutation As String = 0
         Dim i As Integer
         Dim intPositionID As Integer = 0
@@ -583,12 +580,10 @@ Public Class frmImport
             strQual = lvwImport.Items(i).SubItems(3).Text
             strFilter = lvwImport.Items(i).SubItems(4).Text
             strInfo = lvwImport.Items(i).SubItems(5).Text
-
-            strFormat = lvwImport.Items(i).SubItems(6).Text
-            strMutation = Mid(lvwImport.Items(i).SubItems(7).Text, 1, 1)
+            strMutation = Mid(lvwImport.Items(i).SubItems(6).Text, 1, 1)
 
 
-            Call cDataAccess.InsertPositionByMemberID19(intFK_MemberID, intPosition, strRef, strAlt, strQual, strFilter, strInfo, strFormat, strMutation)
+            Call cDataAccess.InsertPositionByMemberID19(intFK_MemberID, intPosition, strRef, strAlt, strQual, strFilter, strInfo, strMutation)
 
         Next
 

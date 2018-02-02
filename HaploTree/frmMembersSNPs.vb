@@ -46,7 +46,7 @@
             End If
 
             'Now see if this person has records stored
-            dsPositions = cDataAccess.GetPositionsByMemberID38(mintMemberID)
+            dsPositions = cDataAccess.GetHg38VariantsByMemberID(mintMemberID)
             If dsPositions.Tables(0).Rows.Count > 0 Then
                 Call FillListview(dsPositions)
             End If

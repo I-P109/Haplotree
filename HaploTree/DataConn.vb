@@ -7,7 +7,7 @@ Module DataConn
     ' - NOTES:  This connects to the access database which contains the document information.
 
     '***************************************************************************************************
-    Public Function GetConnection() As OleDb.OleDbConnection
+    Public Function GetConnectionVariantDB() As OleDb.OleDbConnection
         Dim strConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & App_Path() & "VariantDB.accdb;Persist Security Info=False"
 
         Try

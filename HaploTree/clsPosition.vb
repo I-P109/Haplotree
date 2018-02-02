@@ -1,34 +1,34 @@
 ﻿Imports HaploTree
 
 Public Class Position
-    Private p_ID As String
-    Private p_PosHg19 As Long
-    Private p_PosHg38 As Long
+    Private p_ID As Integer
+    Private p_PosHg19 As String
+    Private p_PosHg38 As String
     Private p_AncestrallCall As String 'or reference call
     Private p_IsSavedToDB As Boolean
     Private p_ds As DataSet 'from Member table in HaploTreeDB
 
-    Public ReadOnly Property ID As String
+    Public ReadOnly Property ID As Integer
         Get
             Return p_ID
         End Get
     End Property
 
-    Public Property PosHg19 As Long
+    Public Property PosHg19 As String
         Get
             Return p_PosHg19
         End Get
-        Set(value As Long)
+        Set(value As String)
             p_PosHg19 = value
             p_IsSavedToDB = False
         End Set
     End Property
 
-    Public Property PosHg38 As Long
+    Public Property PosHg38 As String
         Get
             Return p_PosHg38
         End Get
-        Set(value As Long)
+        Set(value As String)
             p_PosHg38 = value
             p_IsSavedToDB = False
         End Set
@@ -51,15 +51,15 @@ Public Class Position
     End Property
 
     Public Sub New()
-        p_ID = ""
-        p_PosHg19 = -999
-        p_PosHg38 = -999
+        p_ID = 0
+        p_PosHg19 = "-999"
+        p_PosHg38 = "-999"
         p_AncestrallCall = ""
         p_IsSavedToDB = False
         p_ds = Nothing
     End Sub
 
-    Public Sub New(ByVal PosID As String, ByVal Pos19 As String, ByVal Pos38 As String, ByVal AncestCall As String)
+    Public Sub New(ByVal PosID As Integer, ByVal Pos19 As String, ByVal Pos38 As String, ByVal AncestCall As String)
         p_ID = PosID
         p_PosHg19 = Pos19
         p_PosHg38 = Pos38
@@ -68,7 +68,7 @@ Public Class Position
         p_ds = Nothing
     End Sub
 
-    Public Sub LoadWithID(ByVal PosID As String) 'load from the HaploTreeDB
+    Public Sub LoadWithID(ByVal PosID As Integer) 'load from the HaploTreeDB
         Dim cDataAccess As New clsDataAccess
 
         p_ds = cDataAccess.GetPositionByID(PosID)
@@ -99,7 +99,7 @@ Public Class Position
         p_IsSavedToDB = True
     End Sub
 
-    Public Sub LoadWithPos19(ByVal Pos19 As Long) 'load from the HaploTreeDB
+    Public Sub LoadWithPos19(ByVal Pos19 As String) 'load from the HaploTreeDB
         Dim cDataAccess As New clsDataAccess
 
         p_ds = cDataAccess.GetPositionByPosHg19(Pos19)
@@ -130,7 +130,7 @@ Public Class Position
         p_IsSavedToDB = True
     End Sub
 
-    Public Sub LoadWithPos38(ByVal Pos38 As Long) 'load from the HaploTreeDB
+    Public Sub LoadWithPos38(ByVal Pos38 As String) 'load from the HaploTreeDB
         Dim cDataAccess As New clsDataAccess
 
         p_ds = cDataAccess.GetPositionByPosHg38(Pos38)
@@ -161,7 +161,7 @@ Public Class Position
         p_IsSavedToDB = True
     End Sub
 
-    Private Function AlreadyExistsInDB() As String 'returns the ID if exists, "" if not
+    Private Function AlreadyExistsInDB() As Integer 'returns the ID if exists, "" if not
         Dim ds As DataSet
         Dim cDataAccess As New clsDataAccess
 
@@ -172,35 +172,37 @@ Public Class Position
             End If
         End If
         ds = Nothing
-        ds = cDataAccess.GetPositionByPos19(p_PosHg19) 'from HaploTreeDB
+        ds = cDataAccess.GetPositionByPosHg19(p_PosHg19) 'from HaploTreeDB
         If Not IsNothing(ds) Then
             If ds.Tables(0).Rows.Count > 0 Then
                 Return ds.Tables(0).Rows(0).Item("ID")
             Else
-                Return ""
+                Return 0
             End If
         Else
-            Return ""
+            Return 0
         End If
     End Function
 
     Public Sub SavetoDB() 'into HaploTreeDB
         Dim cDataAccess As New clsDataAccess
 
-        If p_ID = "" Then 'insert 
-            'Save as new Position, but check if exists in first
-            p_ID = AlreadyExistsInDB()
-            If p_ID = "" Then 'This is an insert
-                cDataAccess.InsertPosition(p_PosHg19, p_PosHg38, p_AncestrallCall)
-                p_ID = AlreadyExistsInDB() 'now should have got a ID!
-            Else 'This is an update
-                cDataAccess.UpdatePosition(p_PosHg19, p_PosHg38, p_AncestrallCall, p_ID)
+        If p_IsSavedToDB = False Then
+            If p_ID = 0 Then 'insert 
+                'Save as new Position, but check if exists in first
+                p_ID = AlreadyExistsInDB()
+                If p_ID = 0 Then 'This is an insert
+                    cDataAccess.InsertPosition(p_PosHg19, p_PosHg38, p_AncestrallCall)
+                    p_ID = AlreadyExistsInDB() 'now should have got a ID!
+                Else 'This is an update
+                    cDataAccess.UpdatePosition(p_ID, p_PosHg19, p_PosHg38, p_AncestrallCall)
+                End If
+            Else
+                'Save updates
+                cDataAccess.UpdatePosition(p_ID, p_PosHg19, p_PosHg38, p_AncestrallCall)
             End If
-        Else
-            'Save updates
-            cDataAccess.UpdatePosition(p_PosHg19, p_PosHg38, p_AncestrallCall, p_ID)
+            p_IsSavedToDB = True
         End If
-        p_IsSavedToDB = True
     End Sub
 
     Protected Overrides Sub Finalize()

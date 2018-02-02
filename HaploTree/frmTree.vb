@@ -9,12 +9,13 @@
         End Get
         Set(value As Boolean)
             p_SelectOnly = value
-            If value = True Then
+            If value = False Then
                 cmnuAddNode.Enabled = True
                 cmnuRemoveNode.Enabled = True
                 cmnuAddTextColor.Enabled = True
                 cmnuAddBackgroundColor.Enabled = True
                 cmnuSNPInfo.Enabled = True
+                cmnuEditNodeName.Enabled = True
                 cmnuSelectNode.Enabled = False
                 p_SelectedNode = ""
             Else
@@ -23,6 +24,7 @@
                 cmnuAddTextColor.Enabled = False
                 cmnuAddBackgroundColor.Enabled = False
                 cmnuSNPInfo.Enabled = False
+                cmnuEditNodeName.Enabled = False
                 cmnuSelectNode.Enabled = True
             End If
         End Set

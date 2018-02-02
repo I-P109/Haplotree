@@ -22,7 +22,7 @@ Public Class frmMain
 
     Private Sub mnuEditMembersLoadToTree_Click(sender As Object, e As EventArgs) Handles mnuEditMembersUploadToTree.Click
         Dim frmMembSearch As New frmMembersSearch
-        frmMembSearch.MdiParent = Me
+
         frmMembSearch.btnEdit.Enabled = False
 
         frmMembSearch.ShowDialog()
@@ -117,5 +117,10 @@ Public Class frmMain
 
     Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
+    End Sub
+
+    Private Sub TestToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TestToolStripMenuItem.Click
+        Dim frmTest As New frmTest
+        frmTest.Show()
     End Sub
 End Class

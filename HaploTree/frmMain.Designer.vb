@@ -27,20 +27,21 @@ Partial Class frmMain
         Me.mnuFileImport = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuEdit = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuEditMembers = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuEditMembersDetails = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuEditMembersUploadToTree = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuView = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuViewMembersSNPs = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuViewTree = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuReports = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuReportsMembers = New System.Windows.Forms.ToolStripMenuItem()
-        Me.mnuEditMembersDetails = New System.Windows.Forms.ToolStripMenuItem()
-        Me.mnuEditMembersUploadToTree = New System.Windows.Forms.ToolStripMenuItem()
+        Me.TestToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
         'MenuStrip1
         '
         Me.MenuStrip1.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuFile, Me.mnuEdit, Me.mnuView, Me.mnuReports})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuFile, Me.mnuEdit, Me.mnuView, Me.mnuReports, Me.TestToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Padding = New System.Windows.Forms.Padding(8, 2, 0, 2)
@@ -58,7 +59,7 @@ Partial Class frmMain
         'mnuFileImport
         '
         Me.mnuFileImport.Name = "mnuFileImport"
-        Me.mnuFileImport.Size = New System.Drawing.Size(129, 26)
+        Me.mnuFileImport.Size = New System.Drawing.Size(181, 26)
         Me.mnuFileImport.Text = "Import"
         '
         'mnuEdit
@@ -72,8 +73,20 @@ Partial Class frmMain
         '
         Me.mnuEditMembers.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuEditMembersDetails, Me.mnuEditMembersUploadToTree})
         Me.mnuEditMembers.Name = "mnuEditMembers"
-        Me.mnuEditMembers.Size = New System.Drawing.Size(181, 26)
+        Me.mnuEditMembers.Size = New System.Drawing.Size(146, 26)
         Me.mnuEditMembers.Text = "Members"
+        '
+        'mnuEditMembersDetails
+        '
+        Me.mnuEditMembersDetails.Name = "mnuEditMembersDetails"
+        Me.mnuEditMembersDetails.Size = New System.Drawing.Size(183, 26)
+        Me.mnuEditMembersDetails.Text = "Details"
+        '
+        'mnuEditMembersUploadToTree
+        '
+        Me.mnuEditMembersUploadToTree.Name = "mnuEditMembersUploadToTree"
+        Me.mnuEditMembersUploadToTree.Size = New System.Drawing.Size(183, 26)
+        Me.mnuEditMembersUploadToTree.Text = "Upload to Tree"
         '
         'mnuView
         '
@@ -107,17 +120,11 @@ Partial Class frmMain
         Me.mnuReportsMembers.Size = New System.Drawing.Size(195, 26)
         Me.mnuReportsMembers.Text = "Members Report"
         '
-        'mnuEditMembersDetails
+        'TestToolStripMenuItem
         '
-        Me.mnuEditMembersDetails.Name = "mnuEditMembersDetails"
-        Me.mnuEditMembersDetails.Size = New System.Drawing.Size(183, 26)
-        Me.mnuEditMembersDetails.Text = "Details"
-        '
-        'mnuEditMembersUploadToTree
-        '
-        Me.mnuEditMembersUploadToTree.Name = "mnuEditMembersUploadToTree"
-        Me.mnuEditMembersUploadToTree.Size = New System.Drawing.Size(183, 26)
-        Me.mnuEditMembersUploadToTree.Text = "Upload to Tree"
+        Me.TestToolStripMenuItem.Name = "TestToolStripMenuItem"
+        Me.TestToolStripMenuItem.Size = New System.Drawing.Size(47, 24)
+        Me.TestToolStripMenuItem.Text = "Test"
         '
         'frmMain
         '
@@ -149,4 +156,5 @@ Partial Class frmMain
     Friend WithEvents mnuReportsMembers As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents mnuEditMembersDetails As ToolStripMenuItem
     Friend WithEvents mnuEditMembersUploadToTree As ToolStripMenuItem
+    Friend WithEvents TestToolStripMenuItem As ToolStripMenuItem
 End Class
