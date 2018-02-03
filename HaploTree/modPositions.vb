@@ -1,5 +1,5 @@
 ﻿Module modPositions
-    Public Function ConvertHG19ToHG38(ByVal vdblPosition As Double) As Double
+    Public Function ConvertHG19ToHG38(ByVal vdblPosition As Long) As Long
 
 
 
@@ -458,18 +458,13 @@
                 Return vdblPosition - 2146150
             Case 59282592 To 59363566
                 Return vdblPosition - 2146151
+            Case Else
+                Return -999
         End Select
-
-
-
-
-
     End Function
 
 
-    Public Function ConvertHG38ToHG19(ByVal vdblPosition As Double) As Double
-
-
+    Public Function ConvertHG38ToHG19(ByVal vdblPosition As Long) As Long
 
         Select Case vdblPosition
             Case 10001 To 44821
@@ -926,6 +921,8 @@
                 Return vdblPosition + 2146150
             Case 57136441 To 57217415
                 Return vdblPosition + 2146151
+            Case Else
+                Return -999
         End Select
     End Function
 

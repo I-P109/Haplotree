@@ -321,13 +321,14 @@ Public Class Member
         Dim HasMut As Boolean
 
         HasMut = False
-        For Each MutID In p_MutationsIDs
-            If MutID = MutationID Then
-                HasMut = True
-                Exit For
-            End If
-        Next
-
+        If Not IsNothing(p_MutationsIDs) Then
+            For Each MutID In p_MutationsIDs
+                If MutID = MutationID Then
+                    HasMut = True
+                    Exit For
+                End If
+            Next
+        End If
         Return HasMut
     End Function
 
@@ -336,13 +337,14 @@ Public Class Member
         Dim HasMut As Boolean
 
         HasMut = False
-        For Each MutID In p_PrivateMutationsIDs
-            If MutID = MutationID Then
-                HasMut = True
-                Exit For
-            End If
-        Next
-
+        If Not IsNothing(p_PrivateMutationsIDs) Then
+            For Each MutID In p_PrivateMutationsIDs
+                If MutID = MutationID Then
+                    HasMut = True
+                    Exit For
+                End If
+            Next
+        End If
         Return HasMut
     End Function
 
@@ -351,13 +353,14 @@ Public Class Member
         Dim HasMut As Boolean
 
         HasMut = False
-        For Each MutID In p_PutativeMutationsIDs
-            If MutID = MutationID Then
-                HasMut = True
-                Exit For
-            End If
-        Next
-
+        If Not IsNothing(p_PutativeMutationsIDs) Then
+            For Each MutID In p_PutativeMutationsIDs
+                If MutID = MutationID Then
+                    HasMut = True
+                    Exit For
+                End If
+            Next
+        End If
         Return HasMut
     End Function
 
@@ -979,7 +982,11 @@ Public Class Member
             If Not IsNothing(p_PutativeMutationsIDs) Then
                 AllPutativeMutationsIDs = p_PutativeMutationsIDs(0)
                 For i = 1 To p_PutativeMutationsIDs.Count - 1
-                    AllPutativeMutationsIDs = AllPutativeMutationsIDs & "," & p_PutativeMutationsIDs(i)
+                    If AllPutativeMutationsIDs = "" Or AllPutativeMutationsIDs = "," Then
+                        AllPutativeMutationsIDs = p_PutativeMutationsIDs(i)
+                    Else
+                        AllPutativeMutationsIDs = AllPutativeMutationsIDs & "," & p_PutativeMutationsIDs(i)
+                    End If
                 Next
             Else
                 AllPutativeMutationsIDs = ""
@@ -988,7 +995,11 @@ Public Class Member
             If Not IsNothing(p_PrivateMutationsIDs) Then
                 AllPrivateMutationsIDs = p_PrivateMutationsIDs(0)
                 For i = 1 To p_PrivateMutationsIDs.Count - 1
-                    AllPrivateMutationsIDs = AllPrivateMutationsIDs & "," & p_PrivateMutationsIDs(i)
+                    If AllPrivateMutationsIDs = "" Or AllPrivateMutationsIDs = "," Then
+                        AllPrivateMutationsIDs = p_PrivateMutationsIDs(i)
+                    Else
+                        AllPrivateMutationsIDs = AllPrivateMutationsIDs & "," & p_PrivateMutationsIDs(i)
+                    End If
                 Next
             Else
                 AllPrivateMutationsIDs = ""
@@ -997,7 +1008,11 @@ Public Class Member
             If Not IsNothing(p_MutationsIDs) Then
                 AllMutationsIDs = p_MutationsIDs(0)
                 For i = 1 To p_MutationsIDs.Count - 1
-                    AllMutationsIDs = AllMutationsIDs & "," & p_MutationsIDs(i)
+                    If AllMutationsIDs = "" Or AllMutationsIDs = "," Then
+                        AllMutationsIDs = p_MutationsIDs(i)
+                    Else
+                        AllMutationsIDs = AllMutationsIDs & "," & p_MutationsIDs(i)
+                    End If
                 Next
             Else
                 AllMutationsIDs = ""

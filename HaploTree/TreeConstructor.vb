@@ -12,7 +12,23 @@ Module TreeConstructor
         End Set
     End Property
 
-    Public Sub InsertNewKitInTree(KitID As Integer) 'run this AFTER saving KitID's variant file data to the DB 
+    Public Sub AnalyseVariantData(KitID As Integer)
+        Dim NewMember As New Member()
+        Dim HasMut As Boolean
+
+        NewMember.LoadWithID(KitID)
+        If NewMember.IsPlacedInTheTree = False Then
+            If NewMember.Variant19Loaded = True Or NewMember.Variant38Loaded = True Then
+                HasMut = SetAllMutationsIDs(NewMember) 'set values to newmember.MutationsIDs and newmember.privatemutationsIDs if not already done
+            Else
+                MsgBox("Member " & NewMember.Name & " has no variant file loaded")
+            End If
+        Else
+            MsgBox("Member " & NewMember.Name & " is already placed in the tree")
+        End If
+    End Sub
+
+    Public Sub InsertNewKitInTree(KitID As Integer, RootNodeName As String) 'run this AFTER saving KitID's variant file data to the DB 
         Dim ParentNode As Node
         Dim SplitNode As Boolean
         Dim HasCommonMutations As Boolean
@@ -21,150 +37,150 @@ Module TreeConstructor
         Dim MutId As String
         Dim MbId As String
         Dim NdId As String
-        Dim RootNodeName As String
-        Dim HasMut As Boolean
 
 
         NewMember.LoadWithID(KitID)
         If NewMember.IsPlacedInTheTree = False Then
             If NewMember.Variant19Loaded = True Or NewMember.Variant38Loaded = True Then
-                HasMut = SetAllMutationsIDs(NewMember) 'set values to newmember.MutationsIDs and newmember.privatemutationsIDs if not already done
-
-                Dim frmTree As New frmTree
-                frmTree.SelectOnly = True
-                frmTree.Show()
-                RootNodeName = frmTree.SelectedNode
-                'RootNodeName = "Root" 'to be updated when we give user the choice of a starting node
-                p_TreeRoot = GetNode(RootNodeName)
-                If IsNothing(p_TreeRoot) Then
-                    If NBNodesInDB() > 0 Then 'the provided name is not found in the DB
-                        If MsgBox("Houston we have a problem: The node " & RootNodeName & " is not found in the DB.\n Pick an other node?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
-                            'write code to give the possibilty to the user to directly chose an existing node in the DB?
-                            'while waiting:
-                            Exit Sub
-                        Else
-                            Exit Sub
+                If Not IsNothing(NewMember.MutationsIDs) Then
+                    If NewMember.MutationsIDs.Count > 0 Then
+                        'RootNodeName = "Root" 'to be updated when we give user the choice of a starting node
+                        p_TreeRoot = GetNode(RootNodeName)
+                        If IsNothing(p_TreeRoot) Then
+                            If NBNodesInDB() > 0 Then 'the provided name is not found in the DB
+                                If MsgBox("Houston we have a problem: The node " & RootNodeName & " is not found in the DB.\n Pick an other node?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+                                    'write code to give the possibilty to the user to directly chose an existing node in the DB?
+                                    'while waiting:
+                                    Exit Sub
+                                Else
+                                    Exit Sub
+                                End If
+                            Else 'we have no node yet and need to create the first one
+                                'create node
+                                Dim NewNd As New Node()
+                                NewNd.Name = RootNodeName
+                                NewNd.MutationsIDs = NewMember.MutationsIDs
+                                NewNd.AppendChildMemberID(NewMember.ID)
+                                NewMember.CurrentParentNodeID = NewNd.ID
+                                NewNd.SavetoDB()
+                                NewMember.SavetoDB()
+                                Exit Sub
+                            End If
                         End If
-                    Else 'we have no node yet and need to create the first one
-                        'create node
-                        Dim NewNd As New Node()
-                        NewNd.Name = RootNodeName
-                        NewNd.MutationsIDs = NewMember.MutationsIDs
-                        NewNd.AppendChildMemberID(NewMember.ID)
-                        NewMember.CurrentParentNodeID = NewNd.ID
-                        NewNd.SavetoDB()
-                        NewMember.SavetoDB()
-                        Exit Sub
-                    End If
-                End If
 
-                ParentNode = FindClosestExistingNodeDownward(NewMember, p_TreeRoot) 'the user provides an apriori start node to speed up the process
+                        ParentNode = FindClosestExistingNodeDownward(NewMember, p_TreeRoot) 'the user provides an apriori start node to speed up the process
 
-                If IsNothing(ParentNode) Then
-                    'investigate higher in the tree?
-                    If MsgBox("Houston we have a problem: this kit can not be hanged on any node below " & p_TreeRoot.Name & "in the DB.\n Investigate higher?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
-                        ParentNode = FindClosestExistingNodeUpward(NewMember, p_TreeRoot, p_TreeRoot.ID)
                         If IsNothing(ParentNode) Then
-                            MsgBox("Houston we have a problem: this kit can not be hanged on any node! Abborting!!")
-                            Exit Sub
+                            'investigate higher in the tree?
+                            If MsgBox("Houston we have a problem: this kit can not be hanged on any node below " & p_TreeRoot.Name & "in the DB.\n Investigate higher?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+                                ParentNode = FindClosestExistingNodeUpward(NewMember, p_TreeRoot, p_TreeRoot.ID)
+                                If IsNothing(ParentNode) Then
+                                    MsgBox("Houston we have a problem: this kit can not be hanged on any node! Abborting!!")
+                                    Exit Sub
+                                End If
+                            Else
+                                Exit Sub
+                            End If
                         End If
-                    Else
-                        Exit Sub
-                    End If
-                End If
 
-                SplitNode = False
-                For Each MutId In ParentNode.MutationsIDs
-                    'test if the node needs to be splitted
-                    If NewMember.HasMutation(MutId) = False Then
-                        SplitNode = True
-                        Exit For
-                    End If
-                Next
+                        SplitNode = False
+                        For Each MutId In ParentNode.MutationsIDs
+                            'test if the node needs to be splitted
+                            If NewMember.HasMutation(MutId) = False Then
+                                SplitNode = True
+                                Exit For
+                            End If
+                        Next
 
-                If SplitNode = False Then 'no need to split the node
-                    'check if has common mutations with existing members below parentnode
-                    HasAddedBranch = False
-                    For Each MbId In ParentNode.ChildrenMembersIDs
-                        Dim Mb As New Member()
-                        Mb.LoadWithID(MbId)
-                        HasCommonMutations = False
-                        If HasAddedBranch = False Then 'no other member should have common muttations with new kit
-                            For Each MutId In Mb.PrivateMutationsIDs 'it is only necessary to check private mutations to eventually add a branch
-                                If NewMember.HasMutation(MutId) = True Then
-                                    HasCommonMutations = True
-                                    Exit For
+                        If SplitNode = False Then 'no need to split the node
+                            'check if has common mutations with existing members below parentnode
+                            HasAddedBranch = False
+                            For Each MbId In ParentNode.ChildrenMembersIDs
+                                Dim Mb As New Member()
+                                Mb.LoadWithID(MbId)
+                                HasCommonMutations = False
+                                If HasAddedBranch = False Then 'no other member should have common muttations with new kit
+                                    For Each MutId In Mb.PrivateMutationsIDs 'it is only necessary to check private mutations to eventually add a branch
+                                        If NewMember.HasMutation(MutId) = True Then
+                                            HasCommonMutations = True
+                                            Exit For
+                                        End If
+                                    Next
+                                    If HasCommonMutations = True Then 'need to add a node/branch
+                                        Dim NewNode As Node
+                                        NewNode = AddNodeBelow(ParentNode, Mb, NewMember) 'creates a new node below parentnode with the common mutations of Mb and newmember
+
+                                        ParentNode.AppendChildNodeID(NewNode.ID)
+                                        ParentNode.RemoveChildMemberID(Mb.ID)
+                                        For Each MutId In NewNode.MutationsIDs
+                                            Dim Mut As New Mutation()
+                                            Mb.RemovePrivateMutationID(MutId)
+                                            Mut.Load(MutId)
+                                            Mut.IsPrivate = False
+                                            Mut.SavetoDB()
+                                        Next
+
+                                        Mb.CurrentParentNodeID = NewNode.ID
+                                        NewMember.CurrentParentNodeID = NewNode.ID
+
+                                        NewNode.SavetoDB()
+                                        ParentNode.SavetoDB()
+                                        Mb.SavetoDB()
+                                        NewMember.SavetoDB()
+                                        HasAddedBranch = True
+                                    End If
+                                Else
+                                    MsgBox("Houston we have a problem: It seems we can make more than one new branch with different members")
+                                    'here we need to find a way to address that issue if it happens ... may have to review/add some putativemutations in some members below this node - manual work
                                 End If
                             Next
-                            If HasCommonMutations = True Then 'need to add a node/branch
-                                Dim NewNode As Node
-                                NewNode = AddNodeBelow(ParentNode, Mb, NewMember) 'creates a new node below parentnode with the common mutations of Mb and newmember
-
-                                ParentNode.AppendChildNodeID(NewNode.ID)
-                                ParentNode.RemoveChildMemberID(Mb.ID)
-                                For Each MutId In NewNode.MutationsIDs
-                                    Dim Mut As New Mutation()
-                                    Mb.RemovePrivateMutationID(MutId)
-                                    Mut.Load(MutId)
-                                    Mut.IsPrivate = False
-                                    Mut.SavetoDB()
-                                Next
-
-                                Mb.CurrentParentNodeID = NewNode.ID
-                                NewMember.CurrentParentNodeID = NewNode.ID
-
-                                NewNode.SavetoDB()
+                            If HasAddedBranch = False Then 'there is no other members with common mutations
+                                ParentNode.AppendChildMemberID(NewMember.ID)
+                                NewMember.CurrentParentNodeID = ParentNode.ID
                                 ParentNode.SavetoDB()
-                                Mb.SavetoDB()
                                 NewMember.SavetoDB()
-                                HasAddedBranch = True
                             End If
-                        Else
-                            MsgBox("Houston we have a problem: It seems we can make more than one new branch with different members")
-                            'here we need to find a way to address that issue if it happens ... may have to review/add some putativemutations in some members below this node - manual work
+                        Else ' need to split node
+                            Dim NewNode As Node
+
+                            NewNode = AddNodeBelow(ParentNode, NewMember) 'creates a new node below parentnode with the noncommon mutations of ParentNode and newmember
+
+                            For Each MutId In NewNode.MutationsIDs
+                                ParentNode.RemoveMutationID(MutId)
+                            Next
+                            For Each MbId In NewNode.ChildrenMembersIDs
+                                Dim Mb As New Member()
+                                Mb.LoadWithID(MbId)
+                                Mb.CurrentParentNodeID = NewNode.ID
+                                Mb.SavetoDB()
+                            Next
+                            For Each NdId In NewNode.ChildrenNodesIDs
+                                Dim Nd As New Node()
+                                Nd.LoadWithID(NdId)
+                                Nd.ParentNodeID = NewNode.ID
+                                Nd.SavetoDB()
+                            Next
+
+                            ParentNode.ChildrenMembersIDs = Nothing
+                            ParentNode.ChildrenNodesIDs = Nothing
+
+                            ParentNode.AppendChildMemberID(NewMember.ID)
+                            ParentNode.AppendChildNodeID(NewNode.ID)
+
+                            NewMember.CurrentParentNodeID = ParentNode.ID
+
+                            NewNode.SavetoDB()
+                            ParentNode.SavetoDB()
+                            NewMember.SavetoDB()
+                            HasAddedBranch = True
                         End If
-                    Next
-                    If HasAddedBranch = False Then 'there is no other members with common mutations
-                        ParentNode.AppendChildMemberID(NewMember.ID)
-                        NewMember.CurrentParentNodeID = ParentNode.ID
-                        ParentNode.SavetoDB()
-                        NewMember.SavetoDB()
+                        CheckTreeConsistency(NewMember, p_TreeRoot)
+                    Else
+                        MsgBox("Member " & NewMember.Name & " has no mutations loaded!\n Analyse Variant first")
                     End If
-                Else ' need to split node
-                    Dim NewNode As Node
-
-                    NewNode = AddNodeBelow(ParentNode, NewMember) 'creates a new node below parentnode with the noncommon mutations of ParentNode and newmember
-
-                    For Each MutId In NewNode.MutationsIDs
-                        ParentNode.RemoveMutationID(MutId)
-                    Next
-                    For Each MbId In NewNode.ChildrenMembersIDs
-                        Dim Mb As New Member()
-                        Mb.LoadWithID(MbId)
-                        Mb.CurrentParentNodeID = NewNode.ID
-                        Mb.SavetoDB()
-                    Next
-                    For Each NdId In NewNode.ChildrenNodesIDs
-                        Dim Nd As New Node()
-                        Nd.LoadWithID(NdId)
-                        Nd.ParentNodeID = NewNode.ID
-                        Nd.SavetoDB()
-                    Next
-
-                    ParentNode.ChildrenMembersIDs = Nothing
-                    ParentNode.ChildrenNodesIDs = Nothing
-
-                    ParentNode.AppendChildMemberID(NewMember.ID)
-                    ParentNode.AppendChildNodeID(NewNode.ID)
-
-                    NewMember.CurrentParentNodeID = ParentNode.ID
-
-                    NewNode.SavetoDB()
-                    ParentNode.SavetoDB()
-                    NewMember.SavetoDB()
-                    HasAddedBranch = True
+                Else
+                    MsgBox("Member " & NewMember.Name & " has no mutations loaded!\n Analyse Variant first")
                 End If
-                CheckTreeConsistency(NewMember, p_TreeRoot)
             Else
                 MsgBox("Member " & NewMember.Name & " has no variant file loaded")
             End If
@@ -388,7 +404,7 @@ Module TreeConstructor
 
         NbPrivate = 0
         NbMut = 0
-        For i = 1 To NbItems
+        For i = 1 To NbItems - 1
             Dim ID As Integer
             Dim Position38 As String
             Dim ReferenceCall As String
@@ -485,7 +501,7 @@ Module TreeConstructor
                     Dim Alt As String
                     Alt = ds.Tables(0).Rows(0).Item("AltCall")
                     If Not Alt = alternCall Then
-                        MsgBox("AltCall Mismatch at mutation ID" & PositionID & "!") 'should not happen!
+                        MsgBox("AltCall Mismatch at mutation ID" & ds.Tables(0).Rows(0).Item("ID") & "!") 'should not happen!
                         Return 0
                     Else
                         Return ds.Tables(0).Rows(0).Item("ID")
@@ -503,7 +519,6 @@ Module TreeConstructor
     Private Function CreateNewMutationInDB(Pos38 As String, RefCall As String, altCall As String) As Integer 'Creates a new mutation in the mutation table and return its allocated ID
         Dim MutID As Integer
         Dim PosID As Integer
-        Dim NewMut As New Mutation()
 
         PosID = PositionExistsInDB(Pos38, RefCall)
         If PosID = 0 Then 'position doesn't exist in the DB, we need to create one
@@ -519,8 +534,9 @@ Module TreeConstructor
             End If
         End If
         MutID = MutationExistsInDB(PosID, altCall) 'checks if exists ... just in case!
-        If MutID = "" Then
+        If MutID = 0 Then
             If CheckCall(altCall) = True Then
+                Dim NewMut As New Mutation()
                 NewMut.PositionID = PosID
                 NewMut.AltCall = altCall
                 NewMut.AppendName("temp_" & Pos38)
@@ -528,8 +544,10 @@ Module TreeConstructor
                 NewMut.SavetoDB()
                 MutID = NewMut.ID
             Else ' not a proper altcall, do not create a position and return ""
-
+                MsgBox("Not a proper call, mutation not created")
             End If
+        Else
+            MsgBox("mutation exists already, no need to create!")
         End If
         Return MutID
     End Function
@@ -548,16 +566,14 @@ Module TreeConstructor
     Private Function GetHg19FromHg38(Position38 As String) As String
         Dim Pos19 As Long
         'Get it from Position38
-        tobedone
-        Pos19 = ""
+        Pos19 = ConvertHG38ToHG19(CLng(Position38))
         Return Pos19
     End Function
 
     Private Function GetHg38FromHg19(Position19 As String) As String
         Dim Pos38 As Long
         'Get it from Position19
-        tobedone
-        Pos38 = ""
+        Pos38 = ConvertHG19ToHG38(CLng(Position19))
         Return Pos38
     End Function
 End Module

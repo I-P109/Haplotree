@@ -146,13 +146,14 @@ Public Class Mutation
         Dim HasNm As Boolean
 
         HasNm = False
-        For Each Nm In p_Names
-            If Nm = Nam Then
-                HasNm = True
-                Exit For
-            End If
-        Next
-
+        If Not IsNothing(p_Names) Then
+            For Each Nm In p_Names
+                If Nm = Nam Then
+                    HasNm = True
+                    Exit For
+                End If
+            Next
+        End If
         Return HasNm
     End Function
 
@@ -345,7 +346,11 @@ Public Class Mutation
             If Not IsNothing(p_Names) Then
                 AllNames = p_Names(0)
                 For i = 1 To p_Names.Count - 1
-                    AllNames = AllNames & "," & p_Names(i)
+                    If AllNames = "" Or AllNames = "," Then
+                        AllNames = p_Names(i)
+                    Else
+                        AllNames = AllNames & "," & p_Names(i)
+                    End If
                 Next
             Else
                 AllNames = ""
@@ -369,7 +374,7 @@ Public Class Mutation
 
     Protected Overrides Sub Finalize()
         If p_IsSavedToDB = False Then
-            If MsgBox("Mutation " & p_Names(0) & " has been modified! Do you want to save changes to the DB?") = MsgBoxResult.Ok Then
+            If MsgBox("Mutation " & p_Names(0) & " has been modified! Do you want to save changes to the DB?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
                 'do it
                 Me.SavetoDB()
             End If

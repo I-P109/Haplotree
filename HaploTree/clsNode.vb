@@ -30,12 +30,14 @@ Public Class Node
         Dim HasMemb As Boolean
 
         HasMemb = False
-        For Each MembID In p_ChildrenMembersIDs
-            If MembID = ChildMembID Then
-                HasMemb = True
-                Exit For
-            End If
-        Next
+        If Not IsNothing(p_ChildrenMembersIDs) Then
+            For Each MembID In p_ChildrenMembersIDs
+                If MembID = ChildMembID Then
+                    HasMemb = True
+                    Exit For
+                End If
+            Next
+        End If
         Return HasMemb
     End Function
 
@@ -44,12 +46,14 @@ Public Class Node
         Dim HasNd As Boolean
 
         HasNd = False
-        For Each NdID In p_ChildrenNodesIDs
-            If NdID = ChildNodeID Then
-                HasNd = True
-                Exit For
-            End If
-        Next
+        If Not IsNothing(p_ChildrenNodesIDs) Then
+            For Each NdID In p_ChildrenNodesIDs
+                If NdID = ChildNodeID Then
+                    HasNd = True
+                    Exit For
+                End If
+            Next
+        End If
         Return HasNd
     End Function
 
@@ -280,13 +284,14 @@ Public Class Node
         Dim HasMut As Boolean
 
         HasMut = False
-        For Each MutID In p_MutationsIDs
-            If MutID = MutationID Then
-                HasMut = True
-                Exit For
-            End If
-        Next
-
+        If Not IsNothing(p_MutationsIDs) Then
+            For Each MutID In p_MutationsIDs
+                If MutID = MutationID Then
+                    HasMut = True
+                    Exit For
+                End If
+            Next
+        End If
         Return HasMut
     End Function
 
@@ -433,7 +438,12 @@ Public Class Node
             If Not IsNothing(p_ChildrenNodesIDs) Then
                 AllChildrenNodesIDs = p_ChildrenNodesIDs(0)
                 For i = 1 To p_ChildrenNodesIDs.Count - 1
-                    AllChildrenNodesIDs = AllChildrenNodesIDs & "," & p_ChildrenNodesIDs(i)
+                    If AllChildrenNodesIDs = "" Or AllChildrenNodesIDs = "," Then
+                        AllChildrenNodesIDs = p_ChildrenNodesIDs(i)
+                    Else
+                        AllChildrenNodesIDs = AllChildrenNodesIDs & "," & p_ChildrenNodesIDs(i)
+                    End If
+
                 Next
             Else
                 AllChildrenNodesIDs = ""
@@ -442,7 +452,11 @@ Public Class Node
             If Not IsNothing(p_ChildrenMembersIDs) Then
                 AllChildrenMembersIDs = p_ChildrenMembersIDs(0)
                 For i = 1 To p_ChildrenMembersIDs.Count - 1
-                    AllChildrenMembersIDs = AllChildrenMembersIDs & "," & p_ChildrenMembersIDs(i)
+                    If AllChildrenMembersIDs = "" Or AllChildrenMembersIDs = "," Then
+                        AllChildrenMembersIDs = p_ChildrenMembersIDs(i)
+                    Else
+                        AllChildrenMembersIDs = AllChildrenMembersIDs & "," & p_ChildrenMembersIDs(i)
+                    End If
                 Next
             Else
                 AllChildrenMembersIDs = ""
@@ -451,7 +465,11 @@ Public Class Node
             If Not IsNothing(p_MutationsIDs) Then
                 AllMutationsIDs = p_MutationsIDs(0)
                 For i = 1 To p_MutationsIDs.Count - 1
-                    AllMutationsIDs = AllMutationsIDs & "," & p_MutationsIDs(i)
+                    If AllMutationsIDs = "" Or AllMutationsIDs = "," Then
+                        AllMutationsIDs = p_MutationsIDs(i)
+                    Else
+                        AllMutationsIDs = AllMutationsIDs & "," & p_MutationsIDs(i)
+                    End If
                 Next
             Else
                 AllMutationsIDs = ""
@@ -476,7 +494,7 @@ Public Class Node
 
     Protected Overrides Sub Finalize()
         If p_IsSavedToDB = False Then
-            If MsgBox("Node " & p_Name & " has been modified! Do you want to save changes to the DB?") = MsgBoxResult.Ok Then
+            If MsgBox("Node " & p_Name & " has been modified! Do you want to save changes to the DB?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
                 'do it
                 Me.SavetoDB()
             End If

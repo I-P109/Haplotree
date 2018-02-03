@@ -165,21 +165,27 @@ Public Class Position
         Dim ds As DataSet
         Dim cDataAccess As New clsDataAccess
 
-        ds = cDataAccess.GetPositionByPosHg38(p_PosHg38)
-        If Not IsNothing(ds) Then
-            If ds.Tables(0).Rows.Count > 0 Then
-                Return ds.Tables(0).Rows(0).Item("ID")
+        If Not p_PosHg38 = -999 Then
+            ds = cDataAccess.GetPositionByPosHg38(p_PosHg38)
+            If Not IsNothing(ds) Then
+                If ds.Tables(0).Rows.Count > 0 Then
+                    Return ds.Tables(0).Rows(0).Item("ID")
+                End If
             End If
         End If
         ds = Nothing
-        ds = cDataAccess.GetPositionByPosHg19(p_PosHg19) 'from HaploTreeDB
-        If Not IsNothing(ds) Then
-            If ds.Tables(0).Rows.Count > 0 Then
-                Return ds.Tables(0).Rows(0).Item("ID")
+        If Not p_PosHg19 = -999 Then
+            ds = cDataAccess.GetPositionByPosHg19(p_PosHg19) 'from HaploTreeDB
+            If Not IsNothing(ds) Then
+                If ds.Tables(0).Rows.Count > 0 Then
+                    Return ds.Tables(0).Rows(0).Item("ID")
+                Else
+                    Return 0
+                End If
             Else
                 Return 0
             End If
-        Else
+        Else 'case -999 is when it has not been possible to get a Hg19 position from Hg38
             Return 0
         End If
     End Function
@@ -207,7 +213,7 @@ Public Class Position
 
     Protected Overrides Sub Finalize()
         If p_IsSavedToDB = False Then
-            If MsgBox("Position " & ID & " has been modified! Do you want to save changes to the DB?") = MsgBoxResult.Ok Then
+            If MsgBox("Position " & ID & " has been modified! Do you want to save changes to the DB?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
                 'do it
                 Me.SavetoDB()
             End If

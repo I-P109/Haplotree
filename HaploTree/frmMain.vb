@@ -20,15 +20,27 @@ Public Class frmMain
         frmMembers.Show()
     End Sub
 
-    Private Sub mnuEditMembersLoadToTree_Click(sender As Object, e As EventArgs) Handles mnuEditMembersUploadToTree.Click
+    Private Sub mnuEditMembersLoadToTree_Click(sender As Object, e As EventArgs) Handles mnuEditMembersAnalyseVariants.Click
         Dim frmMembSearch As New frmMembersSearch
 
         frmMembSearch.btnEdit.Enabled = False
-
         frmMembSearch.ShowDialog()
 
-        If frmMembersSearch.ID > 0 Then InsertNewKitInTree(frmMembersSearch.ID)
+        If frmMembSearch.ID > 0 Then AnalyseVariantData(frmMembSearch.ID)
 
+    End Sub
+
+    Private Sub UploadToTreeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles mnuEditMembersUploadToTree.Click
+        Dim frmMembSearch As New frmMembersSearch
+        Dim formTree As New frmTree
+
+        frmMembSearch.btnEdit.Enabled = False
+        frmMembSearch.ShowDialog()
+
+        formTree.SelectOnly = True
+        formTree.MdiParent = Me
+        formTree.SelectedMemberID = frmMembSearch.ID
+        formTree.Show()
     End Sub
 
     Private Sub mnuViewMembersSNPs_Click(sender As Object, e As EventArgs) Handles mnuViewMembersSNPs.Click
@@ -123,4 +135,6 @@ Public Class frmMain
         Dim frmTest As New frmTest
         frmTest.Show()
     End Sub
+
+
 End Class

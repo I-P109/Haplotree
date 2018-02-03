@@ -1,7 +1,8 @@
 ﻿Public Class frmTree
     Dim cDataAccess As New clsDataAccess
-    Private p_SelectedNode As String
+    Private p_SelectedNodeName As String
     Private p_SelectOnly As Boolean 'to handle menus so that only the Select one is visible
+    Private p_SelectedMemberID As Integer
 
     Public Property SelectOnly As Boolean
         Get
@@ -17,7 +18,7 @@
                 cmnuSNPInfo.Enabled = True
                 cmnuEditNodeName.Enabled = True
                 cmnuSelectNode.Enabled = False
-                p_SelectedNode = ""
+                p_SelectedNodeName = ""
             Else
                 cmnuAddNode.Enabled = False
                 cmnuRemoveNode.Enabled = False
@@ -30,17 +31,26 @@
         End Set
     End Property
 
-    Public ReadOnly Property SelectedNode As String
+    Public ReadOnly Property SelectedNodeName As String
         Get
-            Return p_SelectedNode
+            Return p_SelectedNodeName
         End Get
+    End Property
+
+    Public Property SelectedMemberID As Integer
+        Get
+            Return p_SelectedMemberID
+        End Get
+        Set(value As Integer)
+            p_SelectedMemberID = value
+        End Set
     End Property
 
     Private Sub frmTree_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Me.Left = 0
         Me.Top = 0
-        Me.Width = Me.Parent.Width
-        Me.Height = Me.Parent.Height
+        'Me.Width = Me.Parent.Width
+        'Me.Height = Me.Parent.Height
 
         Me.tvwTree.Height = Me.Height - 150
 
@@ -288,7 +298,10 @@
     End Sub
 
     Private Sub cmnuSelectNode_Click(sender As Object, e As EventArgs) Handles cmnuSelectNode.Click
-        p_SelectedNode = tvwTree.SelectedNode.Text
+        p_SelectedNodeName = tvwTree.SelectedNode.Text
+
+        If p_SelectedMemberID > 0 And Not p_SelectedNodeName = "" Then InsertNewKitInTree(p_SelectedMemberID, p_SelectedNodeName)
+
         Me.Close()
     End Sub
 End Class
