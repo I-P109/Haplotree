@@ -17,10 +17,15 @@ Public Class Node
         End Get
         Set(value As String())
             Dim i As Integer
-            ReDim p_ChildrenNodesIDs(UBound(value))
-            For i = 0 To UBound(value)
-                p_ChildrenNodesIDs(i) = value(i)
-            Next
+            If Not IsNothing(value) Then
+                ReDim p_ChildrenNodesIDs(UBound(value))
+                For i = 0 To UBound(value)
+                    p_ChildrenNodesIDs(i) = value(i)
+                Next
+            Else
+                Dim EmptyStrArray(0) As String
+                p_ChildrenNodesIDs = EmptyStrArray
+            End If
             p_IsSavedToDB = False
         End Set
     End Property
@@ -58,14 +63,16 @@ Public Class Node
     End Function
 
     Public Sub AppendChildNodeID(NewChildNodeID As String)
-        If Me.HasChildNodeID(NewChildNodeID) = False Then
-            If IsNothing(p_ChildrenNodesIDs) Then
-                ReDim p_ChildrenNodesIDs(1)
-            Else
-                ReDim Preserve p_ChildrenNodesIDs(UBound(p_ChildrenNodesIDs) + 1)
+        If Not NewChildNodeID = "" Then
+            If Me.HasChildNodeID(NewChildNodeID) = False Then
+                If IsNothing(p_ChildrenNodesIDs) Then
+                    ReDim p_ChildrenNodesIDs(1)
+                Else
+                    ReDim Preserve p_ChildrenNodesIDs(UBound(p_ChildrenNodesIDs) + 1)
+                End If
+                p_ChildrenNodesIDs(UBound(p_ChildrenNodesIDs)) = NewChildNodeID
+                p_IsSavedToDB = False
             End If
-            p_ChildrenNodesIDs(UBound(p_ChildrenNodesIDs)) = NewChildNodeID
-            p_IsSavedToDB = False
         End If
     End Sub
 
@@ -145,22 +152,30 @@ Public Class Node
         End Get
         Set(value As String())
             Dim i As Integer
-            ReDim p_ChildrenMembersIDs(UBound(value))
-            For i = 0 To UBound(value)
-                p_ChildrenMembersIDs(i) = value(i)
-            Next
+            If Not IsNothing(value) Then
+                ReDim p_ChildrenMembersIDs(UBound(value))
+                For i = 0 To UBound(value)
+                    p_ChildrenMembersIDs(i) = value(i)
+                Next
+            Else
+                Dim EmptyStrArray(0) As String
+                p_ChildrenMembersIDs = EmptyStrArray
+            End If
+            p_IsSavedToDB = False
         End Set
     End Property
 
     Public Sub AppendChildMemberID(NewMemberChildID As String)
-        If Me.HasChildMemberID(NewMemberChildID) = False Then
-            If IsNothing(p_ChildrenMembersIDs) Then
-                ReDim p_ChildrenMembersIDs(1)
-            Else
-                ReDim Preserve p_ChildrenMembersIDs(UBound(p_ChildrenMembersIDs) + 1)
+        If Not NewMemberChildID = "" Then
+            If Me.HasChildMemberID(NewMemberChildID) = False Then
+                If IsNothing(p_ChildrenMembersIDs) Then
+                    ReDim p_ChildrenMembersIDs(1)
+                Else
+                    ReDim Preserve p_ChildrenMembersIDs(UBound(p_ChildrenMembersIDs) + 1)
+                End If
+                p_ChildrenMembersIDs(UBound(p_ChildrenMembersIDs)) = NewMemberChildID
+                p_IsSavedToDB = False
             End If
-            p_ChildrenMembersIDs(UBound(p_ChildrenMembersIDs)) = NewMemberChildID
-            p_IsSavedToDB = False
         End If
     End Sub
 
@@ -201,22 +216,30 @@ Public Class Node
         End Get
         Set(value As String())
             Dim i As Integer
-            ReDim p_MutationsIDs(UBound(value))
-            For i = 0 To UBound(value)
-                p_MutationsIDs(i) = value(i)
-            Next
+            If Not IsNothing(value) Then
+                ReDim p_MutationsIDs(UBound(value))
+                For i = 0 To UBound(value)
+                    p_MutationsIDs(i) = value(i)
+                Next
+            Else
+                Dim EmptyStrArray(0) As String
+                p_MutationsIDs = EmptyStrArray
+            End If
+            p_IsSavedToDB = False
         End Set
     End Property
 
     Public Sub AppendMutationsID(NewMutationsID As String)
-        If Me.HasMutation(NewMutationsID) = False Then
-            If IsNothing(p_MutationsIDs) Then
-                ReDim p_MutationsIDs(1)
-            Else
-                ReDim Preserve p_MutationsIDs(UBound(p_MutationsIDs) + 1)
+        If Not NewMutationsID = "" Then
+            If Me.HasMutation(NewMutationsID) = False Then
+                If IsNothing(p_MutationsIDs) Then
+                    ReDim p_MutationsIDs(1)
+                Else
+                    ReDim Preserve p_MutationsIDs(UBound(p_MutationsIDs) + 1)
+                End If
+                p_MutationsIDs(UBound(p_MutationsIDs)) = NewMutationsID
+                p_IsSavedToDB = False
             End If
-            p_MutationsIDs(UBound(p_MutationsIDs)) = NewMutationsID
-            p_IsSavedToDB = False
         End If
     End Sub
 

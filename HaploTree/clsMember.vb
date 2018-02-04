@@ -25,24 +25,31 @@ Public Class Member
         End Get
         Set(value As String())
             Dim i As Integer
-            ReDim p_PutativeMutationsIDs(UBound(value))
-            For i = 0 To UBound(value)
-                p_PutativeMutationsIDs(i) = value(i)
-            Next
+            If Not IsNothing(value) Then
+                ReDim p_PutativeMutationsIDs(UBound(value))
+                For i = 0 To UBound(value)
+                    p_PutativeMutationsIDs(i) = value(i)
+                Next
+            Else
+                Dim EmptyStrArray(0) As String
+                p_PutativeMutationsIDs = EmptyStrArray
+            End If
             p_IsSavedToDB = False
         End Set
     End Property
 
     Public Sub AppendPutativeMutationsID(NewPutativeMutationsID As String) 'we may need to check that the mutation ID is not already in the list??
-        If Me.HasPutativeMutation(NewPutativeMutationsID) = False Then
-            If IsNothing(p_PutativeMutationsIDs) Then
-                ReDim p_PutativeMutationsIDs(1)
-            Else
+        If Not NewPutativeMutationsID = "" Then
+            If Me.HasPutativeMutation(NewPutativeMutationsID) = False Then
+                If IsNothing(p_PutativeMutationsIDs) Then
+                    ReDim p_PutativeMutationsIDs(1)
+                Else
 
-                ReDim Preserve p_PutativeMutationsIDs(UBound(p_PutativeMutationsIDs) + 1)
+                    ReDim Preserve p_PutativeMutationsIDs(UBound(p_PutativeMutationsIDs) + 1)
+                End If
+                p_PutativeMutationsIDs(UBound(p_PutativeMutationsIDs)) = NewPutativeMutationsID
+                p_IsSavedToDB = False
             End If
-            p_PutativeMutationsIDs(UBound(p_PutativeMutationsIDs)) = NewPutativeMutationsID
-            p_IsSavedToDB = False
         End If
     End Sub
 
@@ -94,23 +101,30 @@ Public Class Member
         End Get
         Set(value As String())
             Dim i As Integer
-            ReDim p_MutationsIDs(UBound(value))
-            For i = 0 To UBound(value)
-                p_MutationsIDs(i) = value(i)
-            Next
+            If Not IsNothing(value) Then
+                ReDim p_MutationsIDs(UBound(value))
+                For i = 0 To UBound(value)
+                    p_MutationsIDs(i) = value(i)
+                Next
+            Else
+                Dim EmptyStrArray(0) As String
+                p_MutationsIDs = EmptyStrArray
+            End If
             p_IsSavedToDB = False
         End Set
     End Property
 
     Public Sub AppendMutationsID(NewMutationsID As String) 'we may need to check that the mutation ID is not already in the list??
-        If Me.HasMutation(NewMutationsID) = False Then
-            If IsNothing(p_MutationsIDs) Then
-                ReDim p_MutationsIDs(1)
-            Else
-                ReDim Preserve p_MutationsIDs(UBound(p_MutationsIDs) + 1)
+        If Not NewMutationsID = "" Then
+            If Me.HasMutation(NewMutationsID) = False Then
+                If IsNothing(p_MutationsIDs) Then
+                    ReDim p_MutationsIDs(1)
+                Else
+                    ReDim Preserve p_MutationsIDs(UBound(p_MutationsIDs) + 1)
+                End If
+                p_MutationsIDs(UBound(p_MutationsIDs)) = NewMutationsID
+                p_IsSavedToDB = False
             End If
-            p_MutationsIDs(UBound(p_MutationsIDs)) = NewMutationsID
-            p_IsSavedToDB = False
         End If
     End Sub
 
@@ -193,23 +207,30 @@ Public Class Member
         End Get
         Set(value As String())
             Dim i As Integer
-            ReDim p_PrivateMutationsIDs(UBound(value))
-            For i = 0 To UBound(value)
-                p_PrivateMutationsIDs(i) = value(i)
-            Next
+            If Not IsNothing(value) Then
+                ReDim p_PrivateMutationsIDs(UBound(value))
+                For i = 0 To UBound(value)
+                    p_PrivateMutationsIDs(i) = value(i)
+                Next
+            Else
+                Dim EmptyStrArray(0) As String
+            p_MutationsIDs = EmptyStrArray
+            End If
             p_IsSavedToDB = False
         End Set
     End Property
 
     Public Sub AppendPrivateMutationsID(NewPrivateMutationsID As String)
-        If Me.HasPrivateMutation(NewPrivateMutationsID) = False Then
-            If IsNothing(p_PrivateMutationsIDs) Then
-                ReDim p_PrivateMutationsIDs(1)
-            Else
-                ReDim Preserve p_PrivateMutationsIDs(UBound(p_PrivateMutationsIDs) + 1)
+        If Not NewPrivateMutationsID = "" Then
+            If Me.HasPrivateMutation(NewPrivateMutationsID) = False Then
+                If IsNothing(p_PrivateMutationsIDs) Then
+                    ReDim p_PrivateMutationsIDs(1)
+                Else
+                    ReDim Preserve p_PrivateMutationsIDs(UBound(p_PrivateMutationsIDs) + 1)
+                End If
+                p_PrivateMutationsIDs(UBound(p_PrivateMutationsIDs)) = NewPrivateMutationsID
+                p_IsSavedToDB = False
             End If
-            p_PrivateMutationsIDs(UBound(p_PrivateMutationsIDs)) = NewPrivateMutationsID
-            p_IsSavedToDB = False
         End If
     End Sub
 

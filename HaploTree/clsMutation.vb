@@ -45,10 +45,15 @@ Public Class Mutation
         End Get
         Set(value As String())
             Dim i As Integer
-            ReDim p_Names(UBound(value))
-            For i = 0 To UBound(value)
-                p_Names(i) = value(i)
-            Next
+            If Not IsNothing(value) Then
+                ReDim p_Names(UBound(value))
+                For i = 0 To UBound(value)
+                    p_Names(i) = value(i)
+                Next
+            Else
+                Dim EmptyStrArray(0) As String
+                p_Names = EmptyStrArray
+            End If
             p_IsSavedToDB = False
         End Set
     End Property
@@ -158,12 +163,14 @@ Public Class Mutation
     End Function
 
     Public Sub AppendName(NewName As String)
-        If Me.HasName(NewName) = False Then
-            If Not p_Names(0) = "" Then
-                ReDim Preserve p_Names(UBound(p_Names) + 1)
+        If Not NewName = "" Then
+            If Me.HasName(NewName) = False Then
+                If Not p_Names(0) = "" Then
+                    ReDim Preserve p_Names(UBound(p_Names) + 1)
+                End If
+                p_Names(UBound(p_Names)) = NewName
+                p_IsSavedToDB = False
             End If
-            p_Names(UBound(p_Names)) = NewName
-            p_IsSavedToDB = False
         End If
     End Sub
 
