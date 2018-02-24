@@ -499,6 +499,86 @@ Public Class Member
         End If
     End Function
 
+    Public Function GetFullAltCallHg38AtPositionHg38(PosHg38 As String) As String 'from Variant38
+        If Not IsNothing(p_dsVariant38) Then
+            Dim i As Integer
+            Dim Itemi As Integer
+            Itemi = -1
+            For i = 0 To p_dsVariant38.Tables(0).Rows.Count - 1
+                If p_dsVariant38.Tables(0).Rows(i).Item("Pos") = PosHg38 Then
+                    Itemi = i
+                    Exit For
+                End If
+            Next
+            If Itemi = -1 Then 'not found
+                Return ""
+            Else
+                Return p_dsVariant38.Tables(0).Rows(Itemi).Item("Alt")
+            End If
+        Else
+            Return ""
+        End If
+    End Function
+
+    Public Function GetFullAltCallAtPositionHg38(PosHg38 As String) As String 'prefarably from Variant38, returns from Variant19 if no Hh38 loaded
+        If p_Variant38Loaded = True Then
+            Dim i As Integer
+            Dim Itemi As Integer
+            Itemi = -1
+            For i = 0 To p_dsVariant38.Tables(0).Rows.Count - 1
+                If p_dsVariant38.Tables(0).Rows(i).Item("Pos") = PosHg38 Then
+                    Itemi = i
+                    Exit For
+                End If
+            Next
+            If Itemi = -1 Then 'not found
+                Return ""
+            Else
+                Return p_dsVariant38.Tables(0).Rows(Itemi).Item("Alt")
+            End If
+        Else
+            If p_Variant19Loaded = True Then
+                Dim i As Integer
+                Dim Itemi As Integer
+                Itemi = -1
+                For i = 0 To p_dsVariant19.Tables(0).Rows.Count - 1
+                    If p_dsVariant19.Tables(0).Rows(i).Item("Pos") = ConvertHG38ToHG19(CLng(PosHg38)) Then
+                        Itemi = i
+                        Exit For
+                    End If
+                Next
+                If Itemi = -1 Then 'not found
+                    Return ""
+                Else
+                    Return p_dsVariant19.Tables(0).Rows(Itemi).Item("Alt")
+                End If
+            Else
+                Return ""
+            End If
+        End If
+    End Function
+
+    Public Function GetFullAltCallHg19AtPositionHg38(PosHg38 As String) As String 'from Variant19
+        If Not IsNothing(p_dsVariant19) Then
+            Dim i As Integer
+            Dim Itemi As Integer
+            Itemi = -1
+            For i = 0 To p_dsVariant19.Tables(0).Rows.Count - 1
+                If p_dsVariant19.Tables(0).Rows(i).Item("Pos") = PosHg38 Then
+                    Itemi = i
+                    Exit For
+                End If
+            Next
+            If Itemi = -1 Then 'not found
+                Return ""
+            Else
+                Return p_dsVariant19.Tables(0).Rows(Itemi).Item("Alt")
+            End If
+        Else
+            Return ""
+        End If
+    End Function
+
     Public Function GetRefCallHg38AtRow(Itemi As Integer) As String 'from Variant38
         If Not IsNothing(p_dsVariant38) Then
             Dim str As String
@@ -722,31 +802,31 @@ Public Class Member
                 If p_ds.Tables(0).Rows(0).IsNull("MutationsIDs") = False Then
                     p_MutationsIDs = GetStringArrayCommaDelimited(p_ds.Tables(0).Rows(0).Item("MutationsIDs"))
                 Else
-                    MsgBox("This Member has no Mutations Loaded!")
+                    'MsgBox("This Member has no Mutations Loaded!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("PrivateMutationsIDs") = False Then
                     p_PrivateMutationsIDs = GetStringArrayCommaDelimited(p_ds.Tables(0).Rows(0).Item("PrivateMutationsIDs"))
                 Else
-                    MsgBox("This Member has no Private Mutations Loaded!")
+                    'MsgBox("This Member has no Private Mutations Loaded!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("PutativeMutationsIDs") = False Then
                     p_PutativeMutationsIDs = GetStringArrayCommaDelimited(p_ds.Tables(0).Rows(0).Item("PutativeMutationsIDs"))
                 Else
-                    MsgBox("This Member has no Putative Mutations Loaded!")
+                    'MsgBox("This Member has no Putative Mutations Loaded!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("CurrentParentnodeID") = False Then
                     p_CurrentParentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentParentnodeID")
                 Else
-                    MsgBox("This Member has no CurrentParentnodeID yet!")
+                    'MsgBox("This Member has no CurrentParentnodeID yet!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("IsPlacedInTheTree") = False Then
                     p_IsPlacedInTheTree = p_ds.Tables(0).Rows(0).Item("IsPlacedInTheTree")
                 Else
-                    MsgBox("This Member is not placed in the tree yet!")
+                    'MsgBox("This Member is not placed in the tree yet!")
                     p_IsPlacedInTheTree = False
                 End If
 
@@ -754,26 +834,26 @@ Public Class Member
                 p_dsVariant38 = cDataAccess.GetHg38VariantsByMemberID(p_ID)
                 If Not IsNothing(p_dsVariant38) Then
                     If Not p_dsVariant38.Tables(0).Rows.Count > 0 Then
-                        MsgBox("Member has no variant38 data loaded")
+                        'MsgBox("Member has no variant38 data loaded")
                     Else
                         p_Variant38Loaded = True
                         p_NbVariant38 = p_dsVariant38.Tables(0).Rows.Count
                     End If
                 Else
-                    MsgBox("Member " & p_Name & " has no variant38 loaded!")
+                    'MsgBox("Member " & p_Name & " has no variant38 loaded!")
                 End If
 
                 'Now see if this person has variant19 records stored
                 p_dsVariant19 = cDataAccess.GetHg19VariantsByMemberID(p_ID)
                 If Not IsNothing(p_dsVariant19) Then
                     If Not p_dsVariant19.Tables(0).Rows.Count > 0 Then
-                        MsgBox("Member has no variant19 data loaded")
+                        'MsgBox("Member has no variant19 data loaded")
                     Else
                         p_Variant19Loaded = True
                         p_NbVariant19 = p_dsVariant19.Tables(0).Rows.Count
                     End If
                 Else
-                    MsgBox("Member " & p_Name & " has no variant19 loaded!")
+                    'MsgBox("Member " & p_Name & " has no variant19 loaded!")
                 End If
             End If
         Else
@@ -884,49 +964,49 @@ Public Class Member
                 If p_ds.Tables(0).Rows(0).IsNull("MemberName") = False Then
                     p_Name = p_ds.Tables(0).Rows(0).Item("MemberName")
                 Else
-                    MsgBox("This Member has no name!")
+                    'MsgBox("This Member has no name!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("FTDNAID") = False Then
                     p_FTDNAKit = p_ds.Tables(0).Rows(0).Item("FTDNAID")
                 Else
-                    MsgBox("This Member has no FTDNA kit number!")
+                    'MsgBox("This Member has no FTDNA kit number!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("YFullID") = False Then
                     p_YFullKit = p_ds.Tables(0).Rows(0).Item("YFullID")
                 Else
-                    MsgBox("This Member has no YFull kit number!")
+                    'MsgBox("This Member has no YFull kit number!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("MutationsIDs") = False Then
                     p_MutationsIDs = GetStringArrayCommaDelimited(p_ds.Tables(0).Rows(0).Item("MutationsIDs"))
                 Else
-                    MsgBox("This Member has no Mutations Loaded!")
+                    'MsgBox("This Member has no Mutations Loaded!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("PrivateMutationsIDs") = False Then
                     p_PrivateMutationsIDs = GetStringArrayCommaDelimited(p_ds.Tables(0).Rows(0).Item("PrivateMutationsIDs"))
                 Else
-                    MsgBox("This Member has no Private Mutations Loaded!")
+                    'MsgBox("This Member has no Private Mutations Loaded!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("PutativeMutationsIDs") = False Then
                     p_PutativeMutationsIDs = GetStringArrayCommaDelimited(p_ds.Tables(0).Rows(0).Item("PutativeMutationsIDs"))
                 Else
-                    MsgBox("This Member has no Putative Mutations Loaded!")
+                    'MsgBox("This Member has no Putative Mutations Loaded!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("CurrentParentnodeID") = False Then
                     p_CurrentParentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentParentnodeID")
                 Else
-                    MsgBox("This Member has no CurrentParentnodeID yet!")
+                    'MsgBox("This Member has no CurrentParentnodeID yet!")
                 End If
 
                 If p_ds.Tables(0).Rows(0).IsNull("IsPlacedInTheTree") = False Then
                     p_IsPlacedInTheTree = p_ds.Tables(0).Rows(0).Item("IsPlacedInTheTree")
                 Else
-                    MsgBox("This Member is not placed in the tree yet!")
+                    'MsgBox("This Member is not placed in the tree yet!")
                     p_IsPlacedInTheTree = False
                 End If
 
@@ -934,7 +1014,7 @@ Public Class Member
                 p_dsVariant38 = cDataAccess.GetHg38VariantsByMemberID(p_ID)
                 If Not IsNothing(p_dsVariant38) Then
                     If Not p_dsVariant38.Tables(0).Rows.Count > 0 Then
-                        MsgBox("Member has no variant38 data loaded")
+                        'MsgBox("Member has no variant38 data loaded")
                     Else
                         p_Variant38Loaded = True
                         p_NbVariant38 = p_dsVariant38.Tables(0).Rows.Count
@@ -947,13 +1027,13 @@ Public Class Member
                 p_dsVariant19 = cDataAccess.GetHg19VariantsByMemberID(p_ID)
                 If Not IsNothing(p_dsVariant19) Then
                     If Not p_dsVariant19.Tables(0).Rows.Count > 0 Then
-                        MsgBox("Member has no variant19 data loaded")
+                        'MsgBox("Member has no variant19 data loaded")
                     Else
-                        p_Variant19Loaded =
-                            p_NbVariant19 = p_dsVariant19.Tables(0).Rows.Count
+                        p_Variant19Loaded = True
+                        p_NbVariant19 = p_dsVariant19.Tables(0).Rows.Count
                     End If
                 Else
-                    MsgBox("Member " & p_Name & " has no variant19 loaded!")
+                    'MsgBox("Member " & p_Name & " has no variant19 loaded!")
                 End If
             End If
         Else

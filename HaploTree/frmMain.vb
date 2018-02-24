@@ -7,6 +7,10 @@ Imports PdfSharp.Drawing.Layout
 Public Class frmMain
     Dim cDataAccess As New clsDataAccess
 
+    Private Sub Form_Closing(sender As Object, e As EventArgs) Handles MyBase.FormClosing
+        Me.Dispose()
+    End Sub
+
     Private Sub mnuFileImport_Click(sender As Object, e As EventArgs) Handles mnuFileImport.Click
         Dim frmImport As New frmImport
         frmImport.MdiParent = Me
@@ -127,14 +131,40 @@ Public Class frmMain
         Process.Start(filename)
     End Sub
 
-    Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
-    End Sub
-
     Private Sub TestToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TestToolStripMenuItem.Click
         Dim frmTest As New frmTest
         frmTest.Show()
     End Sub
 
+    Private Sub AllSNPsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AllSNPsToolStripMenuItem.Click
+        Dim frmAllMembersSNPs As New frmAllMembersSNPs
+        frmAllMembersSNPs.MdiParent = Me
+        frmAllMembersSNPs.Show()
+    End Sub
 
+    Private Sub mnuLoadMutationDbHG19_Click(sender As Object, e As EventArgs) Handles mnuLoadMutationDbHG19.Click
+        'LoadMutationsFromBigYHg19DB()
+    End Sub
+
+    Private Sub mnuLoadMemberDbHg19_Click(sender As Object, e As EventArgs) Handles mnuLoadMemberDbHg19.Click
+        'LoadMembersFromBigYHg19DB()
+        'LoadMembersDetailsFromBigYHg19DB()
+        'LoadMembersVariantFromBigYHg19DB()
+        'FindPrivateMutationsFromBigYHg19DB()
+    End Sub
+
+    Private Sub mnuViewHaploTree_Click(sender As Object, e As EventArgs) Handles mnuViewHaploTree.Click
+        Dim frmHaploTree As New frmHaploTree
+        frmHaploTree.MdiParent = Me
+        frmHaploTree.SelectionMode = False
+        frmHaploTree.Show()
+    End Sub
+
+    Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+    End Sub
+
+    Private Sub mnuAddParentNodeID_Click(sender As Object, e As EventArgs) Handles mnuAddParentNodeID.Click
+        AddParentNodeIDtotblMutations()
+    End Sub
 End Class

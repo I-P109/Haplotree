@@ -19,3 +19,7 @@ C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree
 C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.exe
 C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.xml
 C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.pdb
+C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.frmAllMembersSNPs.resources
+C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.frmSNPMember.resources
+C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.frmHaploTree.resources
+C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.frmProgress.resources

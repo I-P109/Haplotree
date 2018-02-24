@@ -29,13 +29,19 @@ Partial Class frmMain
         Me.mnuEditMembers = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuEditMembersDetails = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuEditMembersAnalyseVariants = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuEditMembersUploadToTree = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuLoadMemberDbHg19 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MutationsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuLoadMutationDbHG19 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuAddParentNodeID = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuView = New System.Windows.Forms.ToolStripMenuItem()
+        Me.AllSNPsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuViewMembersSNPs = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuViewTree = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuViewHaploTree = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuReports = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuReportsMembers = New System.Windows.Forms.ToolStripMenuItem()
         Me.TestToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.mnuEditMembersUploadToTree = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -46,7 +52,7 @@ Partial Class frmMain
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Padding = New System.Windows.Forms.Padding(8, 2, 0, 2)
-        Me.MenuStrip1.Size = New System.Drawing.Size(896, 28)
+        Me.MenuStrip1.Size = New System.Drawing.Size(1024, 28)
         Me.MenuStrip1.TabIndex = 0
         Me.MenuStrip1.Text = "MenuStrip1"
         '
@@ -65,14 +71,14 @@ Partial Class frmMain
         '
         'mnuEdit
         '
-        Me.mnuEdit.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuEditMembers})
+        Me.mnuEdit.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuEditMembers, Me.MutationsToolStripMenuItem})
         Me.mnuEdit.Name = "mnuEdit"
         Me.mnuEdit.Size = New System.Drawing.Size(47, 24)
         Me.mnuEdit.Text = "Edit"
         '
         'mnuEditMembers
         '
-        Me.mnuEditMembers.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuEditMembersDetails, Me.mnuEditMembersAnalyseVariants, Me.mnuEditMembersUploadToTree})
+        Me.mnuEditMembers.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuEditMembersDetails, Me.mnuEditMembersAnalyseVariants, Me.mnuEditMembersUploadToTree, Me.mnuLoadMemberDbHg19})
         Me.mnuEditMembers.Name = "mnuEditMembers"
         Me.mnuEditMembers.Size = New System.Drawing.Size(181, 26)
         Me.mnuEditMembers.Text = "Members"
@@ -80,7 +86,7 @@ Partial Class frmMain
         'mnuEditMembersDetails
         '
         Me.mnuEditMembersDetails.Name = "mnuEditMembersDetails"
-        Me.mnuEditMembersDetails.Size = New System.Drawing.Size(185, 26)
+        Me.mnuEditMembersDetails.Size = New System.Drawing.Size(191, 26)
         Me.mnuEditMembersDetails.Text = "Details"
         '
         'mnuEditMembersAnalyseVariants
@@ -89,12 +95,51 @@ Partial Class frmMain
         Me.mnuEditMembersAnalyseVariants.Size = New System.Drawing.Size(191, 26)
         Me.mnuEditMembersAnalyseVariants.Text = "Analyse Variants"
         '
+        'mnuEditMembersUploadToTree
+        '
+        Me.mnuEditMembersUploadToTree.Name = "mnuEditMembersUploadToTree"
+        Me.mnuEditMembersUploadToTree.Size = New System.Drawing.Size(191, 26)
+        Me.mnuEditMembersUploadToTree.Text = "Upload to Tree"
+        '
+        'mnuLoadMemberDbHg19
+        '
+        Me.mnuLoadMemberDbHg19.Enabled = False
+        Me.mnuLoadMemberDbHg19.Name = "mnuLoadMemberDbHg19"
+        Me.mnuLoadMemberDbHg19.Size = New System.Drawing.Size(191, 26)
+        Me.mnuLoadMemberDbHg19.Text = "Load Db HG19 "
+        '
+        'MutationsToolStripMenuItem
+        '
+        Me.MutationsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuLoadMutationDbHG19, Me.mnuAddParentNodeID})
+        Me.MutationsToolStripMenuItem.Name = "MutationsToolStripMenuItem"
+        Me.MutationsToolStripMenuItem.Size = New System.Drawing.Size(181, 26)
+        Me.MutationsToolStripMenuItem.Text = "Mutations"
+        '
+        'mnuLoadMutationDbHG19
+        '
+        Me.mnuLoadMutationDbHG19.Enabled = False
+        Me.mnuLoadMutationDbHG19.Name = "mnuLoadMutationDbHG19"
+        Me.mnuLoadMutationDbHG19.Size = New System.Drawing.Size(209, 26)
+        Me.mnuLoadMutationDbHG19.Text = "Load Db HG19"
+        '
+        'mnuAddParentNodeID
+        '
+        Me.mnuAddParentNodeID.Name = "mnuAddParentNodeID"
+        Me.mnuAddParentNodeID.Size = New System.Drawing.Size(318, 26)
+        Me.mnuAddParentNodeID.Text = "Add ParentNodeID from HaploTree"
+        '
         'mnuView
         '
-        Me.mnuView.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuViewMembersSNPs, Me.mnuViewTree})
+        Me.mnuView.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.AllSNPsToolStripMenuItem, Me.mnuViewMembersSNPs, Me.mnuViewTree, Me.mnuViewHaploTree})
         Me.mnuView.Name = "mnuView"
         Me.mnuView.Size = New System.Drawing.Size(53, 24)
         Me.mnuView.Text = "View"
+        '
+        'AllSNPsToolStripMenuItem
+        '
+        Me.AllSNPsToolStripMenuItem.Name = "AllSNPsToolStripMenuItem"
+        Me.AllSNPsToolStripMenuItem.Size = New System.Drawing.Size(183, 26)
+        Me.AllSNPsToolStripMenuItem.Text = "All SNPs"
         '
         'mnuViewMembersSNPs
         '
@@ -107,6 +152,12 @@ Partial Class frmMain
         Me.mnuViewTree.Name = "mnuViewTree"
         Me.mnuViewTree.Size = New System.Drawing.Size(183, 26)
         Me.mnuViewTree.Text = "Tree"
+        '
+        'mnuViewHaploTree
+        '
+        Me.mnuViewHaploTree.Name = "mnuViewHaploTree"
+        Me.mnuViewHaploTree.Size = New System.Drawing.Size(183, 26)
+        Me.mnuViewHaploTree.Text = "Haplo Tree"
         '
         'mnuReports
         '
@@ -127,17 +178,11 @@ Partial Class frmMain
         Me.TestToolStripMenuItem.Size = New System.Drawing.Size(47, 24)
         Me.TestToolStripMenuItem.Text = "Test"
         '
-        'mnuEditMembersUploadToTree
-        '
-        Me.mnuEditMembersUploadToTree.Name = "mnuEditMembersUploadToTree"
-        Me.mnuEditMembersUploadToTree.Size = New System.Drawing.Size(185, 26)
-        Me.mnuEditMembersUploadToTree.Text = "Upload to Tree"
-        '
         'frmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(896, 476)
+        Me.ClientSize = New System.Drawing.Size(1024, 514)
         Me.Controls.Add(Me.MenuStrip1)
         Me.IsMdiContainer = True
         Me.MainMenuStrip = Me.MenuStrip1
@@ -165,4 +210,10 @@ Partial Class frmMain
     Friend WithEvents mnuEditMembersAnalyseVariants As ToolStripMenuItem
     Friend WithEvents TestToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents mnuEditMembersUploadToTree As ToolStripMenuItem
+    Friend WithEvents AllSNPsToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents MutationsToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents mnuLoadMutationDbHG19 As ToolStripMenuItem
+    Friend WithEvents mnuLoadMemberDbHg19 As ToolStripMenuItem
+    Friend WithEvents mnuViewHaploTree As ToolStripMenuItem
+    Friend WithEvents mnuAddParentNodeID As ToolStripMenuItem
 End Class

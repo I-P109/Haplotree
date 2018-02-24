@@ -243,6 +243,11 @@ Module TreeConstructor
                             NewNode.Name = Mut.Name(0) 'find a better way to give a default name to a node, or ensure that position 0 is not empty!
                             Found1Mut = True
                         End If
+                    Else
+                        Dim Mut As New Mutation
+                        Mut.Load(MutId)
+                        Mut.IsPrivate = False
+                        Mut.SavetoDB()
                     End If
                 End If
             Next
@@ -270,6 +275,7 @@ Module TreeConstructor
                     Dim Mut As New Mutation
                     Mut.Load(MutId)
                     Mut.CurrentParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the mutation if not needed
+                    Mut.IsPrivate = True
                     Mut.SavetoDB()
                     NewNode.AppendMutationsID(MutId)
                     If Found1Mut = False Then
@@ -637,4 +643,409 @@ Module TreeConstructor
         'loop on each Memb.MutationsIDs and check mutations of each other membersIDs, stops if found at least 1, if nonem set mutationID in PrivateMutationsIDs list.
 
     End Sub
+
+    Public Sub LoadMutationsFromBigYHg19DB()
+        Dim cDataAccess As New clsDataAccess
+        Dim ds As New DataSet
+        Dim i As Integer
+        Dim NbMembers As Integer
+
+        ds = cDataAccess.GetAllBigYHg19Mutations()
+        If Not IsNothing(ds) Then 'the db is not empty
+            If ds.Tables(0).Rows.Count > 0 Then
+                NbMembers = ds.Tables(0).Columns.Count - 4
+                For i = 0 To ds.Tables(0).Rows.Count - 1
+                    If ds.Tables(0).Rows(i).IsNull("ID") = False Then
+                        Dim IsMut As Boolean
+                        Dim PosHg19 As String
+                        Dim PosHg38 As String
+                        Dim SNPname As String
+                        Dim ref As String
+                        Dim rowID As Integer
+                        Dim MutID As Integer
+                        Dim MembKitnb As String
+                        Dim read As String
+
+                        IsMut = False
+
+                        PosHg19 = ds.Tables(0).Rows(i).Item("PosHg19")
+                        SNPname = ds.Tables(0).Rows(i).Item("SNPname")
+                        ref = ds.Tables(0).Rows(i).Item("Reference")
+                        rowID = ds.Tables(0).Rows(i).Item("ID")
+                        read = ""
+
+                        'test if a real mutation
+                        If ref.Length = 1 Then 'we want only 1 base as reference
+                            Dim j As Integer
+
+                            For j = 0 To NbMembers - 1
+                                'test if exists at least 1 read different from ref
+                                MembKitnb = ds.Tables(0).Columns(j + 3).ColumnName
+                                If Not IsDBNull(ds.Tables(0).Rows(i).Item(j + 3)) Then
+                                    read = ds.Tables(0).Rows(i).Item(j + 3)
+                                Else
+                                    read = ""
+                                End If
+
+                                If read.Contains("PASS") = True Then
+                                    If Not ref = Left(read, 1) Then
+                                        IsMut = True
+                                        Exit For
+                                    End If
+                                End If
+                            Next
+                        End If
+
+                        'if a real mutation create and save mutation in the DB
+                        If IsMut = True Then
+                            PosHg38 = GetHg38FromHg19(PosHg19)
+                            If PosHg38 = -999 Then
+                                MsgBox("position " & PosHg19 & " gives -999 in hg38")
+                            Else
+                                MutID = GetMutationIDFromDB(PosHg38, ref, Left(read, 1)) 'Check in the DB if mutation exists and returns its ID if so, 0 if not.
+                                If MutID = 0 Then 'the mutation in this item's position didn't exist in the DB
+                                    MutID = CreateNewMutationInDB(PosHg38, ref, Left(read, 1)) 'Creates a new mutation in the mutation table and return its allocated ID if valid, 0 if not.
+                                    Dim newMut As New Mutation
+                                    Dim Pos As New Position
+                                    newMut.Load(MutID)
+                                    Pos.LoadWithID(newMut.PositionID)
+
+                                    If Not SNPname = "N/A" Then
+                                        newMut.Name = SNPname.Split(",")
+                                    Else
+                                        newMut.AppendName("temp_" & Pos.PosHg38)
+                                    End If
+
+                                    If Not PosHg19 = Pos.PosHg19 Then
+                                        MsgBox("position " & PosHg19 & " transfers int hg38 but gives back something different")
+                                    End If
+                                    newMut.SavetoDB()
+                                End If
+                            End If
+                        End If
+                    End If
+                Next
+            End If
+        End If
+
+    End Sub
+
+    Public Function GetAllMutationsIDs() As Integer()
+        Dim cDataAccess As New clsDataAccess
+        Dim ds As New DataSet
+        Dim i As Integer
+
+        ds = cDataAccess.GetAllMutations
+        If Not IsNothing(ds) Then 'the db is not empty
+            If ds.Tables(0).Rows.Count > 0 Then
+                Dim IntArray(ds.Tables(0).Rows.Count - 1) As Integer
+
+                For i = 0 To ds.Tables(0).Rows.Count - 1
+                    IntArray(i) = ds.Tables(0).Rows(i).Item("ID")
+                Next
+
+                Return IntArray
+            Else
+                Return Nothing
+            End If
+        Else
+            Return Nothing
+        End If
+
+    End Function
+
+    Public Sub LoadMembersFromBigYHg19DB()
+        Dim cDataAccess As New clsDataAccess
+        Dim ds As New DataSet
+        Dim i As Integer
+        Dim NbMembers As Integer
+
+        ds = cDataAccess.GetAllBigYHg19Mutations()
+        If Not IsNothing(ds) Then 'the db is not empty
+            If ds.Tables(0).Rows.Count > 0 Then
+                Dim PosHg19 As String
+                Dim PosHg38 As String
+                Dim ref As String
+                Dim MutID As Integer
+                Dim MembKitnb As String
+                Dim read As String
+                Dim j As Integer
+
+                NbMembers = ds.Tables(0).Columns.Count - 4
+                For j = 0 To NbMembers - 1
+                    Dim NewMemb As New Member
+                    Dim MembDs As New DataSet
+                    'test if exists
+                    MembKitnb = ds.Tables(0).Columns(j + 3).ColumnName
+                    MembDs = cDataAccess.GetMemberByFTDNAID(MembKitnb)
+                    If Not IsNothing(MembDs) Then
+                        If MembDs.Tables(0).Rows.Count > 0 Then
+                            'member exists already - do nothing
+
+                        Else
+                            'create new member.
+                            cDataAccess.InsertMember("Name " & MembKitnb, MembKitnb, "")
+                        End If
+                    Else
+                        'create new member.
+                        cDataAccess.InsertMember("Name " & MembKitnb, MembKitnb, "")
+                    End If
+
+                    NewMemb.LoadWithFTDNAID(MembKitnb)
+
+                    For i = 0 To ds.Tables(0).Rows.Count - 1
+                        If ds.Tables(0).Rows(i).IsNull("ID") = False Then
+                            ref = ds.Tables(0).Rows(i).Item("Reference")
+
+                            'test if a real mutation
+                            If ref.Length = 1 Then 'we want only 1 base as reference
+                                PosHg19 = ds.Tables(0).Rows(i).Item("PosHg19")
+                                read = ""
+                                If Not IsDBNull(ds.Tables(0).Rows(i).Item(j + 3)) Then
+                                    read = ds.Tables(0).Rows(i).Item(j + 3)
+                                Else
+                                    read = ""
+                                End If
+
+                                If read.Contains("PASS") = True Then
+                                    If Not ref = Left(read, 1) Then 'the member has a mutation
+                                        PosHg38 = GetHg38FromHg19(PosHg19)
+                                        If PosHg38 = -999 Then
+                                            'MsgBox("position " & PosHg19 & " gives -999 in hg38")
+                                        Else
+                                            MutID = GetMutationIDFromDB(PosHg38, ref, Left(read, 1)) 'Check in the DB if mutation exists and returns its ID if so, 0 if not.
+                                            If Not MutID = 0 Then 'the mutation in this item's position didn't exist in the DB
+                                                NewMemb.AppendMutationsID(MutID)
+                                            End If
+                                        End If
+
+                                    End If
+                                End If
+                            End If
+
+                        End If
+                    Next
+                    NewMemb.SavetoDB()
+                Next
+            End If
+        End If
+    End Sub
+
+    Public Sub LoadMembersVariantFromBigYHg19DB()
+        Dim cDataAccess As New clsDataAccess
+        Dim ds As New DataSet
+        Dim i As Integer
+        Dim NbMembers As Integer
+
+        ds = cDataAccess.GetAllBigYHg19Mutations()
+        If Not IsNothing(ds) Then 'the db is not empty
+            If ds.Tables(0).Rows.Count > 0 Then
+                Dim PosHg19 As String
+                Dim ref As String
+                Dim MembKitnb As String
+                Dim read As String
+                Dim j As Integer
+
+                NbMembers = ds.Tables(0).Columns.Count - 4
+                For j = 0 To NbMembers - 1
+                    Dim NewMembID As Integer
+                    Dim MembDs As New DataSet
+                    'test if exists
+                    MembKitnb = ds.Tables(0).Columns(j + 3).ColumnName
+                    MembDs = cDataAccess.GetMemberByFTDNAID(MembKitnb)
+                    If Not IsNothing(MembDs) Then
+                        If MembDs.Tables(0).Rows.Count > 0 Then
+                            NewMembID = MembDs.Tables(0).Rows(0).Item("ID")
+                            For i = 0 To ds.Tables(0).Rows.Count - 1
+                                If ds.Tables(0).Rows(i).IsNull("ID") = False Then
+                                    ref = ds.Tables(0).Rows(i).Item("Reference")
+
+                                    If ref.Length = 1 Then 'we want only 1 base as reference
+                                        PosHg19 = ds.Tables(0).Rows(i).Item("PosHg19")
+                                        read = ""
+                                        If Not IsDBNull(ds.Tables(0).Rows(i).Item(j + 3)) Then
+                                            read = ds.Tables(0).Rows(i).Item(j + 3)
+                                        Else
+                                            read = ""
+                                        End If
+
+                                        If read.Contains("PASS") = True Then
+                                            cDataAccess.InsertPositionByMemberID19(NewMembID, PosHg19, ref, read.Replace("PASS", ""), "PASS", read)
+                                        ElseIf read.Contains("COVERED") = True Then
+                                            cDataAccess.InsertPositionByMemberID19(NewMembID, PosHg19, ref, ref, "COVERED", "COVERED")
+                                        ElseIf read.Contains("REJECTED") = True Then
+                                            cDataAccess.InsertPositionByMemberID19(NewMembID, PosHg19, ref, read.Replace("REJECTED", ""), "REJECTED", read)
+                                        Else
+
+                                        End If
+                                    End If
+
+                                End If
+                            Next
+                        End If
+                    End If
+                Next
+            End If
+        End If
+    End Sub
+
+    Public Sub FindPrivateMutationsFromBigYHg19DB()
+        Dim cDataAccess As New clsDataAccess
+        Dim ds As New DataSet
+        Dim i As Integer
+
+        ds = cDataAccess.GetAllMutations()
+        If Not IsNothing(ds) Then 'the db is not empty
+            If ds.Tables(0).Rows.Count > 0 Then
+                For i = 0 To ds.Tables(0).Rows.Count - 1
+                    If ds.Tables(0).Rows(i).IsNull("ID") = False Then
+                        Dim MutID As String
+                        Dim Mut As New Mutation
+                        Dim Pos As New Position
+                        Dim NbMembWithMut As Integer
+                        Dim MembDs As New DataSet
+
+                        MutID = ds.Tables(0).Rows(i).Item("ID")
+                        Mut.Load(MutID)
+                        Pos.LoadWithID(Mut.PositionID)
+
+                        MembDs = cDataAccess.GetMembersWithHG19Variants(Pos.PosHg19, Pos.AncestrallCall, Mut.AltCall)
+                        If Not IsNothing(MembDs) Then
+                            NbMembWithMut = MembDs.Tables(0).Rows.Count
+                            If NbMembWithMut > 1 Then
+                                Mut.IsPrivate = False
+                                Mut.SavetoDB()
+                            ElseIf NbMembWithMut > 0 Then
+                                'it is a private mutation
+                                Mut.IsPrivate = True
+                                Mut.SavetoDB()
+                                Dim Memb As New Member
+                                Memb.LoadWithID(MembDs.Tables(0).Rows(0).Item("FK_MemberID"))
+                                Memb.AppendPrivateMutationsID(MutID)
+                                Memb.SavetoDB()
+                            Else
+                                'that should not happen: it means no one has the mutation
+
+                            End If
+                        End If
+
+
+                    End If
+                Next
+            End If
+        End If
+    End Sub
+
+    Public Sub LoadMembersDetailsFromBigYHg19DB()
+        Dim cDataAccess As New clsDataAccess
+        Dim ds As New DataSet
+        Dim i As Integer
+
+        ds = cDataAccess.GetAllDetailsMemberBigYHg19Mutations()
+        If Not IsNothing(ds) Then 'the db is not empty
+            If ds.Tables(0).Rows.Count > 0 Then
+                For i = 0 To ds.Tables(0).Rows.Count - 1
+                    If ds.Tables(0).Rows(i).IsNull("FTDNAKitID") = False Then
+                        Dim FTDNAKitID As String
+                        Dim YFullKitID As String
+                        Dim MembName As String
+                        Dim MembCountry As String
+
+                        Dim NewMemb As New Member
+                        Dim MembDs As New DataSet
+                        'test if exists
+                        FTDNAKitID = ds.Tables(0).Rows(i).Item("FTDNAKitID")
+                        If ds.Tables(0).Rows(i).IsNull("YFullKitID") = False Then
+                            YFullKitID = ds.Tables(0).Rows(i).Item("YFullKitID")
+                        Else
+                            YFullKitID = ""
+                        End If
+                        If ds.Tables(0).Rows(i).IsNull("Name") = False Then
+                            MembName = ds.Tables(0).Rows(i).Item("Name")
+                        Else
+                            MembName = ""
+                        End If
+
+                        If ds.Tables(0).Rows(i).IsNull("Country") = False Then
+                            MembCountry = ds.Tables(0).Rows(i).Item("Country")
+                        Else
+                            MembCountry = ""
+                        End If
+                        MembDs = cDataAccess.GetMemberByFTDNAID(FTDNAKitID)
+                        If Not IsNothing(MembDs) Then
+                            If MembDs.Tables(0).Rows.Count > 0 Then
+                                'member exists already 
+
+                            Else
+                                'create new member.
+                                cDataAccess.InsertMember(MembName, FTDNAKitID, YFullKitID)
+                            End If
+                        Else
+                            'create new member.
+                            cDataAccess.InsertMember(MembName, FTDNAKitID, YFullKitID)
+                        End If
+
+                        NewMemb.LoadWithFTDNAID(FTDNAKitID)
+                        NewMemb.Name = MembName
+                        NewMemb.YFullKit = YFullKitID
+                        'NewMemb.Country = MembCountry
+
+                        NewMemb.SavetoDB()
+                    End If
+                Next
+            End If
+        End If
+    End Sub
+
+    Public Sub AddParentNodeIDtotblMutations()
+        Dim cDataAccess As New clsDataAccess
+        Dim dsNodes As DataSet
+        Dim i As Integer
+        Dim PrgFrmNd As New frmProgress
+
+        dsNodes = cDataAccess.GetAllNodes()
+
+        If Not IsNothing(dsNodes) Then
+            If dsNodes.Tables(0).Rows.Count > 0 Then
+                PrgFrmNd.InitiateMe()
+                PrgFrmNd.Show()
+                PrgFrmNd.UpdateMe("Loading nodes", 0)
+                PrgFrmNd.Visible = True
+                For i = 0 To dsNodes.Tables(0).Rows.Count - 1
+                    If Not dsNodes.Tables(0).Rows(i).IsNull("ID") Then
+                        Dim NdID As Integer
+                        NdID = dsNodes.Tables(0).Rows(i).Item("ID")
+                        If dsNodes.Tables(0).Rows(i).IsNull("MutationsIDs") = False Then
+                            Dim PrgFrmMut As New frmProgress
+                            Dim Str As String
+                            Dim StrArray As String()
+                            Dim j As Integer
+                            PrgFrmMut.InitiateMe()
+                            PrgFrmMut.Show()
+                            PrgFrmMut.UpdateMe("Loading mutations", 0)
+                            PrgFrmMut.Visible = True
+                            Str = dsNodes.Tables(0).Rows(i).Item("MutationsIDs")
+                            StrArray = Str.Split(",")
+                            j = 0
+                            For Each MyStr In StrArray
+                                If Not MyStr = "" Then
+                                    Dim Mut As New Mutation
+                                    Mut.Load(MyStr)
+                                    Mut.CurrentParentNodeID = NdID
+                                    Mut.SavetoDB()
+                                End If
+                                PrgFrmMut.UpdateMe("Loading mutations ...", (j + 1), StrArray.Count)
+                                j = j + 1
+                            Next
+                            PrgFrmMut.Visible = False
+                        End If
+                    End If
+                    PrgFrmNd.UpdateMe("Loading nodes ...", (i + 1), dsNodes.Tables(0).Rows.Count)
+                Next
+                PrgFrmNd.Visible = False
+            End If
+        End If
+
+    End Sub
+
 End Module

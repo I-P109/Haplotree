@@ -48,6 +48,30 @@ Module DataConn
 
 
     '***************************************************************************************************
+    ' - AUTHOR: Nicolas Taban
+    ' - DATE:   2/16/2018
+    ' - NOTES:  This connects to the access database which contains the old P109 data based on the Hg19 variant files.
+    '
+    '***************************************************************************************************
+
+    Public Function GetConnectionP109BigYHg19DB() As OleDb.OleDbConnection
+        Dim strConnectionString As String = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & App_Path() & "P109BigYHg19DB.accdb;Persist Security Info=False"
+
+        Try
+            conn = New OleDbConnection
+            conn.ConnectionString = strConnectionString
+            Return conn
+        Catch ex As Exception
+            ' Throws a new exception that provides information in the message
+            ' string and provides the original exception as the InnerException, e.
+            ' Call WriteToLogFile(Now, "DataConn:GetConnection",ex.Message) 'Wite to the Logfile
+            Throw ex
+
+        End Try
+    End Function
+
+
+    '***************************************************************************************************
     ' - AUTHOR: Darin Flansburg
     ' - DATE:   6/20/2017
     ' - NOTES:  This connects to the access database which contains the document information.

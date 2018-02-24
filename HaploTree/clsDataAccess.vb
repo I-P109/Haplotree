@@ -26,9 +26,127 @@ Public Class clsDataAccess
             MsgBox("Error:" & ex.Message)
             Return Nothing
         End Try
-        '#Disable Warning BC42105 ' Function doesn't return a value on all code paths
+
     End Function
-    '#Enable Warning BC42105 ' Function doesn't return a value on all code paths
+
+    Public Function GetAllMutations() As DataSet
+        Dim sql As String
+
+        sql = "  SELECT * FROM  tblMutation"
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
+    Public Function GetAllBigYHg19Mutations() As DataSet
+        Dim sql As String
+
+        sql = "  SELECT * FROM  tblBigYHg19"
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnectionP109BigYHg19DB()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
+    Public Function GetBigYHg19MutationsFromMemberList(MembersList As Member()) As DataSet
+        Dim sql As String
+        Dim Str As String
+
+        Str = "SNPname, PosHg19, Reference"
+
+        For Each memb In MembersList
+            Str = Str & ", " & memb.FTDNAKit
+        Next
+
+        sql = "  SELECT " & Str & " FROM  tblBigYHg19"
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnectionP109BigYHg19DB()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
+    Public Function GetAllDetailsMemberBigYHg19Mutations() As DataSet
+        Dim sql As String
+
+        sql = "  SELECT * FROM  tblMembersDetails"
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnectionP109BigYHg19DB()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
 
     Public Function GetMemberByID(ByVal mintID As Integer) As DataSet
         Dim sql As String
@@ -57,10 +175,8 @@ Public Class clsDataAccess
             Return Nothing
         End Try
 
-        '#Disable Warning BC42105 ' Function doesn't return a value on all code paths
-    End Function
-    '#Enable Warning BC42105 ' Function doesn't return a value on all code paths
 
+    End Function
 
     Public Function GetMembersAll() As DataSet
         Dim sql As String
@@ -89,9 +205,7 @@ Public Class clsDataAccess
             Return Nothing
         End Try
 
-        '#Disable Warning BC42105 ' Function doesn't return a value on all code paths
     End Function
-    '#Enable Warning BC42105 ' Function doesn't return a value on all code paths
 
     Public Function GetMemberByFTDNAID(ByVal vstrFTDNAID As String) As DataSet
         Dim sql As String
@@ -119,9 +233,8 @@ Public Class clsDataAccess
             MsgBox("Error:" & ex.Message)
             Return Nothing
         End Try
-        '#Disable Warning BC42105 ' Function doesn't return a value on all code paths
+
     End Function
-    '#Enable Warning BC42105 ' Function doesn't return a value on all code paths
 
     Public Function GetHg38VariantsByMemberID(ByVal vintMemberID As Integer) As DataSet
         Dim sql As String
@@ -149,9 +262,7 @@ Public Class clsDataAccess
             MsgBox("Error:" & ex.Message)
             Return Nothing
         End Try
-        '#Disable Warning BC42105 ' Function doesn't return a value on all code paths
     End Function
-    '#Enable Warning BC42105 ' Function doesn't return a value on all code paths
 
     Public Function GetHg19VariantsByMemberID(ByVal vintMemberID As Integer) As DataSet
         Dim sql As String
@@ -378,7 +489,46 @@ Public Class clsDataAccess
 
     End Function
 
+    Public Function InsertPositionByMemberID19(ByVal vstrFK_MemberID As Integer,
+                                             ByVal vintPosition As String,
+                                             ByVal strRef As String,
+                                             ByVal vstrAlt As String,
+                                             ByVal vstrFilter As String,
+                                             ByVal vstrMutation As String) As Integer
+        Dim sql As String
+        Dim rowsAffected As Integer
+        Try
 
+            sql = "  INSERT INTO tblMemberVariantHg19(FK_MemberID, Pos, Ref, Alt, Filter, Mutation) VALUES ("
+
+            sql = sql & vstrFK_MemberID
+            sql = sql & "," & Chr(34) & vintPosition & Chr(34)
+            sql = sql & "," & Chr(34) & strRef & Chr(34)
+            sql = sql & "," & Chr(34) & vstrAlt & Chr(34)
+            sql = sql & "," & Chr(34) & vstrFilter & Chr(34)
+            sql = sql & "," & Chr(34) & vstrMutation & Chr(34)
+            sql = sql & ")"
+
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            If conn.State = ConnectionState.Closed Then
+                dbCommandAccess.Connection = GetConnectionVariantDB()
+                dbCommandAccess.Connection.Open()
+                rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            Else
+                dbCommandAccess.Connection = conn
+                rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            End If
+            'dbCommandAccess.Connection.Close()
+
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
 
     Public Function InsertPositionByMemberID19(ByVal vstrFK_MemberID As Integer,
                                              ByVal vintPosition As Integer,
@@ -1038,6 +1188,34 @@ Public Class clsDataAccess
         End Try
     End Function
 
+    Public Function GetAllNodes() As DataSet
+        Dim sql As String
+
+        sql = "  SELECT * FROM  tblNode "
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
     Public Function GetNodeByID(NodeID As Integer) As DataSet
         Dim sql As String
 
@@ -1084,6 +1262,50 @@ Public Class clsDataAccess
         Catch ex As Exception
             MsgBox("Error:" & ex.Message)
             Return 0
+        End Try
+    End Function
+
+    Public Function GetFullAltCallHg19AtPositionHg38(MemberID As Integer, PosHg38 As String) As String
+        Dim sql As String
+
+        sql = "SELECT Alt FROM tblMemberVariantHg19 WHERE FK_MemberID=" & MemberID
+        sql = sql & " AND Pos=" & PosHg38
+
+        Dim FullAltCall As String
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            FullAltCall = dbCommandAccess.ExecuteScalar()
+            dbCommandAccess.Connection.Close()
+            Return FullAltCall
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return ""
+        End Try
+    End Function
+
+    Public Function GetFullAltCallHg38AtPositionHg38(MemberID As Integer, PosHg38 As String) As String
+        Dim sql As String
+
+        sql = "SELECT Alt FROM tblMemberVariantHg38 WHERE FK_MemberID=" & MemberID
+        sql = sql & " AND Pos=" & PosHg38
+
+        Dim FullAltCall As String
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            FullAltCall = dbCommandAccess.ExecuteScalar()
+            dbCommandAccess.Connection.Close()
+            Return FullAltCall
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return ""
         End Try
     End Function
 
@@ -1189,6 +1411,34 @@ Public Class clsDataAccess
         Catch ex As Exception
             MsgBox("Error:" & ex.Message)
             Return 0
+        End Try
+    End Function
+
+    Public Function GetMembersWithHG19Variants(PosHg19 As String, Ref As String, Alt As String) As DataSet
+        Dim sql As String
+
+        sql = "  SELECT * FROM  tblMemberVariantHg19 WHERE Pos = " & PosHg19
+        sql = sql & " AND Ref = " & Chr(34) & Ref & Chr(34)
+        sql = sql & " AND Alt = " & Chr(34) & Alt & Chr(34)
+
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
         End Try
     End Function
 
@@ -1476,6 +1726,280 @@ Public Class clsDataAccess
         Catch ex As Exception
             MsgBox("Error:" & ex.Message)
             Return 0
+        End Try
+    End Function
+
+    Public Function GetNodeByParentNodeID(ByVal vstrParentNodeID As String) As DataSet
+        Dim sql As String
+        sql = " SELECT * FROM tblNode WHERE ParentNodeID =" & Chr(34) & vstrParentNodeID & Chr(34)
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            Return dataSet
+            dbCommandAccess.Connection.Close()
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
+
+    Public Function ExistsNodeByParentNodeID(ByVal vstrParentNodeID As String) As DataSet
+        Dim sql As String
+
+        sql = " SELECT * FROM tblNode WHERE ParentNodeID =" & Chr(34) & vstrParentNodeID & Chr(34)
+
+        Try
+
+
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+            Return dataSet
+
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+
+    End Function
+
+    Public Function ExistsNodeByID(ByVal vstrParentNodeID As Integer) As DataSet
+        Dim sql As String
+
+        sql = " SELECT * FROM tblNode WHERE ID =" & vstrParentNodeID
+
+        Try
+
+
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+            Return dataSet
+
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+
+    End Function
+
+
+    Public Function GetChildrenMembersIDsByNodeName(ByVal vstrNodeName As String) As DataSet
+        Dim sql As String
+        sql = " SELECT ChildrenMembersIDs FROM tblNode WHERE NodeName =" & Chr(34) & vstrNodeName & Chr(34)
+
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+            Return dataSet
+
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+
+    End Function
+
+
+    Public Function GetMutationIDsByChildrenMembersID(ByVal vintChildrenMembersID As Integer) As DataSet
+        Dim sql As String
+        sql = " SELECT MutationsIDs FROM tblNode WHERE ChildrenMembersIDs =" & Chr(34) & vintChildrenMembersID & Chr(34)
+
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+            Return dataSet
+
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+
+    End Function
+
+
+    Public Function GetPositionIDsByMutationWhereClause(ByVal vstrMutationWhereClause As String) As DataSet
+        Dim sql As String
+        sql = " SELECT PositionID  FROM tblMutation WHERE ID IN (" & vstrMutationWhereClause & ")"
+
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+            Return dataSet
+
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+
+    End Function
+
+    Public Function GetMutationIDsInNode(ByVal vintNodesID As Integer) As DataSet
+        Dim sql As String
+        sql = " SELECT MutationsIDs FROM tblNode WHERE ID =" & vintNodesID
+
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+            Return dataSet
+
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
+    Public Function GetMutationIDsInNodeName(ByVal vstrNodeName As String) As DataSet
+        Dim sql As String
+        sql = " SELECT MutationsIDs FROM tblNode WHERE NodeName =" & Chr(34) & vstrNodeName & Chr(34)
+
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+            Return dataSet
+
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
+    Public Function GetMemberIDsBelowNode(ByVal vintNodesID As Integer) As DataSet
+        Dim sql As String
+        sql = " SELECT ChildrenMembersIDs FROM tblNode WHERE ID =" & vintNodesID
+
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+            Return dataSet
+
+
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
         End Try
     End Function
 End Class

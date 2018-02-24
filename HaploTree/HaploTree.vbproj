@@ -104,10 +104,34 @@
     <Compile Include="clsNode.vb" />
     <Compile Include="clsPosition.vb" />
     <Compile Include="DataConn.vb" />
+    <Compile Include="frmProgress.Designer.vb">
+      <DependentUpon>frmProgress.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmProgress.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSNPMember .Designer.vb">
+      <DependentUpon>frmSNPMember .vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSNPMember .vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmHaploTree.Designer.vb">
+      <DependentUpon>frmHaploTree.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmHaploTree.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmAddNode.Designer.vb">
       <DependentUpon>frmAddNode.vb</DependentUpon>
     </Compile>
     <Compile Include="frmAddNode.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAllMembersSNPs.designer.vb">
+      <DependentUpon>frmAllMembersSNPs.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmAllMembersSNPs.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmEditNode.Designer.vb">
@@ -193,9 +217,21 @@
     <Compile Include="TreeConstructor.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmProgress.resx">
+      <DependentUpon>frmProgress.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSNPMember .resx">
+      <DependentUpon>frmSNPMember .vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmHaploTree.resx">
+      <DependentUpon>frmHaploTree.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmAddNode.resx">
       <DependentUpon>frmAddNode.vb</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAllMembersSNPs.resx">
+      <DependentUpon>frmAllMembersSNPs.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmEditNode.resx">
       <DependentUpon>frmEditNode.vb</DependentUpon>

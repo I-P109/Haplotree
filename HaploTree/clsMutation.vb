@@ -39,6 +39,26 @@ Public Class Mutation
         End Set
     End Property
 
+    Public ReadOnly Property AllNames As String
+        Get
+            Return GetStringCommaDelimitedFromArray(p_Names)
+        End Get
+    End Property
+
+    Private Function GetStringCommaDelimitedFromArray(StringArray() As String) As String
+        Dim str As String
+        Dim i As Integer
+        str = ""
+        For i = 0 To StringArray.Count - 1
+            If i = 0 Then
+                str = StringArray(i)
+            Else
+                str = str & "," & StringArray(i)
+            End If
+        Next
+        Return str
+    End Function
+
     Public Property Name As String()
         Get
             Return p_Names
@@ -100,6 +120,7 @@ Public Class Mutation
         End Get
         Set(value As Boolean)
             p_IsIgnored = value
+            p_IsSavedToDB = False
         End Set
     End Property
 
@@ -109,8 +130,11 @@ Public Class Mutation
         End Get
         Set(value As String)
             p_CurrentParentNodeID = value
+            p_IsSavedToDB = False
         End Set
     End Property
+
+
 
     Public Sub New()
         p_ID = 0
