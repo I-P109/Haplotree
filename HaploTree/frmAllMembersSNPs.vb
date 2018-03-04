@@ -1,7 +1,11 @@
-﻿Public Class frmAllMembersSNPs
+﻿Imports HaploTree
+
+Public Class frmAllMembersSNPs
     Private cDataAccess As New clsDataAccess
     Private MembersList As Member()
     Private MutationList As Mutation()
+    Private p_MembList As Integer()
+    Private p_MutList As Integer()
     Private PositionList As Position() 'must have same order as MutList
     Private NodeNameList As String()
     'Private NodeIDList As Integer()
@@ -15,6 +19,7 @@
     Private OriginalViewSorter As IComparer
     Private Rowindex As Integer
     Private Colindex As Integer
+    Private PaintMini As Boolean = False
 
     Public Property SelectedNodeID As Integer
         Get
@@ -32,14 +37,18 @@
         Set(value As Boolean)
             p_MemberSelected = value
             If value = True Then
+                btnSelectMembers.Text = "Discard Members"
+                lblPassingPositions.Text = "0"
+                Me.btnFindPosition.Enabled = False
+                Me.btnPaint.Enabled = False
+                Me.txtFindPosition.Enabled = False
+                Me.txtFindPosition.Text = ""
+                If MutationSelected = True Then Me.FillTable()
                 ckbxMembers.Checked = True
             Else
                 ckbxMembers.Checked = False
-            End If
-            If MemberSelected = True And MutationSelected = True Then
-                'Me.btnFillTable.Enabled = True
-            Else
-                'Me.btnFillTable.Enabled = False
+                btnSelectMembers.Text = "Select Members"
+                MembersList = Nothing
             End If
         End Set
     End Property
@@ -52,13 +61,17 @@
             p_MutationSelected = value
             If value = True Then
                 ckbxMutations.Checked = True
+                btnSelectMutations.Text = "Discard Mutations"
+                lblPassingPositions.Text = "0"
+                Me.btnFindPosition.Enabled = False
+                Me.btnPaint.Enabled = False
+                Me.txtFindPosition.Enabled = False
+                Me.txtFindPosition.Text = ""
+                If MemberSelected = True Then Me.FillTable()
             Else
                 ckbxMutations.Checked = False
-            End If
-            If MemberSelected = True And MutationSelected = True Then
-                'Me.btnFillTable.Enabled = True
-            Else
-                'Me.btnFillTable.Enabled = False
+                btnSelectMutations.Text = "Select Mutations"
+                MutationList = Nothing
             End If
         End Set
     End Property
@@ -69,6 +82,24 @@
         End Get
         Set(value As String)
             p_SelectedNodeName = value
+        End Set
+    End Property
+
+    Public Property MembList As Integer()
+        Get
+            Return p_MembList
+        End Get
+        Set(value As Integer())
+            p_MembList = value
+        End Set
+    End Property
+
+    Public Property MutList As Integer()
+        Get
+            Return p_MutList
+        End Get
+        Set(value As Integer())
+            p_MutList = value
         End Set
     End Property
 
@@ -83,7 +114,8 @@
         'add columns
         Me.lvwSNPs.Columns.Add("Node Name", 100, HorizontalAlignment.Left)
         Me.lvwSNPs.Columns.Add("Mutation Name", 100, HorizontalAlignment.Left)
-        Me.lvwSNPs.Columns.Add("Position", 80, HorizontalAlignment.Left)
+        Me.lvwSNPs.Columns.Add("HG38", 80, HorizontalAlignment.Left)
+        Me.lvwSNPs.Columns.Add("HG19", 80, HorizontalAlignment.Left)
         Me.lvwSNPs.Columns.Add("Ref", 40, HorizontalAlignment.Left)
         Me.lvwSNPs.Columns.Add("Alt", 40, HorizontalAlignment.Left)
 
@@ -105,7 +137,11 @@
 
         'fill table
         FillListViewWithBigYHg19()
-        PaintCells()
+        If PaintMini = False Then
+            PaintCells()
+        Else
+            PaintFewerCells()
+        End If
     End Sub
 
     Public Sub PopulateAllSNPForm()
@@ -115,7 +151,8 @@
         'add columns
         Me.lvwSNPs.Columns.Add("Node Name", 100, HorizontalAlignment.Left)
         Me.lvwSNPs.Columns.Add("Name", 100, HorizontalAlignment.Left)
-        Me.lvwSNPs.Columns.Add("Position", 80, HorizontalAlignment.Left)
+        Me.lvwSNPs.Columns.Add("HG38", 80, HorizontalAlignment.Left)
+        Me.lvwSNPs.Columns.Add("HG19", 80, HorizontalAlignment.Left)
         Me.lvwSNPs.Columns.Add("Ref", 40, HorizontalAlignment.Left)
         Me.lvwSNPs.Columns.Add("Alt", 40, HorizontalAlignment.Left)
 
@@ -137,7 +174,11 @@
 
         'fill table
         FillListView()
-        PaintCells()
+        If PaintMini = False Then
+            PaintCells()
+        Else
+            PaintFewerCells()
+        End If
     End Sub
 
     Public Sub FillListViewWithBigYHg19()
@@ -163,8 +204,9 @@
                         itmListItem = New ListViewItem()
                         itmListItem.Text = "No Node" 'item 0
                         itmListItem.Text = BigYHg19ds.Tables(0).Rows(i).Item("SNPName") 'item 1
-                        itmListItem.SubItems.Add(BigYHg19ds.Tables(0).Rows(i).Item("PosHg19")) 'item 2
-                        itmListItem.SubItems.Add(BigYHg19ds.Tables(0).Rows(i).Item("Reference")) 'item 3
+                        itmListItem.SubItems.Add(GetHg38FromHg19(BigYHg19ds.Tables(0).Rows(i).Item("PosHg19"))) 'item 2
+                        itmListItem.SubItems.Add(BigYHg19ds.Tables(0).Rows(i).Item("PosHg19")) 'item 3
+                        itmListItem.SubItems.Add(BigYHg19ds.Tables(0).Rows(i).Item("Reference")) 'item 4
                         itmListItem.SubItems.Add("")
 
                         For Cntr = 0 To NbMembers - 1
@@ -222,9 +264,11 @@
                 Dim str(NbMut - 1, NbMembers - 1) As String
                 For i = 0 To NbMut - 1
                     itmListItem = New ListViewItem()
+                    itmListItem.Tag = MutationList(i).ID
                     itmListItem.Text = NodeNameList(i)
                     itmListItem.SubItems.Add(MutationList(i).AllNames)
                     itmListItem.SubItems.Add(PositionList(i).PosHg38)
+                    itmListItem.SubItems.Add(PositionList(i).PosHg19)
                     itmListItem.SubItems.Add(PositionList(i).AncestrallCall)
                     itmListItem.SubItems.Add(MutationList(i).AltCall)
 
@@ -237,9 +281,13 @@
                                 str(i, Cntr) = AltCall
                             Case Else
                                 'check for putative mutation
+                                If MembersList(Cntr).HasPutativeMutation(MutationList(i).ID) = True Then
+                                    str(i, Cntr) = "p" & MutationList(i).AltCall
+                                Else
+                                    str(i, Cntr) = AltCall
+                                End If
 
                         End Select
-
                         itmListItem.SubItems.Add(str(i, Cntr))
                     Next
 
@@ -254,10 +302,11 @@
         End Try
     End Sub
 
-    Public Sub PaintCells()
+    Public Sub PaintFewerCells()
         Dim item As ListViewItem
         Dim NbMembers As Integer
-        Dim Cntr As Integer
+        Dim Cntr, i As Integer
+        Dim myIgnoreFont As New System.Drawing.Font(FontFamily.GenericSansSerif, 10, FontStyle.Strikeout)
 
         If Not IsNothing(MembersList) Then
             NbMembers = MembersList.Count
@@ -266,33 +315,166 @@
         End If
 
         For Each item In lvwSNPs.Items
+            If item.SubItems(0).Text = "Ignored" Then
+                For i = 0 To lvwSNPs.Columns.Count - 1
+                    item.SubItems(i).Font = myIgnoreFont
+                Next
+            End If
 
             For Cntr = 0 To NbMembers + 1 '+1 and not -1 to include the ref and the mutation alt call columns: 2 additional columns
-                Select Case item.SubItems(3 + Cntr).Text
-                    Case "T"
-                        item.UseItemStyleForSubItems = False
-                        item.SubItems(3 + Cntr).BackColor = Color.Red
-                        item.SubItems(3 + Cntr).ForeColor = Color.White
-                    Case "A"
-                        item.UseItemStyleForSubItems = False
-                        item.SubItems(3 + Cntr).BackColor = Color.Green
-                        item.SubItems(3 + Cntr).ForeColor = Color.White
-                    Case "G"
-                        item.UseItemStyleForSubItems = False
-                        item.SubItems(3 + Cntr).BackColor = Color.Orange
-                        item.SubItems(3 + Cntr).ForeColor = Color.White
-                    Case "C"
-                        item.UseItemStyleForSubItems = False
-                        item.SubItems(3 + Cntr).BackColor = Color.DarkBlue
-                        item.SubItems(3 + Cntr).ForeColor = Color.White
+                item.UseItemStyleForSubItems = False
+
+                Select Case item.SubItems(4 + Cntr).Text
+                    Case "T", "pT"
+                        item.SubItems(4 + Cntr).BackColor = Color.Red
+                    Case "A", "pA"
+                        item.SubItems(4 + Cntr).BackColor = Color.Green
+                    Case "G", "pG"
+                        item.SubItems(4 + Cntr).BackColor = Color.Orange
+                    Case "C", "pC"
+                        item.SubItems(4 + Cntr).BackColor = Color.DarkBlue
                     Case Else
-                        item.UseItemStyleForSubItems = False
-                        item.SubItems(3 + Cntr).BackColor = Color.LightBlue
-                        item.SubItems(3 + Cntr).ForeColor = Color.White
+                        item.SubItems(4 + Cntr).BackColor = Color.LightBlue
+
+                End Select
+
+                Select Case Strings.Left(item.SubItems(4 + Cntr).Text, 1) = "p"
+                    Case True
+                        item.SubItems(4 + Cntr).ForeColor = Color.Gray
+                    Case Else
+                        item.SubItems(4 + Cntr).ForeColor = Color.White
+
+                End Select
+                If Cntr > 1 Then
+                    Select Case item.SubItems(4 + Cntr).Text
+                        Case item.SubItems(4).Text
+                            item.SubItems(4 + Cntr).BackColor = Color.LightBlue
+                            item.SubItems(4 + Cntr).ForeColor = Color.Black
+                    End Select
+                End If
+            Next
+        Next
+    End Sub
+
+    Sub PaintFewCell(i As Integer, j As Integer)
+        Dim myIgnoreFont As New System.Drawing.Font(FontFamily.GenericSansSerif, 10, FontStyle.Strikeout)
+        If lvwSNPs.Items(i).SubItems(0).Text = "Ignored" Then
+            lvwSNPs.Items(i).SubItems(j).Font = myIgnoreFont
+        End If
+
+        Select Case lvwSNPs.Items(i).SubItems(j).Text
+            Case "T", "pT"
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.Red
+            Case "A", "pA"
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.Green
+            Case "G", "pG"
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.Orange
+            Case "C", "pC"
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.DarkBlue
+            Case Else
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.LightBlue
+
+        End Select
+
+        Select Case Strings.Left(lvwSNPs.Items(i).SubItems(j).Text, 1) = "p"
+            Case True
+                lvwSNPs.Items(i).SubItems(j).ForeColor = Color.Gray
+            Case Else
+                lvwSNPs.Items(i).SubItems(j).ForeColor = Color.White
+
+        End Select
+
+        Select Case lvwSNPs.Items(i).SubItems(j).Text
+            Case lvwSNPs.Items(i).SubItems(4).Text
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.LightBlue
+                lvwSNPs.Items(i).SubItems(j).ForeColor = Color.Black
+        End Select
+    End Sub
+
+
+    Public Sub PaintCells()
+        Dim item As ListViewItem
+        Dim NbMembers As Integer
+        Dim Cntr, i As Integer
+        Dim myIgnoreFont As New System.Drawing.Font(FontFamily.GenericSansSerif, 10, FontStyle.Strikeout)
+
+        If Not IsNothing(MembersList) Then
+            NbMembers = MembersList.Count
+        Else
+            NbMembers = 0
+        End If
+
+        For Each item In lvwSNPs.Items
+            If item.SubItems(0).Text = "Ignored" Then
+                For i = 0 To lvwSNPs.Columns.Count - 1
+                    item.SubItems(i).Font = myIgnoreFont
+                Next
+            End If
+            For Cntr = 0 To NbMembers + 1 '+1 and not -1 to include the ref and the mutation alt call columns: 2 additional columns
+                item.UseItemStyleForSubItems = False
+
+                Select Case item.SubItems(4 + Cntr).Text
+                    Case "T", "pT"
+                        item.SubItems(4 + Cntr).BackColor = Color.Red
+                    Case "A", "pA"
+                        item.SubItems(4 + Cntr).BackColor = Color.Green
+                    Case "G", "pG"
+                        item.SubItems(4 + Cntr).BackColor = Color.Orange
+                    Case "C", "pC"
+                        item.SubItems(4 + Cntr).BackColor = Color.DarkBlue
+                    Case Else
+                        item.SubItems(4 + Cntr).BackColor = Color.LightBlue
+
+                End Select
+
+                Select Case Strings.Left(item.SubItems(4 + Cntr).Text, 1) = "p"
+                    Case True
+                        item.SubItems(4 + Cntr).ForeColor = Color.Gray
+                    Case Else
+                        item.SubItems(4 + Cntr).ForeColor = Color.White
+
                 End Select
             Next
         Next
 
+    End Sub
+
+    Sub PaintCell(i As Integer, j As Integer)
+        Dim myIgnoreFont As New System.Drawing.Font(FontFamily.GenericSansSerif, 10, FontStyle.Strikeout)
+        If lvwSNPs.Items(i).SubItems(0).Text = "Ignored" Then
+            lvwSNPs.Items(i).SubItems(j).Font = myIgnoreFont
+        End If
+
+        Select Case lvwSNPs.Items(i).SubItems(j).Text
+            Case "T", "pT"
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.Red
+            Case "A", "pA"
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.Green
+            Case "G", "pG"
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.Orange
+            Case "C", "pC"
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.DarkBlue
+            Case Else
+                lvwSNPs.Items(i).SubItems(j).BackColor = Color.LightBlue
+
+        End Select
+
+        Select Case Strings.Left(lvwSNPs.Items(i).SubItems(j).Text, 1) = "p"
+            Case True
+                lvwSNPs.Items(i).SubItems(j).ForeColor = Color.Gray
+            Case Else
+                lvwSNPs.Items(i).SubItems(j).ForeColor = Color.White
+
+        End Select
+    End Sub
+
+    Sub PaintCurrentCell()
+        'PaintCell(Rowindex, Colindex)
+        If PaintMini = False Then
+            PaintCell(Rowindex, Colindex)
+        Else
+            PaintFewCell(Rowindex, Colindex)
+        End If
     End Sub
 
     Private Sub lvwSNPs_ColumnClick(sender As Object, e As ColumnClickEventArgs) Handles lvwSNPs.ColumnClick
@@ -403,16 +585,21 @@
 
 
         For Each item In lvwSNPs.Items
-            For Cntr = 0 To NbMembers + 4 '+4 to include the node name, the mutation name, the position, the ref and the mutation alt call columns: 5 additional columns
+            For Cntr = 0 To NbMembers + 5 '+5 to include the node name, the mutation name, the position hg38, the pos hg19, the ref and the mutation alt call columns: 5 additional columns
                 item.SubItems(Cntr).BackColor = Color.White
             Next
         Next
 
-        Call PaintCells()
+        If PaintMini = False Then
+            PaintCells()
+        Else
+            PaintFewerCells()
+        End If
 
         For Each item In lvwSNPs.Items
-            If item.SubItems(1).Text = Me.txtFindPosition.Text Then
-                For Cntr = 0 To NbMembers + 4 '+4 to include the node name, the mutation name, the position, the ref and the mutation alt call columns: 5 additional columns
+            If item.SubItems(1).Text.Contains(Me.txtFindPosition.Text) = True Or item.SubItems(2).Text.Contains(Me.txtFindPosition.Text) = True Or item.SubItems(3).Text.Contains(Me.txtFindPosition.Text) = True Then
+
+                For Cntr = 0 To NbMembers + 5 '+5 to include the node name, the mutation name, the position hg38, the pos hg19, the ref and the mutation alt call columns: 5 additional columns
                     item.SubItems(Cntr).BackColor = Color.Red
                 Next
                 item.ForeColor = Color.Blue
@@ -427,6 +614,7 @@
         Me.btnSelectMutations.Enabled = True
         Me.txtFindPosition.Enabled = False
         Me.btnFindPosition.Enabled = False
+        Me.btnPaint.Enabled = False
         Me.txtFindPosition.Text = ""
         Me.MembersList = Nothing
         Me.MutationList = Nothing
@@ -440,56 +628,54 @@
         'Me.mnuMoveToAbove.Enabled = False
         Me.MoveAboveItem = -1
         Me.lvwSNPs.LabelEdit = False
+        Me.lvwSNPs.Name = "Loaded " & DateTime.Now.ToString() '"yyyy/MM/dd HH:mm:ss"
     End Sub
 
     Private Sub btnSelectMembers_Click(sender As Object, e As EventArgs) Handles btnSelectMembers.Click
         If Me.MemberSelected = False Then
-            MemberSelected = SelectMembers()
-            If MemberSelected = True Then
-                btnSelectMembers.Text = "Discard Members"
-                lblPassingPositions.Text = "0"
-                Me.btnFindPosition.Enabled = False
-                Me.txtFindPosition.Enabled = False
-                Me.txtFindPosition.Text = ""
-                If MutationSelected = True Then Me.FillTable()
-                'btnLoadAllBigYHg19.Enabled = True 'to be activated if we solve the issue with this table!
-            End If
+            SelectMembers()
         Else
             MemberSelected = False
-            btnSelectMembers.Text = "Select Members"
-            MembersList = Nothing
         End If
 
     End Sub
 
-    Private Function SelectMembers() As Boolean
+    Private Sub SelectMembers()
 
-        Dim MembList As Integer()
+        Dim frmSelectMemb As New frmSelectMemberMutation
+
+        frmSelectMemberMutation.MyParentForm = Me
+        frmSelectMemberMutation.MdiParent = Me.MdiParent
+        frmSelectMemberMutation.SelectMember = True
+        frmSelectMemberMutation.Show()
+    End Sub
+
+    Public Function LoadMembers() As Boolean
         Dim PrgFrm As New frmProgress
         Dim i As Integer
 
         lvwSNPs.Clear()
-        MembList = {1, 3, 2, 125}
+        'MembList = {1, 3, 2, 125}
         'MembList = {3, 7, 10, 21, 45, 55, 65, 76, 87, 98, 100, 110, 119, 125, 135, 145, 155, 165, 176} 'we need to find a way to select members
 
         MembersList = Nothing
 
-        If IsNothing(MembList) Then
+        If IsNothing(p_MembList) Then
             MsgBox("No mutation available!")
             Return False
         End If
-        ReDim MembersList(MembList.Count - 1)
+        ReDim MembersList(p_MembList.Count - 1)
 
         PrgFrm.InitiateMe()
         PrgFrm.Show()
         PrgFrm.UpdateMe("Loading members", 0)
         PrgFrm.Visible = True
 
-        For i = 0 To MembList.Count - 1
+        For i = 0 To p_MembList.Count - 1
             Dim Memb As New Member
-            Memb.LoadWithID(MembList(i))
+            Memb.LoadWithID(p_MembList(i))
             MembersList(i) = Memb
-            PrgFrm.UpdateMe("Loading members ...", 100 * ((i + 1) / MembList.Count))
+            PrgFrm.UpdateMe("Loading members ...", 100 * ((i + 1) / p_MembList.Count))
         Next
         PrgFrm.Visible = False
         Return True
@@ -500,6 +686,7 @@
         Call PopulateAllSNPForm()
 
         Me.btnFindPosition.Enabled = True
+        Me.btnPaint.Enabled = True
         'Me.btnFillTable.Enabled = False
         Me.txtFindPosition.Enabled = True
         Me.txtFindPosition.Text = ""
@@ -516,39 +703,42 @@
 
     Private Sub btnSelectMutations_Click(sender As Object, e As EventArgs) Handles btnSelectMutations.Click
         If Me.MutationSelected = False Then
-            MutationSelected = SelectMutations()
-            If MutationSelected = True Then
-                btnSelectMutations.Text = "Discard Mutations"
-                lblPassingPositions.Text = "0"
-                Me.btnFindPosition.Enabled = False
-                Me.txtFindPosition.Enabled = False
-                Me.txtFindPosition.Text = ""
-                If MemberSelected = True Then Me.FillTable()
-            End If
+            SelectMutations()
         Else
             MutationSelected = False
-            btnSelectMutations.Text = "Select Mutations"
-            MutationList = Nothing
         End If
     End Sub
 
-    Private Function SelectMutations() As Boolean
-        Dim MutList As Integer()
+    Private Sub SelectMutations()
+
+        Dim frmSelectMemb As New frmSelectMemberMutation
+
+        frmSelectMemberMutation.MyParentForm = Me
+        frmSelectMemberMutation.MdiParent = Me.MdiParent
+        frmSelectMemberMutation.SelectMember = False
+        frmSelectMemberMutation.Show()
+
+    End Sub
+
+    Public Function LoadMutations() As Boolean
         Dim PrgFrm As New frmProgress
 
         lvwSNPs.Clear()
         'MutList = GetAllMutationsIDs()
 
-        MutList = {3, 30, 300, 900, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300, 3600}
+        'MutList = {3, 30, 300, 900, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300, 3600}
+        MutationList = Nothing
+        PositionList = Nothing
+        NodeNameList = Nothing
 
-        If IsNothing(MutList) Then
+        If IsNothing(p_MutList) Then
             MsgBox("No mutation available!")
             Return False
         End If
 
-        ReDim MutationList(MutList.Count - 1)
-        ReDim PositionList(MutList.Count - 1)
-        ReDim NodeNameList(MutList.Count - 1)
+        ReDim MutationList(p_MutList.Count - 1)
+        ReDim PositionList(p_MutList.Count - 1)
+        ReDim NodeNameList(p_MutList.Count - 1)
 
 
         PrgFrm.InitiateMe()
@@ -556,22 +746,31 @@
         PrgFrm.UpdateMe("Loading mutations", 0)
         PrgFrm.Visible = True
 
-        For i = 0 To MutList.Count - 1
+        For i = 0 To p_MutList.Count - 1
             Dim Mut As New Mutation
             Dim Pos As New Position
 
-            Mut.Load(MutList(i))
+            'If p_MutList(i) <> 0 Then
+            Mut.Load(p_MutList(i))
+
             Pos.LoadWithID(Mut.PositionID)
+
             If Not Mut.CurrentParentNodeID = "" Then
                 Dim Nod As New Node
                 Nod.LoadWithID(Mut.CurrentParentNodeID)
                 NodeNameList(i) = Nod.Name
             Else
-                NodeNameList(i) = "No Node"
+                If Mut.IsIgnored = True Then
+                    NodeNameList(i) = "Ignored"
+                Else
+                    NodeNameList(i) = "No Node"
+                End If
             End If
+
             MutationList(i) = Mut
             PositionList(i) = Pos
-            PrgFrm.UpdateMe("Loading mutations ...", 100 * ((i + 1) / MutList.Count))
+            PrgFrm.UpdateMe("Loading mutations ...", 100 * ((i + 1) / p_MutList.Count))
+            'End If
         Next
         PrgFrm.Visible = False
         Return True
@@ -634,20 +833,74 @@
         With CType(sender, ListView)
             If e.Data.GetDataPresent("System.Windows.Forms.ListViewItem()") Then
                 Dim drgItm As ListViewItem
-                Dim draggedItem() As ListViewItem
+                Dim draggedItems() As ListViewItem
+                Dim SourceListView As ListView
+                Dim i As Integer
 
-                draggedItem = e.Data.GetData("System.Windows.Forms.ListViewItem()")
-                For Each drgItm In draggedItem
-                    drgItm.ListView.Items.Remove(drgItm)
-                    If indexOfItemUnderMouseToDrop < 0 Then
-                        .Items.Add(drgItm) 'should we test if exist already in the mutationlist and add it if not
-                    Else
-                        .Items.Insert(indexOfItemUnderMouseToDrop, drgItm) 'should we test if exist already in the mutationlist and add it if not
-                    End If
-                Next
+                draggedItems = e.Data.GetData("System.Windows.Forms.ListViewItem()")
+                SourceListView = draggedItems(0).ListView
+                If SourceListView.Columns.Count = lvwSNPs.Columns.Count Then 'we need to check if same columns in the 2 listsviews first!!
+                    For i = 0 To SourceListView.Columns.Count - 1
+                        If Not SourceListView.Columns(i).Text = lvwSNPs.Columns(i).Text Then
+                            MsgBox("Can not drag and drop between lists with different columns!")
+                            Exit Sub
+                        End If
+                    Next
+
+                    For Each drgItm In draggedItems
+                        Dim IndX As Integer = ItemExistsInList(drgItm)
+                        If IndX = -1 Then 'if item doesn't exists already - it means it comes from a different listview
+                            SourceListView.Items.Remove(drgItm)
+                            If indexOfItemUnderMouseToDrop < 0 Then
+                                lvwSNPs.Items.Add(drgItm)
+                            Else
+                                lvwSNPs.Items.Insert(indexOfItemUnderMouseToDrop, drgItm)
+                            End If
+                        Else 'this item exists already
+                            If Not SourceListView.Name = lvwSNPs.Name Then ' Not the same - ask before inserting
+                                Dim msg As String
+                                Dim title As String
+                                Dim style As MsgBoxStyle
+                                Dim response As MsgBoxResult
+
+                                msg = "The mutation exists already in the list, do you want to change its place in the list it or Cancel?"   ' Define message.
+                                style = MsgBoxStyle.OkCancel
+                                title = "Change Place?"   ' Define title.
+
+                                ' Display message.
+                                response = MsgBox(msg, style, title)
+                                If response = MsgBoxResult.Ok Then   ' User chose Yes.
+                                    SourceListView.Items.Remove(drgItm) 'remove from where it was
+                                    lvwSNPs.Items.Remove(drgItm) 'remove from its possition in current list
+                                    lvwSNPs.Items.Insert(indexOfItemUnderMouseToDrop, drgItm) 'add it where the user wants it
+                                End If
+                            Else 'same list view - remove and insert without asking
+                                SourceListView.Items.Remove(drgItm)
+                                lvwSNPs.Items.Insert(indexOfItemUnderMouseToDrop, drgItm)
+                            End If
+
+                        End If
+                    Next
+                Else
+                    MsgBox("Can not drag and drop between lists with different number of columns!")
+                End If
             End If
         End With
     End Sub
+
+    Private Function ItemExistsInList(SearchedItem As ListViewItem) As String 'retunr index if exists, -1 if not. Checking on tags should work as it is unique to each mutation
+        Dim Ind As String
+        Dim itm As ListViewItem
+
+        Ind = -1
+        For Each itm In lvwSNPs.Items
+            If itm.Tag = SearchedItem.Tag Then
+                Ind = itm.Index
+                Exit For
+            End If
+        Next
+        Return Ind
+    End Function
 
     Private Sub mnuCutFrom_Click(sender As Object, e As EventArgs)
         Dim i As Integer
@@ -996,7 +1249,11 @@
                                     Nod.LoadWithID(Mut.CurrentParentNodeID)
                                     NodeNameList(j) = Nod.Name
                                 Else
-                                    NodeNameList(j) = "No Node"
+                                    If Mut.IsIgnored = True Then
+                                        NodeNameList(j) = "Ignored"
+                                    Else
+                                        NodeNameList(j) = "No Node"
+                                    End If
                                 End If
 
                                 'If IsNothing(NdIDList(i)) = True Then
@@ -1077,6 +1334,8 @@
         Dim NbMembers As Integer
         Dim Cntr As Integer
         Dim Ind As Integer
+        Dim PrgFrm As New frmProgress
+        Dim i As Integer
 
         If Not IsNothing(MembersList) Then
             NbMembers = MembersList.Count
@@ -1084,19 +1343,26 @@
             NbMembers = 0
         End If
 
+        PrgFrm.InitiateMe()
+        PrgFrm.Show()
+        PrgFrm.UpdateMe("Saving changes ...", 0)
+        PrgFrm.Visible = True
+        i = 0
+
         For Each item In lvwSNPs.Items
             Dim NdId As Integer
-            For Cntr = 5 To NbMembers + 1 '+1 and not -1 to include the ref and the mutation alt call columns: 2 additional columns
+            For Cntr = 0 To NbMembers - 1
                 Dim Str As String
 
-                Str = item.SubItems(Cntr).Text
+                Str = item.SubItems(Cntr + 6).Text 'starts from the 6th subitem
                 If Strings.Left(Str, 1) = "p" Then
                     'add that mutation to the member as putative mutation if not already there!
                     'get ID of the member - use Cntr as index of the column from MembersList
                     Ind = GetMutIndex(item.SubItems(1).Text)
-                    If MembersList(Cntr - 5).HasPutativeMutation(MutationList(Ind).ID) = False Then
-                        MembersList(Cntr - 5).AppendPutativeMutationsID(MutationList(Ind).ID)
-                        MembersList(Cntr - 5).AppendMutationsID(MutationList(Ind).ID)
+                    If MembersList(Cntr).HasPutativeMutation(MutationList(Ind).ID) = False Then
+                        MembersList(Cntr).AppendPutativeMutationsID(MutationList(Ind).ID)
+                        MembersList(Cntr).AppendMutationsID(MutationList(Ind).ID)
+                        MembersList(Cntr).SavetoDB()
                     Else
                         'do nothing
                     End If
@@ -1104,16 +1370,17 @@
                     'remove that mutation from the mutation list and putativemutation list and get value back from variant
                     'get ID of the member - use Cntr as index of the column from MembersList
                     Ind = GetMutIndex(item.SubItems(1).Text)
-                    If MembersList(Cntr - 5).HasPutativeMutation(MutationList(Ind).ID) = True Then
-                        MembersList(Cntr - 5).AppendPutativeMutationsID(MutationList(Ind).ID)
-                        MembersList(Cntr - 5).AppendMutationsID(MutationList(Ind).ID)
+                    If MembersList(Cntr).HasPutativeMutation(MutationList(Ind).ID) = True Then
+                        MembersList(Cntr).RemovePutativeMutationID(MutationList(Ind).ID)
+                        MembersList(Cntr).RemoveMutationID(MutationList(Ind).ID)
+                        MembersList(Cntr).SavetoDB()
                     Else
                         'do nothing
                     End If
                 End If
             Next
 
-            If Not item.SubItems(0).Text = "No Node" Then
+            If Not item.SubItems(0).Text = "No Node" And Not item.SubItems(0).Text = "Ignored" Then
                 Ind = GetMutIndex(item.SubItems(1).Text)
                 If Not Ind = -1 Then
                     NdId = GetNodeIDfromName(item.SubItems(0).Text)
@@ -1149,7 +1416,10 @@
                     End If
                 End If
             End If
+            i = i + 1
+            PrgFrm.UpdateMe("Saving changes ... item ", i, lvwSNPs.Items.Count)
         Next
+        PrgFrm.Visible = False
     End Sub
 
     Private Function GetNodeIDfromName(NodName As String) As Integer
@@ -1192,9 +1462,11 @@
         If lvwSNPs.LabelEdit = True Then
             lvwSNPs.LabelEdit = False
             btnAllowEdit.Text = "Allow Node Name Edit"
+            btnSaveChanges.Enabled = False
         Else
             lvwSNPs.LabelEdit = True
             btnAllowEdit.Text = "Prevent Node Name Edit"
+            btnSaveChanges.Enabled = True
         End If
     End Sub
 
@@ -1202,10 +1474,11 @@
 
         If lvwSNPs.Items.Count > 0 Then
             If Rowindex > -1 And Rowindex < lvwSNPs.Items.Count Then
-                If Colindex > 4 And Colindex < lvwSNPs.Columns.Count Then
+                If Colindex > 5 And Colindex < lvwSNPs.Columns.Count Then
                     If lvwSNPs.Items(Rowindex).SubItems(Colindex).Text = "" Then
-                        lvwSNPs.Items(Rowindex).SubItems(Colindex).Text = "p" & lvwSNPs.Items(Rowindex).SubItems(4).Text
+                        lvwSNPs.Items(Rowindex).SubItems(Colindex).Text = "p" & lvwSNPs.Items(Rowindex).SubItems(5).Text
                         btnSaveChanges.Enabled = True
+                        PaintCurrentCell()
                     End If
                 End If
             End If
@@ -1250,6 +1523,7 @@
                     If Strings.Left(Str, 1) = "p" Then
                         lvwSNPs.Items(Rowindex).SubItems(Colindex).Text = "UndoP"
                         btnSaveChanges.Enabled = True
+                        PaintCurrentCell()
                     End If
                 End If
             End If
@@ -1266,7 +1540,7 @@
                     Str = lvwSNPs.Items(Rowindex).SubItems(Colindex).Text
                     NewName = InputBox("Enter new Mutation name", "New Mutation Name", Str)
                     If NewName = Str Then
-                        MsgBox("no new name!")
+                        'MsgBox("no new name!")
                     ElseIf NewName = "" Then
 
                     Else
@@ -1288,30 +1562,150 @@
                     Dim NdName As String
                     Dim NewName As String
                     NdName = lvwSNPs.Items(Rowindex).SubItems(Colindex).Text
-                    If Not NdName = "No Node" Then
+                    If Not NdName = "Ignored" Then
                         NewName = InputBox("Enter new Node name", "New Node Name", NdName)
                         If NewName = NdName Then
-                            MsgBox("no new name!")
+                            'MsgBox("no new name!")
                         ElseIf NewName = "" Then
 
                         Else
-                            Dim Nd As New Node
-                            Dim i As Integer
-                            Nd.LoadWithName(NdName)
-                            Nd.Name = NewName
-                            Nd.SavetoDB()
-                            lvwSNPs.Items(Rowindex).SubItems(Colindex).Text = NewName
-                            For i = 0 To lvwSNPs.Items.Count - 1
-                                If lvwSNPs.Items(i).SubItems(Colindex).Text = NdName Then lvwSNPs.Items(i).SubItems(Colindex).Text = NewName
-                            Next
+                            If Not NewName = "No Node" And Not NewName = "Ignored" Then
+                                Dim Nd As New Node
+                                Dim i As Integer
+                                Nd.LoadWithName(NdName)
+                                Nd.Name = NewName
+                                Nd.SavetoDB()
+                                lvwSNPs.Items(Rowindex).SubItems(Colindex).Text = NewName
+                                For i = 0 To lvwSNPs.Items.Count - 1
+                                    If lvwSNPs.Items(i).SubItems(Colindex).Text = NdName Then lvwSNPs.Items(i).SubItems(Colindex).Text = NewName
+                                Next
+                            End If
                         End If
                     End If
                 End If
             End If
         End If
+    End Sub
 
+    Private Sub btnPaint_Click(sender As Object, e As EventArgs) Handles btnPaint.Click
+        If PaintMini = False Then
+            PaintMini = True
+            btnPaint.Text = "Paint Maximum"
+            PaintFewerCells()
+        Else
+            PaintMini = False
+            btnPaint.Text = "Paint Minimum"
+            PaintCells()
+        End If
+    End Sub
 
+    Private Sub mnuIgnoreMutation_Click(sender As Object, e As EventArgs) Handles mnuIgnoreMutation.Click
+        If lvwSNPs.Items.Count > 0 Then
+            If Rowindex > -1 And Rowindex < lvwSNPs.Items.Count Then
+                Dim myIgnoreFont As New System.Drawing.Font(FontFamily.GenericSansSerif, 10, FontStyle.Strikeout)
+                Dim MutName As String
+                Dim NdName As String
+                Dim i As Integer
+                Dim Inde As Integer
 
+                NdName = lvwSNPs.Items(Rowindex).SubItems(0).Text
+                If Not NdName = "Ignored" Then
+                    MutName = lvwSNPs.Items(Rowindex).SubItems(1).Text
+                    Inde = GetMutIndex(MutName)
+                    MutationList(Inde).IsIgnored = True
+                    MutationList(Inde).CurrentParentNodeID = ""
+                    MutationList(Inde).SavetoDB()
 
+                    If Not NdName = "No Node" Then
+                        Dim Nd As New Node
+                        Nd.LoadWithName(NdName)
+                        Nd.RemoveMutationID(MutationList(Inde).ID)
+                        Nd.SavetoDB()
+                    End If
+                    lvwSNPs.Items(Rowindex).SubItems(0).Text = "Ignored"
+                    For i = 0 To lvwSNPs.Columns.Count - 1
+                        lvwSNPs.Items(Rowindex).SubItems(i).Font = myIgnoreFont
+                    Next
+                End If
+            End If
+        End If
+    End Sub
+
+    Private Sub mnuUningnoreMutation_Click(sender As Object, e As EventArgs) Handles mnuUningnoreMutation.Click
+        If lvwSNPs.Items.Count > 0 Then
+            If Rowindex > -1 And Rowindex < lvwSNPs.Items.Count Then
+                Dim myRegularFont As New System.Drawing.Font(FontFamily.GenericSansSerif, 10, FontStyle.Regular)
+                Dim MutName As String
+                Dim NdName As String
+                Dim i As Integer
+                Dim Inde As Integer
+
+                NdName = lvwSNPs.Items(Rowindex).SubItems(0).Text
+                If NdName = "Ignored" Then
+                    MutName = lvwSNPs.Items(Rowindex).SubItems(1).Text
+                    Inde = GetMutIndex(MutName)
+                    MutationList(Inde).IsIgnored = False
+                    MutationList(Inde).SavetoDB()
+
+                    lvwSNPs.Items(Rowindex).SubItems(0).Text = "No Node"
+                    For i = 0 To lvwSNPs.Columns.Count - 1
+                        lvwSNPs.Items(Rowindex).SubItems(i).Font = myRegularFont
+                    Next
+                End If
+            End If
+        End If
+    End Sub
+
+    Private Sub mnuCopyHg19ToClipboard_Click(sender As Object, e As EventArgs) Handles mnuCopyHg19ToClipboard.Click
+
+        If lvwSNPs.SelectedItems.Count > 0 Then
+            Dim DataToCopy As String
+            Dim i As Integer
+
+            Clipboard.Clear()
+            DataToCopy = ""
+            For i = 0 To lvwSNPs.SelectedItems.Count - 1
+                DataToCopy = DataToCopy & lvwSNPs.SelectedItems(i).SubItems(3).Text & vbNewLine
+            Next
+            Clipboard.SetText(DataToCopy)
+        End If
+    End Sub
+
+    Private Sub mnuCopyHg38ToClipboard_Click(sender As Object, e As EventArgs) Handles mnuCopyHg38ToClipboard.Click
+        If lvwSNPs.SelectedItems.Count > 0 Then
+            Dim DataToCopy As String
+            Dim i As Integer
+
+            Clipboard.Clear()
+            DataToCopy = ""
+            For i = 0 To lvwSNPs.SelectedItems.Count - 1
+                DataToCopy = DataToCopy & lvwSNPs.SelectedItems(i).SubItems(2).Text & vbNewLine
+            Next
+            Clipboard.SetText(DataToCopy)
+        End If
+    End Sub
+
+    Private Sub mnuEditNodeNameForSelectedMutations_Click(sender As Object, e As EventArgs) Handles mnuEditNodeNameForSelectedMutations.Click
+        If lvwSNPs.SelectedItems.Count > 0 Then
+            Dim NdName As String
+            Dim NewName As String
+            NdName = lvwSNPs.SelectedItems(0).SubItems(0).Text
+            If Not NdName = "Ignored" Then
+                NewName = InputBox("Enter new Node name", "New Node Name", NdName)
+                If NewName = "" Then
+                    MsgBox("Can not change node name to empty string!")
+                    'do nothing
+                Else
+                    If Not NewName = "No Node" And Not NewName = "Ignored" Then
+                        For i = 0 To lvwSNPs.SelectedItems.Count - 1
+                            lvwSNPs.SelectedItems(i).SubItems(0).Text = NewName
+                        Next
+                    Else
+                        MsgBox("Can not change node name to 'No Node' or 'Ignored'!")
+                        'do nothing
+                    End If
+                End If
+            End If
+        End If
     End Sub
 End Class

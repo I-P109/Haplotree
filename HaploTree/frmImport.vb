@@ -9,6 +9,7 @@ Public Class frmImport
     Dim mstrFileName As String = ""
     Dim mintMemberID As Integer = 0
     Dim mProcess As Process
+    Dim SelectedMember As Member
 
 
     Private Sub btnBrowse_Click(sender As Object, e As EventArgs) Handles btnBrowse.Click
@@ -34,6 +35,10 @@ Public Class frmImport
         OpenFileDialog1.FileName = "variants"
 
         If OpenFileDialog1.ShowDialog() = System.Windows.Forms.DialogResult.OK Then
+
+            lvwHide.Visible = True
+            lvwImport.Visible = False
+
             lblPathAndFileName.Text = OpenFileDialog1.FileName
             'Set the filename
             mstrFileName = OpenFileDialog1.FileName
@@ -50,13 +55,9 @@ Public Class frmImport
                     Call LoadListviewHG38(mstrFileName)
             End Select
 
-
-
-
             lvwHide.Visible = False
             lvwImport.Visible = True
             MsgBox("Read Complete!", MsgBoxStyle.Information, "READ COMPLETE")
-
 
         End If
     End Sub
@@ -369,130 +370,61 @@ Public Class frmImport
 
     Private Sub btnSearch_Click(sender As Object, e As EventArgs) Handles btnSearch.Click
         Dim frmMembersSearch As New frmMembersSearch
+        Dim SearchedMember As New Member
         frmMembersSearch.ShowDialog()
 
         mintMemberID = frmMembersSearch.ID
+        SearchedMember.LoadWithID(mintMemberID)
+        SelectedMember = SearchedMember
         Call PopulateForm()
 
     End Sub
 
     Public Sub PopulateForm()
         Dim ds As DataSet
-        Dim dsVariantFile As DataSet
-        Dim dsPositions As New DataSet
+        Dim res As MsgBoxResult = MsgBoxResult.No
+
+        'First remove all records from the listview
+        Me.lvwImport.Clear()
 
         'First check to see if the person has a variant file loaded already;
-        dsVariantFile = cDataAccess.GetHg38VariantsByMemberID(mintMemberID)
-        If dsVariantFile.Tables(0).Rows.Count > 0 Then
-            MsgBox("This individual already has a variant file loaded!")
-            Exit Sub
+        If SelectedMember.HasVariant19 = True And SelectedMember.HasVariant38 = True Then
+            res = MsgBox("This individual already has Hg19 and Hg38 variant files loaded! Do you want to re-import file?", MsgBoxStyle.YesNo, "REIMPORT?")
+        ElseIf SelectedMember.HasVariant19 = True Then
+            res = MsgBox("This individual already has Hg19 variant file loaded! Do you want to import file?", MsgBoxStyle.YesNo, "IMPORT?")
+        ElseIf SelectedMember.HasVariant38 = True Then
+            res = MsgBox("This individual already has Hg38 variant file loaded! Do you want to import file?", MsgBoxStyle.YesNo, "IMPORT?")
         Else
-            dsVariantFile = cDataAccess.GetHg19VariantsByMemberID(mintMemberID)
-            If dsVariantFile.Tables(0).Rows.Count > 0 Then
-                MsgBox("This individual already has a variant file loaded!")
-                Exit Sub
-            End If
+            res = MsgBoxResult.Yes
         End If
 
+        If res = MsgBoxResult.Yes Then
+            ds = cDataAccess.GetMemberByID(mintMemberID)
+            If ds.Tables(0).Rows.Count > 0 Then
+                Me.lblID.Text = mintMemberID
 
+                If ds.Tables(0).Rows(0).IsNull("MemberName") = False Then
+                    Me.lblMemberName.Text = ds.Tables(0).Rows(0).Item("MemberName")
+                Else
+                    Me.lblMemberName.Text = ""
+                End If
 
-        ds = cDataAccess.GetMemberByID(mintMemberID)
-        If ds.Tables(0).Rows.Count > 0 Then
-            Me.lblID.Text = mintMemberID
+                If ds.Tables(0).Rows(0).IsNull("FTDNAID") = False Then
+                    Me.lblFTDNAID.Text = ds.Tables(0).Rows(0).Item("FTDNAID")
+                Else
+                    Me.lblFTDNAID.Text = ""
+                End If
 
-            If ds.Tables(0).Rows(0).IsNull("MemberName") = False Then
-                Me.lblMemberName.Text = ds.Tables(0).Rows(0).Item("MemberName")
-            Else
-                Me.lblMemberName.Text = ""
+                If ds.Tables(0).Rows(0).IsNull("YFullID") = False Then
+                    Me.lblYFullID.Text = ds.Tables(0).Rows(0).Item("YFullID")
+                Else
+                    Me.lblYFullID.Text = ""
+                End If
             End If
-
-            If ds.Tables(0).Rows(0).IsNull("FTDNAID") = False Then
-                Me.lblFTDNAID.Text = ds.Tables(0).Rows(0).Item("FTDNAID")
-            Else
-                Me.lblFTDNAID.Text = ""
-            End If
-
-            If ds.Tables(0).Rows(0).IsNull("YFullID") = False Then
-                Me.lblYFullID.Text = ds.Tables(0).Rows(0).Item("YFullID")
-            Else
-                Me.lblYFullID.Text = ""
-            End If
-
-            'First remove all records from the listview
-            Me.lvwImport.Clear()
-
-            'Now see if this person has records stored
-            dsPositions = cDataAccess.GetHg38VariantsByMemberID(mintMemberID)
-            If dsPositions.Tables(0).Rows.Count > 0 Then
-                ' Call FillListview(dsPositions)
-                MsgBox("This individual already has a record imported!")
-                Me.btnSave.Enabled = False
-                Me.btnBrowse.Enabled = False
-            Else
-                Me.btnBrowse.Enabled = True
-            End If
+            btnBrowse.Enabled = True
+        Else
+            btnBrowse.Enabled = False
         End If
-    End Sub
-
-
-    Public Sub FillListview(ByVal dsPositions As DataSet)
-        Dim i As Integer = 0
-        Dim itmListItem As ListViewItem
-        Dim shtCntr As Short
-        Try
-
-            If dsPositions.Tables(0).Rows.Count > 0 Then
-                'Do headers first
-                Me.lvwImport.Clear()
-
-                Me.lvwImport.Columns.Add("ID", 0, HorizontalAlignment.Left)
-                Me.lvwImport.Columns.Add("Position", 80, HorizontalAlignment.Left)
-                lvwImport.Columns.Add("Ref", 50, HorizontalAlignment.Left)
-                lvwImport.Columns.Add("Alt", 50, HorizontalAlignment.Left)
-                lvwImport.Columns.Add("Qual", 70, HorizontalAlignment.Left)
-                lvwImport.Columns.Add("Filter", 60, HorizontalAlignment.Left)
-                lvwImport.Columns.Add("Info", 140, HorizontalAlignment.Left)
-                lvwImport.Columns.Add("Format", 140, HorizontalAlignment.Left)
-                lvwImport.Columns.Add("Mutation", 140, HorizontalAlignment.Left)
-
-                For i = 0 To dsPositions.Tables(0).Rows.Count - 1
-                    itmListItem = New ListViewItem()
-                    itmListItem.Text = dsPositions.Tables(0).Rows(i).Item(0)
-
-                    For shtCntr = 1 To dsPositions.Tables(0).Columns.Count - 1
-                        Select Case dsPositions.Tables(0).Columns.Item(shtCntr).ColumnName()
-                            Case "ID" ', "MemberName"
-                                If dsPositions.Tables(0).Rows(i).Item(shtCntr) Is System.DBNull.Value = True Then
-                                    itmListItem.SubItems.Add("")
-                                Else
-                                    If dsPositions.Tables(0).Rows(i).IsNull(shtCntr) = False Then
-                                        itmListItem.SubItems.Add(dsPositions.Tables(0).Rows(i).Item(shtCntr))
-                                    Else
-                                        itmListItem.SubItems.Add("")
-                                    End If
-                                End If
-                            Case Else
-                                If dsPositions.Tables(0).Rows(i).IsNull(shtCntr) = False Then
-                                    itmListItem.SubItems.Add(dsPositions.Tables(0).Rows(i).Item(shtCntr))
-                                Else
-                                    itmListItem.SubItems.Add("")
-                                End If
-
-                                'itmListItem.SubItems.Add("")
-
-
-                        End Select
-                    Next shtCntr
-                    Me.lvwImport.Items.Add(itmListItem)
-                Next
-
-                lblPassingPositions.Text = lvwImport.Items.Count
-                '   Me.lblMembers.Text = "Total Members: " & ds.Tables(0).Rows.Count
-
-            End If
-        Catch ex As Exception
-            MsgBox(ex.Message)
-        End Try
 
     End Sub
 
@@ -500,14 +432,38 @@ Public Class frmImport
         'Determine if HG 19 ot 38
         Select Case lblGenomeVersion.Text
             Case "HG 38"
-                Call SaveFile38()
+                If SelectedMember.HasVariant38 = True Then
+                    Dim Res As MsgBoxResult = MsgBoxResult.No
+                    Res = MsgBox("This individual already has Hg38 variant file loaded! Do you want to overwrite?", MsgBoxStyle.YesNo, "Overwrite?")
+                    If Res = MsgBoxResult.Yes Then
+                        'delete all previous data
+                        cDataAccess.DeleteVariantHg38(SelectedMember.ID)
+
+                        'write new one
+                        Call SaveFile38()
+                    End If
+                Else
+                    Call SaveFile38()
+                End If
+
             Case "HG 19"
-                Call SaveFile19()
+                If SelectedMember.HasVariant19 = True Then
+                    Dim Res As MsgBoxResult = MsgBoxResult.No
+                    Res = MsgBox("This individual already has Hg19 variant file loaded! Do you want to overwrite?", MsgBoxStyle.YesNo, "Overwrite?")
+                    If Res = MsgBoxResult.Yes Then
+                        'delete all previous data
+                        cDataAccess.DeleteVariantHg19(SelectedMember.ID)
+
+                        'write new one
+                        Call SaveFile19()
+                    End If
+                Else
+                    Call SaveFile19()
+                End If
         End Select
         Me.btnSave.Enabled = False
 
     End Sub
-
 
     Public Sub SaveFile38()
         Dim sql As String = ""
@@ -521,8 +477,8 @@ Public Class frmImport
         Dim strFormat As String = ""
         Dim strMutation As String = 0
         Dim i As Integer
-        Dim dtmStart As DateTime
-        Dim dtmEnd As DateTime
+        'Dim dtmStart As DateTime
+        'Dim dtmEnd As DateTime
 
         Dim intPositionID As Integer = 0
         Dim intYFullID As Integer = 1
@@ -533,24 +489,29 @@ Public Class frmImport
         '16606 position
         'http://www.genetichomeland.com/welcome/dnamarkerindex.asp?snp=P109&chromosome=Y
 
+        If Me.lvwImport.Items.Count > 0 Then
+            intFK_MemberID = Me.lblID.Text.Trim
 
-        intFK_MemberID = Me.lblID.Text.Trim
-        For i = 0 To Me.lvwImport.Items.Count - 1
-            intPosition = lvwImport.Items(i).SubItems(0).Text
-            strRef = lvwImport.Items(i).SubItems(1).Text
-            strAlt = lvwImport.Items(i).SubItems(2).Text
-            strQual = lvwImport.Items(i).SubItems(3).Text
-            strFilter = lvwImport.Items(i).SubItems(4).Text
-            strInfo = lvwImport.Items(i).SubItems(5).Text
-            strMutation = lvwImport.Items(i).SubItems(6).Text
-            '  strMutation = Mid(lvwImport.Items(i).SubItems(7).Text, 1, 1)
+            For i = 0 To Me.lvwImport.Items.Count - 1
+                intPosition = lvwImport.Items(i).SubItems(0).Text
+                strRef = lvwImport.Items(i).SubItems(1).Text
+                strAlt = lvwImport.Items(i).SubItems(2).Text
+                strQual = lvwImport.Items(i).SubItems(3).Text
+                strFilter = lvwImport.Items(i).SubItems(4).Text
+                strInfo = lvwImport.Items(i).SubItems(5).Text
+                strMutation = lvwImport.Items(i).SubItems(6).Text
+                '  strMutation = Mid(lvwImport.Items(i).SubItems(7).Text, 1, 1)
 
-            Call cDataAccess.InsertPositionByMemberID38(intFK_MemberID, intPosition, strRef, strAlt, strQual, strFilter, strInfo, strMutation)
+                Call cDataAccess.InsertPositionByMemberID38(intFK_MemberID, intPosition, strRef, strAlt, strQual, strFilter, strInfo, strMutation)
 
-        Next
+            Next
+            cDataAccess.SetTrueToHasVariantHg38_Member(intFK_MemberID)
 
+            MsgBox("Import Complete", MsgBoxStyle.Exclamation, "IMPORT COMPLETE")
 
-        MsgBox("Import Complete", MsgBoxStyle.Exclamation, "IMPORT COMPLETE")
+        Else
+            MsgBox("No Data to load", MsgBoxStyle.Exclamation, "NO DATA")
+        End If
 
     End Sub
 
@@ -571,25 +532,28 @@ Public Class frmImport
         Dim intYFullID As Integer = 1
         Dim sqlPos As String = ""
 
+        If Me.lvwImport.Items.Count > 0 Then
+            intFK_MemberID = Me.lblID.Text.Trim
 
-        intFK_MemberID = Me.lblID.Text.Trim
-        For i = 0 To Me.lvwImport.Items.Count - 1
-            intPosition = lvwImport.Items(i).SubItems(0).Text
-            strRef = lvwImport.Items(i).SubItems(1).Text
-            strAlt = lvwImport.Items(i).SubItems(2).Text
-            strQual = lvwImport.Items(i).SubItems(3).Text
-            strFilter = lvwImport.Items(i).SubItems(4).Text
-            strInfo = lvwImport.Items(i).SubItems(5).Text
-            strMutation = Mid(lvwImport.Items(i).SubItems(6).Text, 1, 1)
+            For i = 0 To Me.lvwImport.Items.Count - 1
+                intPosition = lvwImport.Items(i).SubItems(0).Text
+                strRef = lvwImport.Items(i).SubItems(1).Text
+                strAlt = lvwImport.Items(i).SubItems(2).Text
+                strQual = lvwImport.Items(i).SubItems(3).Text
+                strFilter = lvwImport.Items(i).SubItems(4).Text
+                strInfo = lvwImport.Items(i).SubItems(5).Text
+                strMutation = Mid(lvwImport.Items(i).SubItems(6).Text, 1, 1)
 
+                Call cDataAccess.InsertPositionByMemberID19(intFK_MemberID, intPosition, strRef, strAlt, strQual, strFilter, strInfo, strMutation)
 
-            Call cDataAccess.InsertPositionByMemberID19(intFK_MemberID, intPosition, strRef, strAlt, strQual, strFilter, strInfo, strMutation)
+            Next
+            cDataAccess.SetTrueToHasVariantHg19_Member(intFK_MemberID)
 
-        Next
+            MsgBox("Import Complete", MsgBoxStyle.Exclamation, "COMPLETE")
 
-
-        MsgBox("Import Complete", MsgBoxStyle.Exclamation, "COMPLETE")
-
+        Else
+                MsgBox("No Data to load", MsgBoxStyle.Exclamation, "NO DATA")
+        End If
     End Sub
 
 
@@ -597,8 +561,6 @@ Public Class frmImport
         Dim strFile As New FileStream(vstrFileName, FileMode.Open)
         Dim strReader As New StreamReader(strFile)
         Dim strLine As String
-
-
 
         'Read first line.
         'strLine = Replace(strReader.ReadLine, Chr(9), "", 1, -1)
@@ -655,6 +617,10 @@ Public Class frmImport
         Dim strMutation As String = ""
         Dim strHold As String = ""
         Dim i As Integer = 0
+
+
+        lvwHide.Visible = True
+        lvwImport.Visible = False
 
         ' lvwImport.Columns.Add("ID", 0, HorizontalAlignment.Left)
         lvwImport.Columns.Add("Position", 100, HorizontalAlignment.Left)
@@ -759,6 +725,10 @@ Public Class frmImport
         Dim strFormat As String = ""
         Dim strMutation As String = ""
         Dim strHold As String = ""
+
+
+        lvwHide.Visible = True
+        lvwImport.Visible = False
 
         'Add the column headers for the listview
         Me.lvwImport.Columns.Add("Position", 80, HorizontalAlignment.Left)

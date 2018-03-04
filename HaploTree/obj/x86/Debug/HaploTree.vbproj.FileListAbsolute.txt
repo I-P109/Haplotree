@@ -23,3 +23,5 @@ C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree
 C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.frmSNPMember.resources
 C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.frmHaploTree.resources
 C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.frmProgress.resources
+C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.frmSelectMemberMutation.resources
+C:\Users\Nicolas\Documents\Nicolas\ALL\HaploExe\source\repos\Haplotree\HaploTree\obj\x86\Debug\HaploTree.frmVariantCompare.resources

@@ -31,9 +31,14 @@ Partial Class frmMain
         Me.mnuEditMembersAnalyseVariants = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuEditMembersUploadToTree = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuLoadMemberDbHg19 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuLoadVariantsFromDbHG19 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuLoadPrivateMutFromDbHG19 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuSetAllToHasMutationhg19 = New System.Windows.Forms.ToolStripMenuItem()
         Me.MutationsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuLoadMutationDbHG19 = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuAddParentNodeID = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuRemoveAllParentNodes = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuSetAllMutationsToPrivate = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuView = New System.Windows.Forms.ToolStripMenuItem()
         Me.AllSNPsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.mnuViewMembersSNPs = New System.Windows.Forms.ToolStripMenuItem()
@@ -78,7 +83,7 @@ Partial Class frmMain
         '
         'mnuEditMembers
         '
-        Me.mnuEditMembers.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuEditMembersDetails, Me.mnuEditMembersAnalyseVariants, Me.mnuEditMembersUploadToTree, Me.mnuLoadMemberDbHg19})
+        Me.mnuEditMembers.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuEditMembersDetails, Me.mnuEditMembersAnalyseVariants, Me.mnuEditMembersUploadToTree, Me.mnuLoadMemberDbHg19, Me.mnuLoadVariantsFromDbHG19, Me.mnuLoadPrivateMutFromDbHG19, Me.mnuSetAllToHasMutationhg19})
         Me.mnuEditMembers.Name = "mnuEditMembers"
         Me.mnuEditMembers.Size = New System.Drawing.Size(181, 26)
         Me.mnuEditMembers.Text = "Members"
@@ -86,47 +91,82 @@ Partial Class frmMain
         'mnuEditMembersDetails
         '
         Me.mnuEditMembersDetails.Name = "mnuEditMembersDetails"
-        Me.mnuEditMembersDetails.Size = New System.Drawing.Size(191, 26)
+        Me.mnuEditMembersDetails.Size = New System.Drawing.Size(378, 26)
         Me.mnuEditMembersDetails.Text = "Details"
         '
         'mnuEditMembersAnalyseVariants
         '
         Me.mnuEditMembersAnalyseVariants.Name = "mnuEditMembersAnalyseVariants"
-        Me.mnuEditMembersAnalyseVariants.Size = New System.Drawing.Size(191, 26)
+        Me.mnuEditMembersAnalyseVariants.Size = New System.Drawing.Size(378, 26)
         Me.mnuEditMembersAnalyseVariants.Text = "Analyse Variants"
         '
         'mnuEditMembersUploadToTree
         '
         Me.mnuEditMembersUploadToTree.Name = "mnuEditMembersUploadToTree"
-        Me.mnuEditMembersUploadToTree.Size = New System.Drawing.Size(191, 26)
+        Me.mnuEditMembersUploadToTree.Size = New System.Drawing.Size(378, 26)
         Me.mnuEditMembersUploadToTree.Text = "Upload to Tree"
         '
         'mnuLoadMemberDbHg19
         '
-        Me.mnuLoadMemberDbHg19.Enabled = False
         Me.mnuLoadMemberDbHg19.Name = "mnuLoadMemberDbHg19"
-        Me.mnuLoadMemberDbHg19.Size = New System.Drawing.Size(191, 26)
-        Me.mnuLoadMemberDbHg19.Text = "Load Db HG19 "
+        Me.mnuLoadMemberDbHg19.Size = New System.Drawing.Size(378, 26)
+        Me.mnuLoadMemberDbHg19.Text = "Load Members from Db HG19 "
+        Me.mnuLoadMemberDbHg19.Visible = False
+        '
+        'mnuLoadVariantsFromDbHG19
+        '
+        Me.mnuLoadVariantsFromDbHG19.Name = "mnuLoadVariantsFromDbHG19"
+        Me.mnuLoadVariantsFromDbHG19.Size = New System.Drawing.Size(378, 26)
+        Me.mnuLoadVariantsFromDbHG19.Text = "Load Variants from Db HG19 "
+        Me.mnuLoadVariantsFromDbHG19.Visible = False
+        '
+        'mnuLoadPrivateMutFromDbHG19
+        '
+        Me.mnuLoadPrivateMutFromDbHG19.Name = "mnuLoadPrivateMutFromDbHG19"
+        Me.mnuLoadPrivateMutFromDbHG19.Size = New System.Drawing.Size(378, 26)
+        Me.mnuLoadPrivateMutFromDbHG19.Text = "Load Private Mutations from Db HG19 "
+        Me.mnuLoadPrivateMutFromDbHG19.Visible = False
+        '
+        'mnuSetAllToHasMutationhg19
+        '
+        Me.mnuSetAllToHasMutationhg19.Name = "mnuSetAllToHasMutationhg19"
+        Me.mnuSetAllToHasMutationhg19.Size = New System.Drawing.Size(378, 26)
+        Me.mnuSetAllToHasMutationhg19.Text = "Set True to HasMutationHg19 - All Members"
+        Me.mnuSetAllToHasMutationhg19.Visible = False
         '
         'MutationsToolStripMenuItem
         '
-        Me.MutationsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuLoadMutationDbHG19, Me.mnuAddParentNodeID})
+        Me.MutationsToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuLoadMutationDbHG19, Me.mnuAddParentNodeID, Me.mnuRemoveAllParentNodes, Me.mnuSetAllMutationsToPrivate})
         Me.MutationsToolStripMenuItem.Name = "MutationsToolStripMenuItem"
         Me.MutationsToolStripMenuItem.Size = New System.Drawing.Size(181, 26)
         Me.MutationsToolStripMenuItem.Text = "Mutations"
         '
         'mnuLoadMutationDbHG19
         '
-        Me.mnuLoadMutationDbHG19.Enabled = False
         Me.mnuLoadMutationDbHG19.Name = "mnuLoadMutationDbHG19"
-        Me.mnuLoadMutationDbHG19.Size = New System.Drawing.Size(209, 26)
-        Me.mnuLoadMutationDbHG19.Text = "Load Db HG19"
+        Me.mnuLoadMutationDbHG19.Size = New System.Drawing.Size(318, 26)
+        Me.mnuLoadMutationDbHG19.Text = "Load Mutations from Db HG19"
+        Me.mnuLoadMutationDbHG19.Visible = False
         '
         'mnuAddParentNodeID
         '
         Me.mnuAddParentNodeID.Name = "mnuAddParentNodeID"
         Me.mnuAddParentNodeID.Size = New System.Drawing.Size(318, 26)
         Me.mnuAddParentNodeID.Text = "Add ParentNodeID from HaploTree"
+        '
+        'mnuRemoveAllParentNodes
+        '
+        Me.mnuRemoveAllParentNodes.Name = "mnuRemoveAllParentNodes"
+        Me.mnuRemoveAllParentNodes.Size = New System.Drawing.Size(318, 26)
+        Me.mnuRemoveAllParentNodes.Text = "Remove All Parent Nodes"
+        Me.mnuRemoveAllParentNodes.Visible = False
+        '
+        'mnuSetAllMutationsToPrivate
+        '
+        Me.mnuSetAllMutationsToPrivate.Name = "mnuSetAllMutationsToPrivate"
+        Me.mnuSetAllMutationsToPrivate.Size = New System.Drawing.Size(318, 26)
+        Me.mnuSetAllMutationsToPrivate.Text = "Set All Mutations to Private"
+        Me.mnuSetAllMutationsToPrivate.Visible = False
         '
         'mnuView
         '
@@ -216,4 +256,9 @@ Partial Class frmMain
     Friend WithEvents mnuLoadMemberDbHg19 As ToolStripMenuItem
     Friend WithEvents mnuViewHaploTree As ToolStripMenuItem
     Friend WithEvents mnuAddParentNodeID As ToolStripMenuItem
+    Friend WithEvents mnuRemoveAllParentNodes As ToolStripMenuItem
+    Friend WithEvents mnuSetAllMutationsToPrivate As ToolStripMenuItem
+    Friend WithEvents mnuLoadVariantsFromDbHG19 As ToolStripMenuItem
+    Friend WithEvents mnuLoadPrivateMutFromDbHG19 As ToolStripMenuItem
+    Friend WithEvents mnuSetAllToHasMutationhg19 As ToolStripMenuItem
 End Class

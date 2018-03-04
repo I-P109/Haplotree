@@ -27,6 +27,7 @@ Partial Class frmAllMembersSNPs
         Me.lblID = New System.Windows.Forms.Label()
         Me.tabMembersSNPs = New System.Windows.Forms.TabControl()
         Me.tabSNPs = New System.Windows.Forms.TabPage()
+        Me.btnPaint = New System.Windows.Forms.Button()
         Me.lblPassingPositions = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.btnFindPosition = New System.Windows.Forms.Button()
@@ -34,6 +35,14 @@ Partial Class frmAllMembersSNPs
         Me.lvwSNPs = New System.Windows.Forms.ListView()
         Me.ContextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.mnuReorder = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuSetToAltCallToolStrip = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuRemoveAltCall = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuRenameMutation = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuRenameNode = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuIgnoreMutation = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuUningnoreMutation = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuCopyHg19ToClipboard = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuCopyHg38ToClipboard = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabMembersWithSNP = New System.Windows.Forms.TabPage()
         Me.lvwMembersWithSNP = New System.Windows.Forms.ListView()
         Me.btnSelectMutations = New System.Windows.Forms.Button()
@@ -43,10 +52,7 @@ Partial Class frmAllMembersSNPs
         Me.ckbxMembers = New System.Windows.Forms.CheckBox()
         Me.btnSaveChanges = New System.Windows.Forms.Button()
         Me.btnAllowEdit = New System.Windows.Forms.Button()
-        Me.mnuSetToAltCallToolStrip = New System.Windows.Forms.ToolStripMenuItem()
-        Me.mnuRemoveAltCall = New System.Windows.Forms.ToolStripMenuItem()
-        Me.mnuRenameMutation = New System.Windows.Forms.ToolStripMenuItem()
-        Me.mnuRenameNode = New System.Windows.Forms.ToolStripMenuItem()
+        Me.mnuEditNodeNameForSelectedMutations = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabMembersSNPs.SuspendLayout()
         Me.tabSNPs.SuspendLayout()
         Me.ContextMenuStrip1.SuspendLayout()
@@ -89,6 +95,7 @@ Partial Class frmAllMembersSNPs
         'tabSNPs
         '
         Me.tabSNPs.AutoScroll = True
+        Me.tabSNPs.Controls.Add(Me.btnPaint)
         Me.tabSNPs.Controls.Add(Me.lblPassingPositions)
         Me.tabSNPs.Controls.Add(Me.Label1)
         Me.tabSNPs.Controls.Add(Me.btnFindPosition)
@@ -102,6 +109,17 @@ Partial Class frmAllMembersSNPs
         Me.tabSNPs.TabIndex = 0
         Me.tabSNPs.Text = "SNPs"
         Me.tabSNPs.UseVisualStyleBackColor = True
+        '
+        'btnPaint
+        '
+        Me.btnPaint.Enabled = False
+        Me.btnPaint.Location = New System.Drawing.Point(263, 44)
+        Me.btnPaint.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnPaint.Name = "btnPaint"
+        Me.btnPaint.Size = New System.Drawing.Size(137, 23)
+        Me.btnPaint.TabIndex = 60
+        Me.btnPaint.Text = "Paint Minimum"
+        Me.btnPaint.UseVisualStyleBackColor = True
         '
         'lblPassingPositions
         '
@@ -168,16 +186,64 @@ Partial Class frmAllMembersSNPs
         'ContextMenuStrip1
         '
         Me.ContextMenuStrip1.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.ContextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuReorder, Me.mnuSetToAltCallToolStrip, Me.mnuRemoveAltCall, Me.mnuRenameMutation, Me.mnuRenameNode})
+        Me.ContextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.mnuReorder, Me.mnuSetToAltCallToolStrip, Me.mnuRemoveAltCall, Me.mnuRenameMutation, Me.mnuRenameNode, Me.mnuIgnoreMutation, Me.mnuUningnoreMutation, Me.mnuCopyHg19ToClipboard, Me.mnuCopyHg38ToClipboard, Me.mnuEditNodeNameForSelectedMutations})
         Me.ContextMenuStrip1.Name = "ContextMenuStrip1"
-        Me.ContextMenuStrip1.Size = New System.Drawing.Size(211, 152)
+        Me.ContextMenuStrip1.Size = New System.Drawing.Size(342, 272)
         '
         'mnuReorder
         '
         Me.mnuReorder.Name = "mnuReorder"
-        Me.mnuReorder.Size = New System.Drawing.Size(210, 24)
+        Me.mnuReorder.Size = New System.Drawing.Size(341, 24)
         Me.mnuReorder.Text = "Re-order as original"
         Me.mnuReorder.Visible = False
+        '
+        'mnuSetToAltCallToolStrip
+        '
+        Me.mnuSetToAltCallToolStrip.Name = "mnuSetToAltCallToolStrip"
+        Me.mnuSetToAltCallToolStrip.Size = New System.Drawing.Size(341, 24)
+        Me.mnuSetToAltCallToolStrip.Text = "Set To Alt Call"
+        '
+        'mnuRemoveAltCall
+        '
+        Me.mnuRemoveAltCall.Name = "mnuRemoveAltCall"
+        Me.mnuRemoveAltCall.Size = New System.Drawing.Size(341, 24)
+        Me.mnuRemoveAltCall.Text = "Remove Alt Call"
+        '
+        'mnuRenameMutation
+        '
+        Me.mnuRenameMutation.Name = "mnuRenameMutation"
+        Me.mnuRenameMutation.Size = New System.Drawing.Size(341, 24)
+        Me.mnuRenameMutation.Text = "Rename Mutation"
+        '
+        'mnuRenameNode
+        '
+        Me.mnuRenameNode.Name = "mnuRenameNode"
+        Me.mnuRenameNode.Size = New System.Drawing.Size(341, 24)
+        Me.mnuRenameNode.Text = "Rename Node"
+        '
+        'mnuIgnoreMutation
+        '
+        Me.mnuIgnoreMutation.Name = "mnuIgnoreMutation"
+        Me.mnuIgnoreMutation.Size = New System.Drawing.Size(341, 24)
+        Me.mnuIgnoreMutation.Text = "Ignore Mutation"
+        '
+        'mnuUningnoreMutation
+        '
+        Me.mnuUningnoreMutation.Name = "mnuUningnoreMutation"
+        Me.mnuUningnoreMutation.Size = New System.Drawing.Size(341, 24)
+        Me.mnuUningnoreMutation.Text = "Un-ingnore Mutation"
+        '
+        'mnuCopyHg19ToClipboard
+        '
+        Me.mnuCopyHg19ToClipboard.Name = "mnuCopyHg19ToClipboard"
+        Me.mnuCopyHg19ToClipboard.Size = New System.Drawing.Size(341, 24)
+        Me.mnuCopyHg19ToClipboard.Text = "Copy Hg19 to clipboard"
+        '
+        'mnuCopyHg38ToClipboard
+        '
+        Me.mnuCopyHg38ToClipboard.Name = "mnuCopyHg38ToClipboard"
+        Me.mnuCopyHg38ToClipboard.Size = New System.Drawing.Size(341, 24)
+        Me.mnuCopyHg38ToClipboard.Text = "Copy Hg38 to clipboard"
         '
         'tabMembersWithSNP
         '
@@ -239,6 +305,7 @@ Partial Class frmAllMembersSNPs
         'ckbxMutations
         '
         Me.ckbxMutations.AutoSize = True
+        Me.ckbxMutations.Enabled = False
         Me.ckbxMutations.Location = New System.Drawing.Point(425, 13)
         Me.ckbxMutations.Name = "ckbxMutations"
         Me.ckbxMutations.Size = New System.Drawing.Size(18, 17)
@@ -248,6 +315,7 @@ Partial Class frmAllMembersSNPs
         'ckbxMembers
         '
         Me.ckbxMembers.AutoSize = True
+        Me.ckbxMembers.Enabled = False
         Me.ckbxMembers.Location = New System.Drawing.Point(425, 44)
         Me.ckbxMembers.Name = "ckbxMembers"
         Me.ckbxMembers.Size = New System.Drawing.Size(18, 17)
@@ -275,29 +343,11 @@ Partial Class frmAllMembersSNPs
         Me.btnAllowEdit.Text = "Allow Node Name Edit"
         Me.btnAllowEdit.UseVisualStyleBackColor = True
         '
-        'mnuSetToAltCallToolStrip
+        'mnuEditNodeNameForSelectedMutations
         '
-        Me.mnuSetToAltCallToolStrip.Name = "mnuSetToAltCallToolStrip"
-        Me.mnuSetToAltCallToolStrip.Size = New System.Drawing.Size(210, 24)
-        Me.mnuSetToAltCallToolStrip.Text = "Set To Alt Call"
-        '
-        'mnuRemoveAltCall
-        '
-        Me.mnuRemoveAltCall.Name = "mnuRemoveAltCall"
-        Me.mnuRemoveAltCall.Size = New System.Drawing.Size(210, 24)
-        Me.mnuRemoveAltCall.Text = "Remove Alt Call"
-        '
-        'mnuRenameMutation
-        '
-        Me.mnuRenameMutation.Name = "mnuRenameMutation"
-        Me.mnuRenameMutation.Size = New System.Drawing.Size(210, 24)
-        Me.mnuRenameMutation.Text = "Rename Mutation"
-        '
-        'mnuRenameNode
-        '
-        Me.mnuRenameNode.Name = "mnuRenameNode"
-        Me.mnuRenameNode.Size = New System.Drawing.Size(210, 24)
-        Me.mnuRenameNode.Text = "Rename Node"
+        Me.mnuEditNodeNameForSelectedMutations.Name = "mnuEditNodeNameForSelectedMutations"
+        Me.mnuEditNodeNameForSelectedMutations.Size = New System.Drawing.Size(341, 24)
+        Me.mnuEditNodeNameForSelectedMutations.Text = "Edit Node Name for selected mutations"
         '
         'frmAllMembersSNPs
         '
@@ -352,4 +402,10 @@ Partial Class frmAllMembersSNPs
     Friend WithEvents mnuRemoveAltCall As ToolStripMenuItem
     Friend WithEvents mnuRenameMutation As ToolStripMenuItem
     Friend WithEvents mnuRenameNode As ToolStripMenuItem
+    Friend WithEvents btnPaint As Button
+    Friend WithEvents mnuIgnoreMutation As ToolStripMenuItem
+    Friend WithEvents mnuUningnoreMutation As ToolStripMenuItem
+    Friend WithEvents mnuCopyHg19ToClipboard As ToolStripMenuItem
+    Friend WithEvents mnuCopyHg38ToClipboard As ToolStripMenuItem
+    Friend WithEvents mnuEditNodeNameForSelectedMutations As ToolStripMenuItem
 End Class

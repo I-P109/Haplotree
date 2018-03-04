@@ -48,14 +48,20 @@ Public Class Mutation
     Private Function GetStringCommaDelimitedFromArray(StringArray() As String) As String
         Dim str As String
         Dim i As Integer
+        Dim IsFirst As Boolean = True
         str = ""
-        For i = 0 To StringArray.Count - 1
-            If i = 0 Then
-                str = StringArray(i)
-            Else
-                str = str & "," & StringArray(i)
-            End If
-        Next
+        If Not IsNothing(StringArray) Then
+            For i = 0 To StringArray.Count - 1
+                If Not StringArray(i) = "" Then
+                    If IsFirst = True Then
+                        str = StringArray(i)
+                        IsFirst = False
+                    Else
+                        str = str & "," & StringArray(i)
+                    End If
+                End If
+            Next
+        End If
         Return str
     End Function
 
@@ -287,7 +293,7 @@ Public Class Mutation
                 If p_ds.Tables(0).Rows(0).IsNull("CurrentParentNodeID") = False Then
                     p_CurrentParentNodeID = p_ds.Tables(0).Rows(0).Item("CurrentParentNodeID")
                 Else
-                    MsgBox("This Mutation has no CurrentNodeID yet!")
+                    'MsgBox("This Mutation has no CurrentNodeID yet!")
                 End If
             End If
         Else
@@ -370,34 +376,33 @@ Public Class Mutation
 
     Public Sub SavetoDB() 'into HaploTreeDB
         Dim cDataAccess As New clsDataAccess
-        Dim AllNames As String
-        Dim i As Integer
 
         If p_IsSavedToDB = False Then
-            If Not IsNothing(p_Names) Then
-                AllNames = p_Names(0)
-                For i = 1 To p_Names.Count - 1
-                    If AllNames = "" Or AllNames = "," Then
-                        AllNames = p_Names(i)
-                    Else
-                        AllNames = AllNames & "," & p_Names(i)
-                    End If
-                Next
-            Else
-                AllNames = ""
-            End If
             If p_ID = 0 Then 'insert 
                 'Save as new Mutation, but check if exists in first
                 p_ID = AlreadyExistsInDB()
                 If p_ID = 0 Then 'This is an insert
-                    cDataAccess.InsertMutation(p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentParentNodeID)
-                    p_ID = AlreadyExistsInDB() 'now should have got a ID!
+                    If p_CurrentParentNodeID = "" Then
+                        cDataAccess.InsertMutation(p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored)
+                        p_ID = AlreadyExistsInDB() 'now should have got a ID!
+                    Else
+                        cDataAccess.InsertMutation(p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentParentNodeID)
+                        p_ID = AlreadyExistsInDB() 'now should have got a ID!
+                    End If
                 Else 'This is an update
-                    cDataAccess.UpdateMutation(p_ID, p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentParentNodeID)
+                    If p_CurrentParentNodeID = "" Then
+                        cDataAccess.UpdateMutation(p_ID, p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored)
+                    Else
+                        cDataAccess.UpdateMutation(p_ID, p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentParentNodeID)
+                    End If
                 End If
             Else
                 'Save updates
-                cDataAccess.UpdateMutation(p_ID, p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentParentNodeID)
+                If p_CurrentParentNodeID = "" Then
+                    cDataAccess.UpdateMutation(p_ID, p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored)
+                Else
+                    cDataAccess.UpdateMutation(p_ID, p_PositionID, p_AltCall, p_RefSNPID, AllNames, p_IsISOGGOfficial, p_IsPrivate, p_IsIgnored, p_CurrentParentNodeID)
+                End If
             End If
             p_IsSavedToDB = True
         End If

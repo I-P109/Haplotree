@@ -104,6 +104,18 @@
     <Compile Include="clsNode.vb" />
     <Compile Include="clsPosition.vb" />
     <Compile Include="DataConn.vb" />
+    <Compile Include="frmVariantCompare.Designer.vb">
+      <DependentUpon>frmVariantCompare.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmVariantCompare.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSelectMemberMutation.Designer.vb">
+      <DependentUpon>frmSelectMemberMutation.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSelectMemberMutation.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmProgress.Designer.vb">
       <DependentUpon>frmProgress.vb</DependentUpon>
     </Compile>
@@ -217,6 +229,12 @@
     <Compile Include="TreeConstructor.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmVariantCompare.resx">
+      <DependentUpon>frmVariantCompare.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSelectMemberMutation.resx">
+      <DependentUpon>frmSelectMemberMutation.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmProgress.resx">
       <DependentUpon>frmProgress.vb</DependentUpon>
     </EmbeddedResource>

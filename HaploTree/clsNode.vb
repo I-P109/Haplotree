@@ -30,6 +30,44 @@ Public Class Node
         End Set
     End Property
 
+    Public ReadOnly Property AllChildrenMembersIDs As String
+        Get
+            Return GetStringCommaDelimitedFromArray(p_ChildrenMembersIDs)
+        End Get
+    End Property
+
+    Public ReadOnly Property AllChildrenNodesIDs As String
+        Get
+            Return GetStringCommaDelimitedFromArray(p_ChildrenNodesIDs)
+        End Get
+    End Property
+
+    Public ReadOnly Property AllMutationsIDs As String
+        Get
+            Return GetStringCommaDelimitedFromArray(p_MutationsIDs)
+        End Get
+    End Property
+
+    Private Function GetStringCommaDelimitedFromArray(StringArray() As String) As String
+        Dim str As String
+        Dim i As Integer
+        Dim IsFirst As Boolean = True
+        str = ""
+        If Not IsNothing(StringArray) Then
+            For i = 0 To StringArray.Count - 1
+                If Not StringArray(i) = "" Then
+                    If IsFirst = True Then
+                        str = StringArray(i)
+                        IsFirst = False
+                    Else
+                        str = str & "," & StringArray(i)
+                    End If
+                End If
+            Next
+        End If
+        Return str
+    End Function
+
     Public Function HasChildMemberID(ChildMembID As String) As Boolean
         Dim MembID As String
         Dim HasMemb As Boolean
@@ -452,52 +490,8 @@ Public Class Node
 
     Public Sub SavetoDB() 'into HaploTreeDB
         Dim cDataAccess As New clsDataAccess
-        Dim AllChildrenNodesIDs As String
-        Dim AllChildrenMembersIDs As String
-        Dim AllMutationsIDs As String
-        Dim i As Integer
 
         If p_IsSavedToDB = False Then
-            If Not IsNothing(p_ChildrenNodesIDs) Then
-                AllChildrenNodesIDs = p_ChildrenNodesIDs(0)
-                For i = 1 To p_ChildrenNodesIDs.Count - 1
-                    If AllChildrenNodesIDs = "" Or AllChildrenNodesIDs = "," Then
-                        AllChildrenNodesIDs = p_ChildrenNodesIDs(i)
-                    Else
-                        AllChildrenNodesIDs = AllChildrenNodesIDs & "," & p_ChildrenNodesIDs(i)
-                    End If
-
-                Next
-            Else
-                AllChildrenNodesIDs = ""
-            End If
-
-            If Not IsNothing(p_ChildrenMembersIDs) Then
-                AllChildrenMembersIDs = p_ChildrenMembersIDs(0)
-                For i = 1 To p_ChildrenMembersIDs.Count - 1
-                    If AllChildrenMembersIDs = "" Or AllChildrenMembersIDs = "," Then
-                        AllChildrenMembersIDs = p_ChildrenMembersIDs(i)
-                    Else
-                        AllChildrenMembersIDs = AllChildrenMembersIDs & "," & p_ChildrenMembersIDs(i)
-                    End If
-                Next
-            Else
-                AllChildrenMembersIDs = ""
-            End If
-
-            If Not IsNothing(p_MutationsIDs) Then
-                AllMutationsIDs = p_MutationsIDs(0)
-                For i = 1 To p_MutationsIDs.Count - 1
-                    If AllMutationsIDs = "" Or AllMutationsIDs = "," Then
-                        AllMutationsIDs = p_MutationsIDs(i)
-                    Else
-                        AllMutationsIDs = AllMutationsIDs & "," & p_MutationsIDs(i)
-                    End If
-                Next
-            Else
-                AllMutationsIDs = ""
-            End If
-
             If p_ID = 0 Then 'insert 
                 'Save as new node, but check if exists in first
                 p_ID = AlreadyExistsInDB()

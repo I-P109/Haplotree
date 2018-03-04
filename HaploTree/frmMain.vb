@@ -37,14 +37,21 @@ Public Class frmMain
     Private Sub UploadToTreeToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles mnuEditMembersUploadToTree.Click
         Dim frmMembSearch As New frmMembersSearch
         Dim formTree As New frmTree
+        Dim Mb As New Member
 
         frmMembSearch.btnEdit.Enabled = False
         frmMembSearch.ShowDialog()
 
-        formTree.SelectOnly = True
-        formTree.MdiParent = Me
-        formTree.SelectedMemberID = frmMembSearch.ID
-        formTree.Show()
+        Mb.LoadWithID(frmMembSearch.ID)
+        If Mb.IsPlacedInTheTree = True Then
+            MsgBox("Member " & Mb.Name & " is already placed in the tree")
+        Else
+            formTree.SelectOnly = True
+            formTree.MdiParent = Me
+            formTree.SelectedMemberID = frmMembSearch.ID
+            formTree.Show()
+        End If
+
     End Sub
 
     Private Sub mnuViewMembersSNPs_Click(sender As Object, e As EventArgs) Handles mnuViewMembersSNPs.Click
@@ -143,14 +150,12 @@ Public Class frmMain
     End Sub
 
     Private Sub mnuLoadMutationDbHG19_Click(sender As Object, e As EventArgs) Handles mnuLoadMutationDbHG19.Click
-        'LoadMutationsFromBigYHg19DB()
+        LoadMutationsFromBigYHg19DB()
     End Sub
 
     Private Sub mnuLoadMemberDbHg19_Click(sender As Object, e As EventArgs) Handles mnuLoadMemberDbHg19.Click
-        'LoadMembersFromBigYHg19DB()
-        'LoadMembersDetailsFromBigYHg19DB()
-        'LoadMembersVariantFromBigYHg19DB()
-        'FindPrivateMutationsFromBigYHg19DB()
+        LoadMembersFromBigYHg19DB()
+        LoadMembersDetailsFromBigYHg19DB()
     End Sub
 
     Private Sub mnuViewHaploTree_Click(sender As Object, e As EventArgs) Handles mnuViewHaploTree.Click
@@ -166,5 +171,25 @@ Public Class frmMain
 
     Private Sub mnuAddParentNodeID_Click(sender As Object, e As EventArgs) Handles mnuAddParentNodeID.Click
         AddParentNodeIDtotblMutations()
+    End Sub
+
+    Private Sub mnuRemoveAllParentNodes_Click(sender As Object, e As EventArgs) Handles mnuRemoveAllParentNodes.Click
+        RemoveAllParenNodes()
+    End Sub
+
+    Private Sub mnuSetAllMutationsToPrivate_Click(sender As Object, e As EventArgs) Handles mnuSetAllMutationsToPrivate.Click
+        SetAllMutationsToPrivate()
+    End Sub
+
+    Private Sub mnuLoadVariantsFromDbHG19_Click(sender As Object, e As EventArgs) Handles mnuLoadVariantsFromDbHG19.Click
+        LoadMembersVariantFromBigYHg19DB()
+    End Sub
+
+    Private Sub mnuLoadPrivateMutFromDbHG19_Click(sender As Object, e As EventArgs) Handles mnuLoadPrivateMutFromDbHG19.Click
+        FindPrivateMutationsFromBigYHg19DB()
+    End Sub
+
+    Private Sub mnuSetAllToHasMutationhg19_Click(sender As Object, e As EventArgs) Handles mnuSetAllToHasMutationhg19.Click
+        SetAllMembersToHasVariant19()
     End Sub
 End Class

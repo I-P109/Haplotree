@@ -33,18 +33,19 @@ Partial Class frmTree
         Me.cmnuAddTextColor = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
         Me.cmnuSNPInfo = New System.Windows.Forms.ToolStripMenuItem()
-        Me.ColorDialog1 = New System.Windows.Forms.ColorDialog()
         Me.cmnuSelectNode = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ColorDialog1 = New System.Windows.Forms.ColorDialog()
         Me.ContextMenuStrip1.SuspendLayout()
         Me.SuspendLayout()
         '
         'tvwTree
         '
         Me.tvwTree.ContextMenuStrip = Me.ContextMenuStrip1
-        Me.tvwTree.Location = New System.Drawing.Point(459, 0)
-        Me.tvwTree.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.tvwTree.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tvwTree.Location = New System.Drawing.Point(0, 0)
+        Me.tvwTree.Margin = New System.Windows.Forms.Padding(4)
         Me.tvwTree.Name = "tvwTree"
-        Me.tvwTree.Size = New System.Drawing.Size(1105, 959)
+        Me.tvwTree.Size = New System.Drawing.Size(1581, 975)
         Me.tvwTree.TabIndex = 0
         '
         'ContextMenuStrip1
@@ -52,7 +53,7 @@ Partial Class frmTree
         Me.ContextMenuStrip1.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.ContextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cmnuAddNode, Me.cmnuEditNodeName, Me.cmnuRemoveNode, Me.ToolStripSeparator1, Me.cmnuAddBackgroundColor, Me.cmnuAddTextColor, Me.ToolStripSeparator2, Me.cmnuSNPInfo, Me.cmnuSelectNode})
         Me.ContextMenuStrip1.Name = "ContextMenuStrip1"
-        Me.ContextMenuStrip1.Size = New System.Drawing.Size(230, 212)
+        Me.ContextMenuStrip1.Size = New System.Drawing.Size(230, 184)
         '
         'cmnuAddNode
         '
@@ -112,7 +113,7 @@ Partial Class frmTree
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1581, 975)
         Me.Controls.Add(Me.tvwTree)
-        Me.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "frmTree"
         Me.Text = "Tree"
         Me.ContextMenuStrip1.ResumeLayout(False)

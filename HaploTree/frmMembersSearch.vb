@@ -32,70 +32,124 @@
     Public Sub FillListview(ByVal ds As DataSet)
         Dim lvwColumn As ColumnHeader
         Dim itmListItem As ListViewItem
-        Dim shtCntr As Short
+        Dim myCheckFont As New System.Drawing.Font("Wingdings", 12, FontStyle.Regular)
 
-        Try
-            If ds.Tables(0).Rows.Count > 0 Then
-                'Do headers first
-                Me.lvwMembers.Clear()
-                For shtCntr = 0 To ds.Tables(0).Columns.Count - 1
-                    lvwColumn = New ColumnHeader()
+        'Try
+        If ds.Tables(0).Rows.Count > 0 Then
 
-                    lvwMembers.Columns.Add(lvwColumn)
+            'Do headers first
+            Me.lvwMembers.Clear()
 
-                    Select Case ds.Tables(0).Columns.Item(shtCntr).ColumnName()
-                        Case "ID"   ', "MemberName"
-                            'lvwColumn = New ColumnHeader()
-                            'lvwColumn.Text = ds.Tables(0).Columns.Item(shtCntr).ColumnName()
-                            'lvwMembers.Columns.Add(lvwColumn)
-                            '         If ds.Tables(0).Columns.Item(shtCntr).ColumnName() = "ID" Then 'Hide columns staring with ID
-                            lvwColumn.Width = 0
-                        Case "YFullID"
-                            lvwColumn.Text = ds.Tables(0).Columns.Item(shtCntr).ColumnName()
-                            lvwColumn.Width = 120
-                        Case "MemberName"
-                            lvwColumn.Text = ds.Tables(0).Columns.Item(shtCntr).ColumnName()
-                            lvwColumn.Width = 180
-                        Case "FTDNAID"
-                            lvwColumn.Text = ds.Tables(0).Columns.Item(shtCntr).ColumnName()
-                            lvwColumn.Width = 120
-                    End Select
-                Next
+            lvwColumn = New ColumnHeader()
+            lvwMembers.Columns.Add(lvwColumn)
+            lvwColumn.Width = 0
+            lvwColumn.Text = "ID"
 
-                For i = 0 To ds.Tables(0).Rows.Count - 1
+            lvwColumn = New ColumnHeader()
+            lvwMembers.Columns.Add(lvwColumn)
+            lvwColumn.Width = 180
+            lvwColumn.Text = "MemberName"
 
-                    itmListItem = New ListViewItem()
-                    itmListItem.Text = ds.Tables(0).Rows(i).Item(0)
+            lvwColumn = New ColumnHeader()
+            lvwMembers.Columns.Add(lvwColumn)
+            lvwColumn.Text = "FTDNAID"
+            lvwColumn.Width = 120
 
-                    For shtCntr = 1 To ds.Tables(0).Columns.Count - 1
-                        Select Case ds.Tables(0).Columns.Item(shtCntr).ColumnName()
-                            Case "ID" ', "MemberName"
-                                If ds.Tables(0).Rows(i).Item(shtCntr) Is System.DBNull.Value = True Then
-                                    itmListItem.SubItems.Add("")
-                                Else
-                                    If ds.Tables(0).Rows(i).IsNull(shtCntr) = False Then
-                                        itmListItem.SubItems.Add(ds.Tables(0).Rows(i).Item(shtCntr))
-                                    Else
-                                        itmListItem.SubItems.Add("")
-                                    End If
-                                End If
-                            Case Else
-                                If ds.Tables(0).Rows(i).IsNull(shtCntr) = False Then
-                                    itmListItem.SubItems.Add(ds.Tables(0).Rows(i).Item(shtCntr))
-                                Else
-                                    itmListItem.SubItems.Add("")
-                                End If
+            lvwColumn = New ColumnHeader()
+            lvwMembers.Columns.Add(lvwColumn)
+            lvwColumn.Text = "YFullID"
+            lvwColumn.Width = 120
 
-                                'itmListItem.SubItems.Add("")
-                        End Select
-                    Next shtCntr
-                    Me.lvwMembers.Items.Add(itmListItem)
-                Next
-                Me.lblMembers.Text = lvwMembers.Items.Count
-            End If
-        Catch ex As Exception
-            MsgBox(ex.Message)
-        End Try
+            lvwColumn = New ColumnHeader()
+            lvwMembers.Columns.Add(lvwColumn)
+            lvwColumn.Text = "Hg19"
+            lvwColumn.Width = 50
+            lvwMembers.Columns(4).TextAlign = HorizontalAlignment.Center
+
+            lvwColumn = New ColumnHeader()
+            lvwMembers.Columns.Add(lvwColumn)
+            lvwColumn.Text = "Hg38"
+            lvwColumn.Width = 50
+            lvwMembers.Columns(5).TextAlign = HorizontalAlignment.Center
+
+            lvwColumn = New ColumnHeader()
+            lvwMembers.Columns.Add(lvwColumn)
+            lvwColumn.Text = "InTree"
+            lvwColumn.Width = 60
+            lvwMembers.Columns(6).TextAlign = HorizontalAlignment.Center
+
+
+            For i = 0 To ds.Tables(0).Rows.Count - 1
+
+                itmListItem = New ListViewItem()
+                itmListItem.Text = ds.Tables(0).Rows(i).Item("ID")
+                itmListItem.UseItemStyleForSubItems = False
+
+                If ds.Tables(0).Rows(i).IsNull("MemberName") = False Then
+                    itmListItem.SubItems.Add(ds.Tables(0).Rows(i).Item("MemberName"))
+                Else
+                    itmListItem.SubItems.Add("")
+                End If
+
+
+                If ds.Tables(0).Rows(i).IsNull("FTDNAID") = False Then
+                    itmListItem.SubItems.Add(ds.Tables(0).Rows(i).Item("FTDNAID"))
+                Else
+                    itmListItem.SubItems.Add("")
+                End If
+
+                If ds.Tables(0).Rows(i).IsNull("YFullID") = False Then
+                    itmListItem.SubItems.Add(ds.Tables(0).Rows(i).Item("YFullID"))
+                Else
+                    itmListItem.SubItems.Add("")
+                End If
+
+                If ds.Tables(0).Rows(i).IsNull("HasVariantHg19") = False Then
+                    If ds.Tables(0).Rows(i).Item("HasVariantHg19").ToString = "True" Then
+                        itmListItem.SubItems.Add(Chr(254))
+                        itmListItem.SubItems.Item(4).ForeColor = Color.DarkBlue
+                    Else
+                        itmListItem.SubItems.Add(Chr(168))
+                        itmListItem.SubItems.Item(4).ForeColor = Color.DarkRed
+                    End If
+                    itmListItem.SubItems.Item(4).Font = myCheckFont
+                Else
+                    itmListItem.SubItems.Add("")
+                End If
+
+                If ds.Tables(0).Rows(i).IsNull("HasVariantHg38") = False Then
+                    If ds.Tables(0).Rows(i).Item("HasVariantHg38").ToString = "True" Then
+                        itmListItem.SubItems.Add(Chr(254))
+                        itmListItem.SubItems.Item(5).ForeColor = Color.DarkBlue
+                    Else
+                        itmListItem.SubItems.Add(Chr(168))
+                        itmListItem.SubItems.Item(5).ForeColor = Color.DarkRed
+                    End If
+                    itmListItem.SubItems.Item(5).Font = myCheckFont
+                Else
+                    itmListItem.SubItems.Add("")
+                End If
+
+                If ds.Tables(0).Rows(i).IsNull("IsPlacedInTheTree") = False Then
+                    If ds.Tables(0).Rows(i).Item("IsPlacedInTheTree").ToString = "True" Then
+                        itmListItem.SubItems.Add(Chr(254))
+                        itmListItem.SubItems.Item(6).ForeColor = Color.DarkBlue
+                    Else
+                        itmListItem.SubItems.Add(Chr(168))
+                        itmListItem.SubItems.Item(6).ForeColor = Color.DarkRed
+                    End If
+                    itmListItem.SubItems.Item(6).Font = myCheckFont
+                Else
+                    itmListItem.SubItems.Add("")
+                End If
+
+                Me.lvwMembers.Items.Add(itmListItem)
+            Next
+            Me.lblMembers.Text = lvwMembers.Items.Count
+        End If
+        'Catch ex As Exception
+        'MsgBox(ex.Message)
+        'End Try
     End Sub
 
     Private Sub lvwMembers_ColumnClick(sender As Object, e As ColumnClickEventArgs) Handles lvwMembers.ColumnClick

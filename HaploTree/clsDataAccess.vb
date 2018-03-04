@@ -29,10 +29,98 @@ Public Class clsDataAccess
 
     End Function
 
+    Public Function GetAllMutationsWithNodeAndPosition() As DataSet
+        Dim sql As String
+
+        sql = "  SELECT tblMutation.ID, tblMutation.MutationNames, tblMutation.AltCall, tblPosition.PosHg38, tblPosition.AncestrallCall, tblNode.NodeName"
+        sql = sql & " FROM ( tblMutation LEFT JOIN tblNode ON tblMutation.CurrentParentNodeID = tblNode.ID)   LEFT JOIN tblPosition ON tblMutation.PositionID = tblPosition.ID "
+        'sql = "  SELECT tblMutation.ID, MutationNames, AltCall, PosHg38, AncestrallCall, NodeName"
+        'sql = sql & " FROM  tblMutation, tblPosition, tblNode WHERE tblMutation.PositionID = tblPosition.ID AND tblMutation.CurrentParentNodeID = tblNode.ID"
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
+    Public Function GetAllMutationsWithPosition() As DataSet
+        Dim sql As String
+
+        sql = " SELECT tblMutation.ID, tblMutation.MutationNames, tblMutation.AltCall, tblPosition.PosHg38, tblPosition.AncestrallCall"
+        sql = sql & " FROM  tblMutation INNER JOIN tblPosition ON tblMutation.PositionID = tblPosition.ID "
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
     Public Function GetAllMutations() As DataSet
         Dim sql As String
 
         sql = "  SELECT * FROM  tblMutation"
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
+            dataAdapter.SelectCommand = dbCommandAccess
+            Dim dataSet As System.Data.DataSet = New System.Data.DataSet()
+            dataAdapter.Fill(dataSet)
+
+            dbCommandAccess.Connection.Close()
+
+            Return dataSet
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return Nothing
+        End Try
+    End Function
+
+    Public Function GetMutationParentNode(MutID As String) As DataSet
+        Dim sql As String
+
+        sql = "  SELECT CurrentParentNodeID FROM  tblMutation WHERE ID = " & MutID
         Try
             Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
             dbCommandAccess.CommandText = sql
@@ -274,7 +362,7 @@ Public Class clsDataAccess
             dbCommandAccess.CommandType = CommandType.Text
 
             '  If conn.State = ConnectionState.Closed Then
-            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection = GetConnectionVariantHg19DB()
             dbCommandAccess.Connection.Open()
             ' End If
 
@@ -397,14 +485,16 @@ Public Class clsDataAccess
                                  ByVal vstrPrivateMutationsIDs As String,
                                  ByVal vstrPutativeMutationsIDs As String,
                                  ByVal vstrCurrentParentNodeID As String,
-                                 ByVal vstrIsPlacedInTheTree As Boolean) As Integer
+                                 ByVal vstrIsPlacedInTheTree As Boolean,
+                                 ByVal vstrHasVariant38 As Boolean,
+                                 ByVal vstrHasVariant19 As Boolean) As Integer
 
 
         Dim sql As String
         Dim rowsAffected As Integer
         Try
             'sql = "  INSERT INTO tblMembers (MemberName, FTDNAID, YFullID,MutationsIDs,PrivateMutationsIDs,PutativeMutationsIDs,CurrentParentNodeID,IsPlacedInTheTree) VALUES ("
-            sql = "  INSERT INTO tblMembers (MemberName, FTDNAID, YFullID,CurrentParentNodeID,IsPlacedInTheTree) VALUES ("
+            sql = "  INSERT INTO tblMembers (MemberName, FTDNAID, YFullID,MutationsIDs,PrivateMutationsIDs,CurrentParentNodeID,IsPlacedInTheTree,HasVariantHg38,HasVariantHg19) VALUES ("
             sql = sql & Chr(34) & vstrMemberName & Chr(34)
             sql = sql & "," & Chr(34) & vstrFTDNAID & Chr(34)
             sql = sql & "," & Chr(34) & vstrYFullID & Chr(34)
@@ -413,6 +503,8 @@ Public Class clsDataAccess
             sql = sql & "," & Chr(34) & vstrPutativeMutationsIDs & Chr(34)
             sql = sql & "," & Chr(34) & vstrCurrentParentNodeID & Chr(34)
             sql = sql & "," & Chr(34) & vstrIsPlacedInTheTree & Chr(34)
+            sql = sql & "," & Chr(34) & vstrHasVariant38 & Chr(34)
+            sql = sql & "," & Chr(34) & vstrHasVariant19 & Chr(34)
             sql = sql & ")"
 
             Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
@@ -514,7 +606,7 @@ Public Class clsDataAccess
             dbCommandAccess.CommandType = CommandType.Text
 
             If conn.State = ConnectionState.Closed Then
-                dbCommandAccess.Connection = GetConnectionVariantDB()
+                dbCommandAccess.Connection = GetConnectionVariantHg19DB()
                 dbCommandAccess.Connection.Open()
                 rowsAffected = dbCommandAccess.ExecuteNonQuery()
             Else
@@ -561,7 +653,7 @@ Public Class clsDataAccess
             dbCommandAccess.CommandType = CommandType.Text
 
             If conn.State = ConnectionState.Closed Then
-                dbCommandAccess.Connection = GetConnectionVariantDB()
+                dbCommandAccess.Connection = GetConnectionVariantHg19DB()
                 dbCommandAccess.Connection.Open()
                 rowsAffected = dbCommandAccess.ExecuteNonQuery()
             Else
@@ -615,6 +707,37 @@ Public Class clsDataAccess
 
     End Function
 
+    Public Function SetMemberPrivateMutations(ByVal vintID As Integer, ByVal vstrPrivateMutationsIDs As String) As Integer
+        Dim sql As String
+        Dim rowsAffected As Integer
+        Try
+
+            sql = "  UPDATE tblMembers SET PrivateMutationsIDs=" & Chr(34) & vstrPrivateMutationsIDs & Chr(34)
+            sql = sql & " WHERE ID=" & vintID
+
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+
+            '  If conn.State = ConnectionState.Closed Then
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            ' End If
+
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            ' End If
+
+
+            dbCommandAccess.Connection.Close()
+
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+
+    End Function
+
     Public Function UpdateMember(ByVal vintID As Integer,
                                  ByVal vstrMemberName As String,
                                  ByVal vstrFTDNAID As String,
@@ -623,7 +746,9 @@ Public Class clsDataAccess
                                  ByVal vstrPrivateMutationsIDs As String,
                                  ByVal vstrPutativeMutationsIDs As String,
                                  ByVal vstrCurrentParentNodeID As String,
-                                 ByVal vstrIsPlacedInTheTree As Boolean) As Integer
+                                 ByVal vstrIsPlacedInTheTree As Boolean,
+                                 ByVal vstrHasVariant38 As Boolean,
+                                 ByVal vstrHasVariant19 As Boolean) As Integer
         Dim sql As String
         Dim rowsAffected As Integer
         Try
@@ -637,6 +762,8 @@ Public Class clsDataAccess
             sql = sql & ",PutativeMutationsIDs=" & Chr(34) & vstrPutativeMutationsIDs & Chr(34)
             sql = sql & ",CurrentParentNodeID=" & Chr(34) & vstrCurrentParentNodeID & Chr(34)
             sql = sql & ",IsPlacedInTheTree=" & vstrIsPlacedInTheTree
+            sql = sql & ",HasVariantHg38=" & vstrHasVariant38
+            sql = sql & ",HasVariantHg19=" & vstrHasVariant19
             sql = sql & " WHERE ID=" & vintID
 
             Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
@@ -810,6 +937,24 @@ Public Class clsDataAccess
         End Try
     End Function
 
+    Function DeleteNodeInHaploTree(NodeID As String) As Integer
+
+        Dim sqlDelete As String = " DELETE FROM tblNode WHERE ID = " & NodeID
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sqlDelete
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
     Public Function GetDistinctParentBranch() As DataSet
         Try
 
@@ -862,6 +1007,44 @@ Public Class clsDataAccess
         Catch ex As Exception
             MsgBox("Error:" & ex.Message)
             Return False
+        End Try
+    End Function
+
+    Public Function DeleteVariantHg38(MembID As Integer) As Integer
+
+        Dim sqlDelete As String = " DELETE FROM tblMemberVariantHg38 WHERE FK_MemberID = " & MembID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sqlDelete
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function DeleteVariantHg19(MembID As Integer) As Integer
+
+        Dim sqlDelete As String = " DELETE FROM tblMemberVariantHg19 WHERE FK_MemberID = " & MembID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sqlDelete
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantHg19DB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
         End Try
     End Function
 
@@ -1276,7 +1459,7 @@ Public Class clsDataAccess
             Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
             dbCommandAccess.CommandText = sql
             dbCommandAccess.CommandType = CommandType.Text
-            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection = GetConnectionVariantHg19DB()
             dbCommandAccess.Connection.Open()
             FullAltCall = dbCommandAccess.ExecuteScalar()
             dbCommandAccess.Connection.Close()
@@ -1403,7 +1586,7 @@ Public Class clsDataAccess
             Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
             dbCommandAccess.CommandText = sql
             dbCommandAccess.CommandType = CommandType.Text
-            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection = GetConnectionVariantHg19DB()
             dbCommandAccess.Connection.Open()
             NbRowsInDB = dbCommandAccess.ExecuteScalar()
             dbCommandAccess.Connection.Close()
@@ -1425,7 +1608,7 @@ Public Class clsDataAccess
             Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
             dbCommandAccess.CommandText = sql
             dbCommandAccess.CommandType = CommandType.Text
-            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection = GetConnectionVariantHg19DB()
             dbCommandAccess.Connection.Open()
 
             Dim dataAdapter As OleDb.OleDbDataAdapter = New OleDbDataAdapter
@@ -1501,7 +1684,7 @@ Public Class clsDataAccess
     Public Function GetMutationByPosAndAltCall(PosID As String, AlternCall As String) As DataSet
         Dim sql As String
 
-        sql = "  SELECT * FROM  tblMutation WHERE PositionID= " & Chr(34) & PosID & Chr(34)
+        sql = "  SELECT * FROM  tblMutation WHERE PositionID= " & PosID
         sql = sql & " AND AltCall=" & Chr(34) & AlternCall & Chr(34)
         Try
             Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
@@ -1653,6 +1836,383 @@ Public Class clsDataAccess
         End Try
     End Function
 
+    Public Function RemoveAllMutationParentsNodes() As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMutation set CurrentParentNodeID = NULL"
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetMutationIDsInNode(NodeID As String, MutationsIDs As String) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblNode set MutationsIDs = " & Chr(34) & MutationsIDs & Chr(34)
+        sql = sql & " WHERE ID = " & NodeID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetTrueToHasVariantHg19_AllMembers() As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMembers set HasVariantHg19 = True"
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetTrueToHasVariantHg19_Member(MembID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMembers set HasVariantHg19 = True WHERE ID = " & MembID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetFalseToHasVariantHg19_Member(MembID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMembers set HasVariantHg19 = False WHERE ID = " & MembID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetTrueToHasVariantHg38_Member(MembID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMembers set HasVariantHg38 = True WHERE ID = " & MembID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetFalseToHasVariantHg38_Member(MembID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMembers set HasVariantHg38 = False WHERE ID = " & MembID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetAllMutationsToPrivate() As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMutation SET IsPrivate = True"
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function IsMutationIgnored(MutID As String) As Boolean
+        Dim sql As String
+
+        sql = "SELECT IsIgnored FROM tblMutation WHERE ID = " & MutID
+
+        Dim IsIgnored As String
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            IsIgnored = dbCommandAccess.ExecuteScalar()
+            dbCommandAccess.Connection.Close()
+            If IsIgnored = "True" Then
+                Return True
+            Else
+                Return False
+            End If
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return False
+        End Try
+    End Function
+
+    Public Function SetMutationToIgnored(MutID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMutation SET IsIgnored = True  WHERE ID = " & MutID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetMutationToNOTIgnored(MutID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMutation SET IsIgnored = False  WHERE ID = " & MutID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function GetMutationNames(MutID As Integer) As String
+        Dim sql As String
+
+        sql = "SELECT MutationNames FROM tblMutation WHERE ID = " & MutID
+
+        Dim MutNames As String
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            MutNames = dbCommandAccess.ExecuteScalar()
+            dbCommandAccess.Connection.Close()
+            Return MutNames
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return ""
+        End Try
+    End Function
+
+    Public Function SetMutationToPrivate(MutID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMutation SET IsPrivate = True  WHERE ID = " & MutID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetMutationToNOTPrivate(MutID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMutation SET IsPrivate = False  WHERE ID = " & MutID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetMutationParentNode(MutId As Integer, ParentNodeID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMutation SET CurrentParentNodeID = " & ParentNodeID & " WHERE ID = " & MutId
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetNodeParentNode(NodeId As Integer, ParentNodeID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblNode SET ParentNodeID = " & ParentNodeID & ", HasParent = True WHERE ID = " & NodeId
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function SetMemberParentNode(MembId As Integer, ParentNodeID As Integer) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMembers SET CurrentParentNodeID = " & ParentNodeID & " WHERE ID = " & MembId
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionVariantDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
     Public Function UpdateMutation(MutationID As Integer,
                                    ByVal PositionID As String,
                                    ByVal AltCall As String,
@@ -1665,14 +2225,52 @@ Public Class clsDataAccess
         Dim sql As String
 
         sql = "  UPDATE tblMutation "
-        sql = sql & " SET PositionID= " & Chr(34) & PositionID & Chr(34)
+        sql = sql & " SET PositionID = " & PositionID
+        sql = sql & ", AltCall = " & Chr(34) & AltCall & Chr(34)
+        sql = sql & ", RefSNPID = " & Chr(34) & RefSNPID & Chr(34)
+        sql = sql & ", MutationNames = " & Chr(34) & MutationNames & Chr(34)
+        sql = sql & ", IsISOGGOfficial = " & IsISOGGOfficial
+        sql = sql & ", IsPrivate = " & IsPrivate
+        sql = sql & ", IsIgnored = " & IsIgnored
+        sql = sql & ", CurrentParentNodeID = " & CurrentParentNodeID
+        sql = sql & " WHERE ID = " & MutationID
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function UpdateMutation(MutationID As Integer,
+                                   ByVal PositionID As String,
+                                   ByVal AltCall As String,
+                                   ByVal RefSNPID As String,
+                                   ByVal MutationNames As String,
+                                   ByVal IsISOGGOfficial As Boolean,
+                                   ByVal IsPrivate As Boolean,
+                                   ByVal IsIgnored As Boolean) As Integer
+        Dim sql As String
+
+        sql = "  UPDATE tblMutation "
+        sql = sql & " SET PositionID= " & PositionID
         sql = sql & ",AltCall=" & Chr(34) & AltCall & Chr(34)
         sql = sql & ",RefSNPID=" & Chr(34) & RefSNPID & Chr(34)
         sql = sql & ",MutationNames=" & Chr(34) & MutationNames & Chr(34)
         sql = sql & ",IsISOGGOfficial=" & IsISOGGOfficial
         sql = sql & ",IsPrivate=" & IsPrivate
         sql = sql & ",IsIgnored=" & IsIgnored
-        sql = sql & ",CurrentParentNodeID=" & Chr(34) & CurrentParentNodeID & Chr(34)
+        sql = sql & ", CurrentParentNodeID = NULL"
         sql = sql & " WHERE ID=" & MutationID
 
         Dim rowsAffected As Integer
@@ -1703,14 +2301,49 @@ Public Class clsDataAccess
         Dim sql As String
 
         sql = " INSERT INTO tblMutation (PositionID, AltCall, MutationNames, IsISOGGOfficial, IsPrivate, RefSNPID, IsIgnored, CurrentParentNodeID) VALUES ("
-        sql = sql & Chr(34) & PositionID & Chr(34)
+        sql = sql & PositionID
         sql = sql & "," & Chr(34) & AltCall & Chr(34)
         sql = sql & "," & Chr(34) & MutationNames & Chr(34)
         sql = sql & "," & IsISOGGOfficial
         sql = sql & "," & IsPrivate
         sql = sql & "," & Chr(34) & RefSNPID & Chr(34)
         sql = sql & "," & IsIgnored
-        sql = sql & "," & Chr(34) & CurrentParentNodeID & Chr(34)
+        sql = sql & "," & CurrentParentNodeID
+        sql = sql & ")"
+
+        Dim rowsAffected As Integer
+        Try
+            Dim dbCommandAccess As OleDb.OleDbCommand = New OleDbCommand
+            dbCommandAccess.CommandText = sql
+            dbCommandAccess.CommandType = CommandType.Text
+            dbCommandAccess.Connection = GetConnectionHaploTreeDB()
+            dbCommandAccess.Connection.Open()
+            rowsAffected = dbCommandAccess.ExecuteNonQuery()
+            dbCommandAccess.Connection.Close()
+            Return rowsAffected
+        Catch ex As Exception
+            MsgBox("Error:" & ex.Message)
+            Return 0
+        End Try
+    End Function
+
+    Public Function InsertMutation(ByVal PositionID As String,
+                                   ByVal AltCall As String,
+                                   ByVal RefSNPID As String,
+                                   ByVal MutationNames As String,
+                                   ByVal IsISOGGOfficial As Boolean,
+                                   ByVal IsPrivate As Boolean,
+                                   ByVal IsIgnored As Boolean) As Integer
+        Dim sql As String
+
+        sql = " INSERT INTO tblMutation (PositionID, AltCall, MutationNames, IsISOGGOfficial, IsPrivate, RefSNPID, IsIgnored) VALUES ("
+        sql = sql & PositionID
+        sql = sql & "," & Chr(34) & AltCall & Chr(34)
+        sql = sql & "," & Chr(34) & MutationNames & Chr(34)
+        sql = sql & "," & IsISOGGOfficial
+        sql = sql & "," & IsPrivate
+        sql = sql & "," & Chr(34) & RefSNPID & Chr(34)
+        sql = sql & "," & IsIgnored
         sql = sql & ")"
 
         Dim rowsAffected As Integer

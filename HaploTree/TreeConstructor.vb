@@ -2,6 +2,7 @@
 
 Module TreeConstructor
     Private p_TreeRoot As Node
+    Dim cDataAccess As New clsDataAccess
 
     Public Property TreeRoot As Node
         Get
@@ -25,17 +26,17 @@ Module TreeConstructor
             End If
         Else
             MsgBox("Member " & NewMember.Name & " is already placed in the tree")
+            'what if new Variant file!
+
         End If
     End Sub
 
     Public Sub InsertNewKitInTree(KitID As Integer, RootNodeName As String) 'run this AFTER saving KitID's variant file data to the DB 
         Dim ParentNode As Node
+        Dim CheckNode As Node
         Dim SplitNode As Boolean
         Dim NewMember As New Member()
         Dim MutId As String
-        Dim MbId As String
-        Dim NdId As String
-        Dim EmptyStrArray(0) As String
         Dim HasPrivateMutations As Boolean
 
         NewMember.LoadWithID(KitID)
@@ -94,10 +95,10 @@ Module TreeConstructor
                                     NewMember.SavetoDB()
                                     For Each MutId In NewMember.MutationsIDs
                                         If Not MutId = "" Then
-                                            Dim Mut As New Mutation
-                                            Mut.Load(MutId)
-                                            Mut.CurrentParentNodeID = NewNd.ID
-                                            Mut.SavetoDB()
+                                            'Dim Mut As New Mutation
+                                            'Mut.Load(MutId)
+                                            cDataAccess.SetMutationParentNode(MutId, NewNd.ID)
+                                            'Mut.SavetoDB()
                                         End If
                                     Next
                                     Exit Sub
@@ -106,6 +107,12 @@ Module TreeConstructor
                         End If
 
                         ParentNode = FindClosestExistingNodeDownward(NewMember, p_TreeRoot) 'the user provides an apriori start node to speed up the process
+                        CheckNode = CheckNodesBelowParent(NewMember, ParentNode) ' check that there are no common mutations in the nodes below (this should help discarding the missing putative mutations)
+                        While CheckNode.ID <> ParentNode.ID
+                            ParentNode = CheckNode
+                            CheckNode = CheckNodesBelowParent(NewMember, ParentNode)
+                        End While
+
 
                         If IsNothing(ParentNode) Then
                             'investigate higher in the tree?
@@ -144,37 +151,17 @@ Module TreeConstructor
                         Next
 
                         If SplitNode = True Then ' need to split node: the new member and the children below this node do not share all the mutations at that node.
-
-                            Dim NewNode As Node
-                            NewNode = AddNodeBelow(ParentNode, NewMember) 'creates a new node below parentnode with the noncommon mutations of ParentNode and newmember and remove them from oarentnode mutationsIDs
-
-                            If Not IsNothing(NewNode.ChildrenMembersIDs) Then
-                                For Each MbId In NewNode.ChildrenMembersIDs 'move all member children under newnode
-                                    If Not MbId = "" Then
-                                        Dim Mb As New Member()
-                                        Mb.LoadWithID(MbId)
-                                        Mb.CurrentParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the member if not needed
-                                        Mb.SavetoDB()
-                                    End If
-                                Next
-                            End If
-                            If Not IsNothing(NewNode.ChildrenNodesIDs) Then
-                                For Each NdId In NewNode.ChildrenNodesIDs 'move all node children under newnode
-                                    If Not NdId = "" Then
-                                        Dim Nd As New Node()
-                                        Nd.LoadWithID(NdId)
-                                        Nd.ParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the node if not needed
-                                        Nd.SavetoDB()
-                                    End If
-                                Next
-                            End If
-                            ParentNode.ChildrenMembersIDs = EmptyStrArray
-                            ParentNode.ChildrenNodesIDs = EmptyStrArray
-                            ParentNode.AppendChildNodeID(NewNode.ID)
+                            InsertNodeBelowWithNonCommonMutations(ParentNode, NewMember) 'creates a new node below parentnode with the noncommon mutations of ParentNode and newmember and remove them from parentnode mutationsIDs
                         End If
 
                         'if new memb has private mutations then add a node below parentnode. Otherwise add the member directly.
-
+                        'need to add also all other mutations the member has that are not in any of the nodes before
+                        'looking only at private mutation of the member is only valid for a new member added to the DB 
+                        'but it doesn't work for a rebuild of a DB where private mutations have been set in a different context.
+                        ' we could forget some mutations that previous members used to build the tree didn't have.
+                        'in the CheckMemberMutations function 
+                        ' we will loop on each mutations from the new member: if the mutation has no parent (and is not ignored) we will add it
+                        ' to the member's parent node (if the member is alone under it), or to a new node below (moving the member under it).
                         If Not IsNothing(NewMember.PrivateMutationsIDs) Then
                             HasPrivateMutations = False
                             For Each MutId In NewMember.PrivateMutationsIDs
@@ -199,6 +186,7 @@ Module TreeConstructor
                         End If
                         ParentNode.SavetoDB()
                         NewMember.SavetoDB()
+                        CheckMemberMutations(NewMember)
                         CheckTreeConsistency(NewMember, p_TreeRoot)
                     Else
                         MsgBox("Member " & NewMember.Name & " has no mutations loaded!\n Analyse Variant first")
@@ -214,48 +202,307 @@ Module TreeConstructor
         End If
     End Sub
 
+    Public Sub CheckMemberMutations(ByRef Memb As Member)
+        ' we will loop on each mutations from the new member: if the mutation has no parent (and is not ignored) we will add it
+        ' to the member's parent node (if the member is alone under it), or to a new node below (moving the member under it).
+        Dim HasMutOnHisOwn As Boolean
+        Dim MutID As String
+
+        HasMutOnHisOwn = False
+        For Each MutID In Memb.MutationsIDs ' check if mutation is ignored and if it is already affected to a node
+            If MutationIsIgnored(MutID) = False And MutationHasNodeParent(MutID) = False Then
+                HasMutOnHisOwn = True
+                Exit For
+            End If
+        Next
+
+        If HasMutOnHisOwn = True Then
+            Dim FrmPrgss As New frmProgress
+            Dim MutIDsList As String
+            Dim IsFirst As Boolean
+            Dim Nd As New Node
+            Dim i As Integer
+            IsFirst = True
+            MutIDsList = ""
+
+            FrmPrgss.InitiateMe()
+            FrmPrgss.UpdateMe("Checking member's mutations ...", 0)
+            FrmPrgss.Show()
+            FrmPrgss.Visible = True
+            i = 0
+
+            Nd.LoadWithID(Memb.CurrentParentNodeID)
+            If Not IsNothing(Nd.ChildrenMembersIDs) Then
+                If Nd.ChildrenMembersIDs.Count > 1 Then 'if has brothers need to create a new node under member's parent node to which to attach the member and his mutations
+                    Nd.LoadWithID(Memb.CurrentParentNodeID)
+                    InsertEmptyNodeBelow(Nd, Memb)
+                End If
+            End If
+
+            For Each MutID In Memb.MutationsIDs
+                    If Not MutID = "" Then
+                        If MutationIsIgnored(MutID) = False And MutationHasNodeParent(MutID) = False Then
+                            If IsFirst = True Then
+                                MutIDsList = MutID
+                                IsFirst = False
+                            Else
+                                MutIDsList = MutIDsList & "," & MutID
+                            End If
+                            SetParentNodeToMutation(MutID, Memb.CurrentParentNodeID)
+                            i = i + 1
+                            FrmPrgss.UpdateMe("Checking member's mutations ...", i, Memb.MutationsIDs.Count)
+                        End If
+                    End If
+                Next
+                FrmPrgss.Visible = False
+                AddMutationToNode(Memb.CurrentParentNodeID, MutIDsList)
+            End If
+    End Sub
+
+    Private Function MemberHasBrother(Memb As Member) As Boolean
+        Dim Nd As New Node
+
+        Nd.LoadWithID(Memb.CurrentParentNodeID)
+        If Nd.ChildrenMembersIDs.Count > 1 Then
+            Return True
+        Else
+            Return False
+        End If
+
+    End Function
+
+    Private Sub SetParentNodeToMutation(MutID As String, ParentNodeID As String)
+        cDataAccess.SetMutationParentNode(MutID, ParentNodeID)
+    End Sub
+
+    Private Function MutationIsIgnored(MutID As String) As Boolean
+        Return cDataAccess.IsMutationIgnored(MutID)
+    End Function
+
+    Private Function MutationHasNodeParent(MutID As String) As Boolean
+        Dim ParentNodeds As DataSet
+        ParentNodeds = cDataAccess.GetMutationParentNode(MutID)
+        If Not IsNothing(ParentNodeds) Then
+            If ParentNodeds.Tables(0).Rows.Count > 0 Then
+                If ParentNodeds.Tables(0).Rows(0).IsNull("CurrentParentNodeID") = False Then
+                    Dim str As String
+                    str = Strings.Replace(ParentNodeds.Tables(0).Rows(0).Item("CurrentParentNodeID"), ",", "")
+                    If Not str = "" Then
+                        Return True
+                    Else
+                        Return False
+                    End If
+                Else
+                    Return False
+                End If
+            Else
+                Return False
+            End If
+        Else
+            Return False
+        End If
+    End Function
+
+    Private Sub AddMutationToNode(NodeID, MutationsIDsToAdd)
+        Dim MutationsIDsds As DataSet
+        Dim MutationsIDs As String
+        MutationsIDsds = cDataAccess.GetMutationIDsInNode(NodeID)
+        If Not IsNothing(MutationsIDsds) Then
+            If MutationsIDsds.Tables(0).Rows.Count > 0 Then
+                If MutationsIDsds.Tables(0).Rows(0).IsNull("MutationsIDs") = False Then
+                    MutationsIDs = MutationsIDsds.Tables(0).Rows(0).Item("MutationsIDs")
+                    MutationsIDs = MutationsIDs & "," & MutationsIDsToAdd
+                Else
+                    MutationsIDs = MutationsIDsToAdd
+                End If
+            Else
+                MutationsIDs = MutationsIDsToAdd
+            End If
+        Else
+            MutationsIDs = MutationsIDsToAdd
+        End If
+        cDataAccess.SetMutationIDsInNode(NodeID, MutationsIDs)
+    End Sub
+
+    Private Function CheckNodesBelowParent(ByRef Memb As Member, ByRef NodeToCheckBelow As Node) As Node
+        Dim NodeToReturn As Node
+        NodeToReturn = Nothing
+        For Each NdId In NodeToCheckBelow.ChildrenNodesIDs
+            If Not NdId = "" Then
+                Dim NewNd As New Node()
+                NewNd.LoadWithID(NdId)
+                NodeToReturn = FindClosestExistingNodeDownward(Memb, NewNd) 'recursive call of this function
+                If Not IsNothing(NodeToReturn) Then 'a node came back from lower levels so we found the right place and stop - no need to investigate parallel levels
+                    Exit For
+                End If
+            End If
+        Next
+        If IsNothing(NodeToReturn) Then
+            Return NodeToCheckBelow 'no node came back from all lower levels because all were different below. Since there is no diff at this level, the current node is the right one
+        Else
+            Return NodeToReturn 'we return upward the node that came from the lower level
+        End If
+    End Function
+
     Private Function NBNodesInDB() As Integer
-        Dim cDataAccess As New clsDataAccess
+
         Return cDataAccess.GetNBNodesInDB
     End Function
 
-    Private Function AddNodeBelow(ByRef ParNode As Node, ByRef NewMemb As Member) As Node 'creates a new node below parentnode with the noncommon mutations of parentnode and newmember
+    Private Sub InsertNodeBelowWithNonCommonMutations(ByRef ParNode As Node, ByRef NewMemb As Member) 'As Node 'creates a new node below parentnode with the noncommon mutations of parentnode and newmember, looping on the mutation of ParentNode
         Dim NewNode As New Node()
         Dim MutId As String
+        Dim MbId As String
+        Dim NdId As String
         Dim Found1Mut As Boolean
+        Dim EmptyStrArray(0) As String
+        Dim FrmPrgss As New frmProgress
+        Dim i As Integer
 
         NewNode.ParentNodeID = ParNode.ID
         NewNode.ChildrenNodesIDs = ParNode.ChildrenNodesIDs 'add all node children of parent node to new node
         NewNode.ChildrenMembersIDs = ParNode.ChildrenMembersIDs 'add all member children of parent node to new node
+        NewNode.SavetoDB() 'need to save to get the ID of the new node
+
+        FrmPrgss.InitiateMe()
+        FrmPrgss.UpdateMe("Checking Parentnode's mutations ...", 0)
+        FrmPrgss.Show()
+        FrmPrgss.Visible = True
+        i = 0
 
         Found1Mut = False
         If Not IsNothing(ParNode.MutationsIDs) Then
             For Each MutId In ParNode.MutationsIDs 'add mutations that the new memb doesn't have
                 If Not MutId = "" Then
                     If NewMemb.HasMutation(MutId) = False Then
-                        Dim Mut As New Mutation
-                        Mut.Load(MutId)
-                        Mut.CurrentParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the mutation if not needed
-                        Mut.SavetoDB()
+                        'Dim Mut As New Mutation
+                        'Mut.Load(MutId)
+                        'Mut.CurrentParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the mutation if not needed
+                        'Mut.SavetoDB()
+                        cDataAccess.SetMutationParentNode(MutId, NewNode.ID)
                         NewNode.AppendMutationsID(MutId)
                         ParNode.RemoveMutationID(MutId)
                         If Found1Mut = False Then
-                            NewNode.Name = Mut.Name(0) 'find a better way to give a default name to a node, or ensure that position 0 is not empty!
+                            NewNode.Name = cDataAccess.GetMutationNames(MutId) '  Mut.Name(0) 'find a better way to give a default name to a node, or ensure that position 0 is not empty!
                             Found1Mut = True
                         End If
                     Else
-                        Dim Mut As New Mutation
-                        Mut.Load(MutId)
-                        Mut.IsPrivate = False
-                        Mut.SavetoDB()
+                        'Dim Mut As New Mutation
+                        'Mut.Load(MutId)
+                        'Mut.IsPrivate = False
+                        'Mut.SavetoDB()
+                        'The mutation is not private anymore
+                        cDataAccess.SetMutationToNOTPrivate(MutId)
+                        'Remove from Private Mutations for the member below
+                        If Not IsNothing(NewNode.ChildrenMembersIDs) Then
+                            For Each MbId In NewNode.ChildrenMembersIDs 'move all member children under newnode
+                                If Not MbId = "" Then
+                                    RemovePrivateMutationFromMember(MutId, MbId)
+                                End If
+                            Next
+                        End If
                     End If
+                End If
+                i = i + 1
+                FrmPrgss.UpdateMe("Checking Parentnode's mutations ...", i, ParNode.MutationsIDs.Count)
+            Next
+        End If
+        FrmPrgss.Visible = False
+        If ParNode.Name = NewNode.Name Then 'this means the new node has got the mutation that gave its name to parent. The parent has not this muation anymore so need new name
+            ParNode.Name = "Change Me: " & NewNode.Name
+        End If
+
+        If Not IsNothing(NewNode.ChildrenMembersIDs) Then
+            For Each MbId In NewNode.ChildrenMembersIDs 'move all member children under newnode
+                If Not MbId = "" Then
+                    'Dim Mb As New Member()
+                    'Mb.LoadWithID(MbId)
+                    'Mb.CurrentParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the member if not needed
+                    'Mb.SavetoDB()
+                    cDataAccess.SetMemberParentNode(MbId, NewNode.ID)
                 End If
             Next
         End If
+        If Not IsNothing(NewNode.ChildrenNodesIDs) Then
+            For Each NdId In NewNode.ChildrenNodesIDs 'move all node children under newnode
+                If Not NdId = "" Then
+                    'Dim Nd As New Node()
+                    'Nd.LoadWithID(NdId)
+                    'Nd.ParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the node if not needed
+                    'Nd.SavetoDB()
+                    cDataAccess.SetNodeParentNode(NdId, NewNode.ID)
+                End If
+            Next
+        End If
+        ParNode.ChildrenMembersIDs = EmptyStrArray
+        ParNode.ChildrenNodesIDs = EmptyStrArray
+        ParNode.AppendChildNodeID(NewNode.ID)
+
         ParNode.SavetoDB()
         NewNode.SavetoDB()
-        Return NewNode
-    End Function
+        'Return NewNode
+    End Sub
+
+    Private Sub RemovePrivateMutationFromMember(MutID As String, MembID As String)
+        Dim PrivateMut As String
+        Dim NewPrivateMut As String
+        Dim ds As DataSet
+
+        ds = cDataAccess.GetMemberByID(MembID)
+        If Not IsNothing(ds) Then
+            If ds.Tables(0).Rows.Count > 0 Then
+                If ds.Tables(0).Rows(0).IsNull("PrivateMutationsIDs") = False Then
+                    PrivateMut = ds.Tables(0).Rows(0).Item("PrivateMutationsIDs")
+                    NewPrivateMut = Strings.Replace(PrivateMut, "," & MutID, "")
+                    cDataAccess.SetMemberPrivateMutations(MembID, NewPrivateMut)
+                End If
+            End If
+        End If
+
+
+    End Sub
+
+    Private Sub InsertEmptyNodeBelow(ByRef ParNode As Node, ByRef NewMemb As Member) 'As Node 'creates an empty new node (without mutations) below parentnode, but rearanging child members
+        Dim NewNode As New Node()
+        Dim EmptyStrArray(0) As String
+
+        NewNode.ParentNodeID = ParNode.ID
+        NewNode.ChildrenNodesIDs = ParNode.ChildrenNodesIDs 'add all node children of parent node to new node
+        NewNode.ChildrenMembersIDs = ParNode.ChildrenMembersIDs 'add all member children of parent node to new node
+        NewNode.SavetoDB() 'need to save to get the ID of the new node
+
+        NewNode.Name = "Node - Member ID: " & NewMemb.ID
+
+        If Not IsNothing(NewNode.ChildrenMembersIDs) Then
+            For Each MbId In NewNode.ChildrenMembersIDs 'move all member children under newnode
+                If Not MbId = "" Then
+                    'Dim Mb As New Member()
+                    'Mb.LoadWithID(MbId)
+                    'Mb.CurrentParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the member if not needed
+                    'Mb.SavetoDB()
+                    cDataAccess.SetMemberParentNode(MbId, NewNode.ID)
+                End If
+            Next
+        End If
+        If Not IsNothing(NewNode.ChildrenNodesIDs) Then
+            For Each NdId In NewNode.ChildrenNodesIDs 'move all node children under newnode
+                If Not NdId = "" Then
+                    'Dim Nd As New Node()
+                    'Nd.LoadWithID(NdId)
+                    'Nd.ParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the node if not needed
+                    'Nd.SavetoDB()
+                    cDataAccess.SetNodeParentNode(NdId, NewNode.ID)
+                End If
+            Next
+        End If
+        ParNode.ChildrenMembersIDs = EmptyStrArray
+        ParNode.ChildrenNodesIDs = EmptyStrArray
+        ParNode.AppendChildNodeID(NewNode.ID)
+
+        ParNode.SavetoDB()
+        NewNode.SavetoDB()
+        'Return NewNode
+    End Sub
 
     Private Function AddPrivateNodeBelow(ByRef ParNode As Node, ByRef NewMemb As Member) As Node 'creates a New node below parentnode With the private mutations of newmember
 
@@ -263,28 +510,42 @@ Module TreeConstructor
         Dim MutId As String
         Dim Found1Mut As Boolean
         Dim EmptyStrArray(0) As String
+        Dim i As Integer
+        Dim FrmPrgss As New frmProgress
 
         NewNode.ParentNodeID = ParNode.ID
         NewNode.ChildrenNodesIDs = EmptyStrArray
         NewNode.AppendChildMemberID(NewMemb.ID)
+        NewNode.SavetoDB() 'need to save to get the ID of the new node
+
+        FrmPrgss.InitiateMe()
+        FrmPrgss.UpdateMe("Checking member's Private mutations ...", 0)
+        FrmPrgss.Show()
+        FrmPrgss.Visible = True
+        i = 0
 
         Found1Mut = False
         If Not IsNothing(NewMemb.PrivateMutationsIDs) Then
             For Each MutId In NewMemb.PrivateMutationsIDs 'add private mutations of the new memb
                 If Not MutId = "" Then
-                    Dim Mut As New Mutation
-                    Mut.Load(MutId)
-                    Mut.CurrentParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the mutation if not needed
-                    Mut.IsPrivate = True
-                    Mut.SavetoDB()
+                    'Dim Mut As New Mutation
+                    'Mut.Load(MutId)
+                    'Mut.CurrentParentNodeID = NewNode.ID ' consider doing a single change directly in the DB rather than loading the mutation if not needed
+                    cDataAccess.SetMutationParentNode(MutId, NewNode.ID)
+                    'Mut.IsPrivate = True
+                    cDataAccess.SetMutationToPrivate(MutId)
+                    'Mut.SavetoDB()
                     NewNode.AppendMutationsID(MutId)
                     If Found1Mut = False Then
-                        NewNode.Name = Mut.Name(0) 'find a better way to give a default name to a node, or ensure that position 0 is not empty!
+                        NewNode.Name = cDataAccess.GetMutationNames(MutId) '  Mut.Name(0) 'find a better way to give a default name to a node, or ensure that position 0 is not empty!
                         Found1Mut = True
                     End If
                 End If
+                i = i + 1
+                FrmPrgss.UpdateMe("Checking member's Private mutations ...", i, NewMemb.PrivateMutationsIDs.Count)
             Next
         End If
+        FrmPrgss.Visible = False
         NewNode.SavetoDB()
         Return NewNode
     End Function
@@ -312,13 +573,13 @@ Module TreeConstructor
         If Not IsNothing(CurrentNode.MutationsIDs) Then 'a proper node shall always have at least 1 mutation
             For Each MutId In CurrentNode.MutationsIDs
                 If Memb.HasMutation(MutId) = False Then 'we found a difference
-                    HasStopped = True
+                    HasStopped = True 'this doesn't work for the highest node because there is always some missing mutations on the highest nodes
                 Else
                     AtLeastOneSimilar = True
                 End If
             Next
             If HasStopped = True Then ' we found at least 1 diff
-                If AtLeastOneSimilar = True Then
+                If AtLeastOneSimilar = True Then 'this doesn't work for the highest node because there is always some missing mutations on the highest nodes
                     Return CurrentNode 'we found at least 1 similar and 1 difference so we return this node ... will have to split it!
                 Else
                     Return Nothing 'all mutations were different so we will have to return its parent or a parrallel node.
@@ -432,6 +693,7 @@ Module TreeConstructor
         Dim NewPrivateMutationsIDsArray(1) As String
         Dim Success As Boolean
         Dim UsingHg38 As Boolean
+        Dim FrmPrgss As New frmProgress
 
         Success = True
         UsingHg38 = True
@@ -463,11 +725,19 @@ Module TreeConstructor
 
         NbPrivate = 0
         NbMut = 0
-        For i = 1 To NbItems - 1
+
+        FrmPrgss.InitiateMe()
+        FrmPrgss.UpdateMe("Analysing member's mutations ...", 0)
+        FrmPrgss.Show()
+        FrmPrgss.Visible = True
+
+
+        For i = 0 To NbItems - 1
             Dim ID As Integer
             Dim Position38 As String
             Dim ReferenceCall As String
             Dim AlternateCall As String
+
             If UsingHg38 = True Then
                 Position38 = NewMemb.GetPositionHg38AtRow(i) 'Pass here the posistion at row i 
                 ReferenceCall = NewMemb.GetRefCallHg38AtRow(i) 'Pass here the refCall at row i
@@ -496,7 +766,9 @@ Module TreeConstructor
             Else
                 'ref = alt no mutation
             End If
+            FrmPrgss.UpdateMe("Analysing member's mutations ...", i + 1, NbItems)
         Next
+        FrmPrgss.Visible = False
         NewMemb.SavetoDB()
         If NbMut = 0 Then Success = False
         Return Success
@@ -622,14 +894,14 @@ Module TreeConstructor
 
     End Function
 
-    Private Function GetHg19FromHg38(Position38 As String) As String
+    Public Function GetHg19FromHg38(Position38 As String) As String
         Dim Pos19 As Long
         'Get it from Position38
         Pos19 = ConvertHG38ToHG19(CLng(Position38))
         Return Pos19
     End Function
 
-    Private Function GetHg38FromHg19(Position19 As String) As String
+    Public Function GetHg38FromHg19(Position19 As String) As String
         Dim Pos38 As Long
         'Get it from Position19
         Pos38 = ConvertHG19ToHG38(CLng(Position19))
@@ -700,7 +972,7 @@ Module TreeConstructor
                         If IsMut = True Then
                             PosHg38 = GetHg38FromHg19(PosHg19)
                             If PosHg38 = -999 Then
-                                MsgBox("position " & PosHg19 & " gives -999 in hg38")
+                                'MsgBox("position " & PosHg19 & " gives -999 in hg38")
                             Else
                                 MutID = GetMutationIDFromDB(PosHg38, ref, Left(read, 1)) 'Check in the DB if mutation exists and returns its ID if so, 0 if not.
                                 If MutID = 0 Then 'the mutation in this item's position didn't exist in the DB
@@ -1048,4 +1320,16 @@ Module TreeConstructor
 
     End Sub
 
+
+    Sub RemoveAllParenNodes()
+        cDataAccess.RemoveAllMutationParentsNodes()
+    End Sub
+
+    Sub SetAllMutationsToPrivate()
+        cDataAccess.SetAllMutationsToPrivate()
+    End Sub
+
+    Sub SetAllMembersToHasVariant19()
+        cDataAccess.SetTrueToHasVariantHg19_AllMembers()
+    End Sub
 End Module
